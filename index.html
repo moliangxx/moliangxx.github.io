@@ -75,6 +75,46 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-c-mopao-sort" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="2025/12/09/c-mopao-sort/" class="article-date">
+  <time class="dt-published" datetime="2025-12-09T11:59:40.000Z" itemprop="datePublished">2025-12-09</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="2025/12/09/c-mopao-sort/">C-Mopao-Sort</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>#include<iostream><br>#include<vector><br>using namespace std;</p>
+<p>int main(){<br>	ios::sync_with_stdio(false);<br>	cin.tie(nullptr);<br>	cout.tie(nullptr);<br>	<br>	int n;<br>	cin&gt;&gt;n;<br>	vector<int> num(n);<br>	for(int i&#x3D;0;i&lt;n;i++){<br>		cin&gt;&gt;num[i];<br>	}<br>	for(int i&#x3D;1;i&lt;n;i++){<br>		bool flag &#x3D; true;<br>		for(int j&#x3D;1;j&lt;n-i;j++){<br>			if(num[j-1]&gt;num[j]){<br>				int c&#x3D;num[j-1];<br>				num[j-1] &#x3D; num[j];<br>				num[j] &#x3D; c;<br>				flag &#x3D;false;<br>			}<br>		}<br>		if(flag){<br>			break;<br>		}<br>	}<br>	for(int i&#x3D;0;i&lt;n;i++){<br>		cout&lt;&lt;num[i]&lt;&lt;” “;<br>	}<br>	return 0;<br>}<br><img src="cto.jpg" alt="rumen"></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://moliangxx.github.io/2025/12/09/c-mopao-sort/" data-id="cuidQPTwIzohdl-UjdNzReKbC" data-title="C-Mopao-Sort" class="article-share-link"><span class="fa fa-share">分享</span></a>
+      
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-hello-world" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="2025/12/09/hello-world/" class="article-date">
@@ -155,6 +195,10 @@
     <h3 class="widget-title">最新文章</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="2025/12/09/c-mopao-sort/">C-Mopao-Sort</a>
+          </li>
         
           <li>
             <a href="2025/12/09/hello-world/">Hello</a>
