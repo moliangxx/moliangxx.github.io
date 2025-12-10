@@ -91,11 +91,18 @@
     $(this).find('img').each(function(){
       if ($(this).parent().hasClass('fancybox') || $(this).parent().is('a')) return;
 
+      // Add native lazy loading where supported
+      try{
+        if (!this.hasAttribute || !this.hasAttribute('loading')){
+          this.setAttribute('loading', 'lazy');
+        }
+      } catch(e){}
+
       var alt = this.alt;
 
       if (alt) $(this).after('<span class="caption">' + alt + '</span>');
 
-      $(this).wrap('<a href="' + this.src + '" data-fancybox=\"gallery\" data-caption="' + alt + '"></a>')
+      $(this).wrap('<a href="' + this.src + '" data-fancybox="gallery" data-caption="' + alt + '"></a>')
     });
 
     $(this).find('.fancybox').each(function(){
