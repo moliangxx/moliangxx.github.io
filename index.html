@@ -1,373 +1,165 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  
-  
-  <title>Welcome to my blog</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta property="og:type" content="website">
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Welcome to my blog - Hello World</title><meta name="author" content="Liang_Mo"><meta name="copyright" content="Liang_Mo"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta property="og:type" content="website">
 <meta property="og:title" content="Welcome to my blog">
 <meta property="og:url" content="https://moliangxx.github.io/index.html">
 <meta property="og:site_name" content="Welcome to my blog">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://moliangxx.github.io/img/avatar.jpg">
 <meta property="article:author" content="Liang_Mo">
 <meta name="twitter:card" content="summary">
-  
-    <link rel="alternate" href="atom.xml" title="Welcome to my blog" type="application/atom+xml">
-  
-  
-    <link rel="shortcut icon" href="/favicon.png">
-  
-  
-  
-<link rel="stylesheet" href="css/style.css">
+<meta name="twitter:image" content="https://moliangxx.github.io/img/avatar.jpg"><script type="application/ld+json"></script><link rel="shortcut icon" href="/img/favicon.webp"><link rel="canonical" href="https://moliangxx.github.io/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="css/index.css?v=5.5.3"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
 
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
   
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
     
-<link rel="stylesheet" href="fancybox/jquery.fancybox.min.css">
-
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
   
-  
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fork-awesome@1.2.0/css/fork-awesome.min.css">
-
-<meta name="generator" content="Hexo 8.1.1"><link rel="stylesheet" href="/css/hero.css">
-</head>
-
-<body>
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.12.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Welcome to my blog',
+  isHighlightShrink: false,
+  isToc: false,
+  pageType: 'home'
+}</script><meta name="generator" content="Hexo 8.1.1"><link rel="stylesheet" href="/css/hero.css">
+</head><body>
 <div class="hero"><div class="hero-bg"></div><div class="hero-overlay"><div class="hero-content"><h1 class="headline">欢迎来到我的博客</h1><h2 class="typewriter"><span id="typed-text"></span><span class="cursor">|</span></h2></div></div></div>
-
-  <div id="container">
-    <div id="wrap">
-      <header id="header">
-  <div id="banner"></div>
-  <div id="header-outer" class="outer">
-    <div id="header-title" class="inner">
-      <h1 id="logo-wrap">
-        <a href="index.html" id="logo">Welcome to my blog</a>
-      </h1>
-      
-        <h2 id="subtitle-wrap">
-          <a href="index.html" id="subtitle">Hello World</a>
-        </h2>
+<div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="../../../../img/avatar.jpg" onerror="this.onerror=null;this.src='../../../../img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="../../../../archives/"><div class="headline">文章</div><div class="length-num">1</div></a><a href="../../../../tags/"><div class="headline">标签</div><div class="length-num">0</div></a><a href="../../../../categories/"><div class="headline">分类</div><div class="length-num">0</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="../../../../index.html"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="../../../../archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="../../../../categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="../../../../tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="../../../../about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="page" id="body-wrap"><header class="full_page" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="index.html"><span class="site-name">Welcome to my blog</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="../../../../index.html"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="../../../../archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="../../../../categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="../../../../tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="../../../../about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="site-info"><h1 id="site-title">Welcome to my blog</h1></div><div id="scroll-down"><i class="fas fa-angle-down scroll-down-effects"></i></div></header><main class="layout" id="content-inner"><div class="recent-posts nc" id="recent-posts"><div class="recent-post-items"><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="2025/12/09/hello-world/" title="Hello">Hello</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2025-12-09T11:56:47.898Z" title="发表于 2025-12-09 19:56:47">2025-12-09</time></span></div><div class="content">Welcome to My blog.Give a like before you go! Quick StartCreate a new post1$ hexo new &quot;My New Post&quot;  More info: Writing Run server1$ hexo server  More info: Server Generate static files1$ hexo generate  More info: Generating Deploy to remote sites1$ hexo deploy  More info: Deployment </div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="../../../../img/avatar.jpg" onerror="this.onerror=null;this.src='../../../../img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">Liang_Mo</div><div class="author-info-description"></div><div class="site-data"><a href="../../../../archives/"><div class="headline">文章</div><div class="length-num">1</div></a><a href="../../../../tags/"><div class="headline">标签</div><div class="length-num">0</div></a><a href="../../../../categories/"><div class="headline">分类</div><div class="length-num">0</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="" title="Hello">Hello</a><time datetime="2025-12-09T11:56:47.898Z" title="发表于 2025-12-09 19:56:47">2025-12-09</time></div></div></div></div><div class="card-widget card-archives">
+    <div class="item-headline">
+      <i class="fas fa-archive"></i>
+      <span>归档</span>
       
     </div>
-    <div id="header-inner" class="inner">
-      <nav id="main-nav">
-        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
-        
-          <a class="main-nav-link" href="index.html">Home</a>
-        
-          <a class="main-nav-link" href="/archives">Archives</a>
-        
-      </nav>
-      <nav id="sub-nav">
-        
-        
-          <a class="nav-icon" href="/atom.xml" title="RSS 订阅"><span class="fa fa-rss"></span></a>
-        
-        <a class="nav-icon nav-search-btn" title="搜索"><span class="fa fa-search"></span></a>
-      </nav>
-      <div id="search-form-wrap">
-        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://moliangxx.github.io"></form>
-      </div>
-    </div>
-  </div>
-</header>
-
-      <div class="outer">
-        <section id="main">
   
-    <article id="post-哈希" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="2025/12/10/%E5%93%88%E5%B8%8C/" class="article-date">
-  <time class="dt-published" datetime="2025-12-10T12:49:48.000Z" itemprop="datePublished">2025-12-10</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="2025/12/10/%E5%93%88%E5%B8%8C/">哈希</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
+    <ul class="card-archive-list">
       
-        <p>#一、首先理解字符串操作的意义：<br>没意义<br>emmmmmm其实字符串操作的意义是很浅显的，比如百度的推荐搜索啊，比如查找比对一篇题解里有多少个相同或者不同的脏字然后kkksc03再根据其数量、恶劣程度决定用多大的刀将博主kill掉。。。所以字符串操作很重要啊喂qwq。</p>
-<p>再来考虑时间：如果百度对于一个人的一次“常搜”推荐需要10s，那么对于全国网友来说，同时上网的人群基数很高，那么如果服务器性能不好的话，怕不是要三星note7 qwq？？？</p>
-<p>所以啊，打造高效的字符串算法是很有必要滴！</p>
-<p>#二、言归正传，浅析字符串哈希<br>哈希其实是所有字符串操作中，笔者认为最简单的操作了（except输入输出qwq）。哈希的过程，其实可以看作对一个串的单向加密过程，并且需要保证所加的密不能高概率重复（就像不能让隔壁老王轻易地用它家的钥匙打开你家门一样qwq），通过这种方式来替代一些很费时间的操作。</p>
-<p>比如，最常见的，当然就是通过哈希数组来判断几个串是否相同（洛谷P3370）。此处的操作呢，很简单，就是对于每个串，我们通过一个固定的转换方式，将相同的串使其的“密”一定相同，不同的串 尽量 不同。</p>
-<p>此处有人指出：那难道不能先比对字符串长度，然后比对ASCLL码之和吗？事实上显然是不行的（比如ab和ba，并不是同一个串，但是如是做却会让其认为是qwq）。这种情况就叫做<strong>hash冲突</strong>，并且在如此的单向加密哈希中，hash冲突的情况在所难免（bzoj就有这种让你给出一组样例，使得一段哈希代码冲突的题，读者可以尝试尝试）。</p>
-<p>而我们此处介绍的，即是最常见的一种哈希：进制哈希。进制哈希的核心便是给出一个固定进制base，将一个串的每一个元素看做一个进制位上的数字，所以这个串就可以看做一个base进制的数，那么这个数就是这个串的哈希值；则我们通过比对每个串的的哈希值，即可判断两个串是否相同</p>
-<p>奉上P3370ac代码（单哈希）：</p>
-<p>#include<iostream><br>#include<cstring><br>#include<algorithm><br>#include<cstdio><br>using namespace std;<br>typedef unsigned long long ull;<br>ull base&#x3D;131;<br>ull a[10010];<br>char s[10010];<br>int n,ans&#x3D;1;<br>int prime&#x3D;233317;<br>ull mod&#x3D;212370440130137957ll;<br>ull hashe(char s[])<br>{<br> int len&#x3D;strlen(s);<br> ull ans&#x3D;0;<br> for (int i&#x3D;0;i&lt;len;i++)<br> ans&#x3D;(ans*base+(ull)s[i])%mod+prime;<br> return ans;<br>}<br>int main()<br>{<br> scanf(“%d”,&amp;n);<br> for(int i&#x3D;1;i&lt;&#x3D;n;i++)<br> {<br> 	scanf(“%s”,s);<br> 	a[i]&#x3D;hashe(s);<br> }<br> sort(a+1,a+n+1);<br> for(int i&#x3D;1;i&lt;n;i++)<br> {<br> 	if(a[i]!&#x3D;a[i+1])<br> 	ans++;<br> }<br> printf(“%d”,ans);<br>} </p>
-<p>当然，再好的哈希也会有冲突，此时有两种做法可以解决或者降低哈希冲突的可能性</p>
-<p>1、无错哈希<br>其实原理很简单，就是我们要记录每一个已经诞生的哈希值，然后对于每一个新的哈希值，我们都可以来判断是否和已有的哈希值冲突，如果冲突，那么可以将这个新的哈希值不断加上一个大质数，直到不再冲突（比如somebody’s birthday qwq）。</p>
-<p>先贴代码：</p>
-<p>for(int i&#x3D;1;i&lt;&#x3D;m;i++)&#x2F;&#x2F;m个串<br>{<br>cin&gt;&gt;str;&#x2F;&#x2F;下一行的check为bool型<br>while(check[hash(str)])hash[i]+&#x3D;19260817;<br>hash[i]+&#x3D; hash(str) ;<br>}</p>
-<p>正如下图（亲手做的英文高逼格）：</p>
-<p>但是，这种方法类似桶查找，但是桶查找的弊端2就会很恶心——数据过大，check数组无能为力来支持上亿个空间（弊端1是由于数据具有跳跃性，浪费最后的统计次数，但在此不是特别明显，就当我皮了一下qwq）</p>
-<p>2、多重哈希<br>这其实就是你用不同的两种或多种方式哈希，然后分别比对每一种哈希值是否相同——显然是增加了空间和时间，但也确实增加了其正确性。</p>
-<p>下面皮一个哈希自动机qwq（不用百度了，名字自己起的）</p>
-<p>&#x2F;&#x2F;哈希自动机,需要二维hash数组<br>for伪代码排序，用来使哈希值单调（更好判断相&#x2F;不同的数量）<br>for(int i&#x3D;1;i&lt;&#x3D;m;i++){<br>	check&#x3D;1；<br>	for(int j&#x3D;1;j&lt;&#x3D;qwq;j++)&#x2F;&#x2F;皮一下<br>		if(hash[j][i]&#x3D;&#x3D;hash[j][i+1]){check&#x3D;0;break;}<br>	if(check)ans++;&#x2F;&#x2F;此为判断相同个数<br>} </p>
-<p>三、字典树浅析<br>1、简要介绍<br>首先要知道，字典树是一种假想数据结构（数据结构不都是 假想的吗qwq），那么问题来了——为什么是要用字典树呢？为什么不用类似字典链表之类的东西呢？很简单，所有树形结构 都有一个基本特点，就是</p>
-<p>元素与元素间的关系为继承的一对多关系。</p>
-<p>拿字典树来说，每一个元素都可以有几个子元素，作为它之后的字母；而倘若要比对两个字符串是否相同，只需要比对在这棵字典树上，这两个串最后一个元素的祖先链(即前缀)是否相同，并且对于祖先链来说，并不用逐个比较，只需要记录访问就行</p>
-<p>比如下图就是一棵Trie，这里用颜色区分单词路径上的点 </p>
-<p>2、字典树基础与如何建树（插入操作）<br>首先，关于字典树，我们一般不是用点来存储字符的，而是用边——为什么呢？之后再说（十分皮地卖个关子qwq）。</p>
-<p>重新首先，一般来说，字典树是不会使用根节点的，原因很浅显，因为根节点的个数决定究竟有几棵字典树，而通常字典树是只有一棵的，否则产生森林会很麻烦（qwq你皮你就splay，并且如果有森林的话应该叫做“字典森林”啊喂）。</p>
-<p>但是我们要知道，并不是一个题中所有的串都有公共前缀（肯定不会的吧qwq），可如果根节点唯一，就代表他们一定有公共前缀，并且公共前缀的长度必定大于等于1。</p>
-<p>其次，字典树中每个节点的子节点数量都肯定会小于某个数。</p>
-<p>如果字典树里都是小写字母，那么“某个数”就是26；如果大小写都有，“某个数”就应该是52（证明过程：显然）；</p>
-<p>并且每个节点的所有的边都不同，这条性质可以便于我们判断在某一棵字典树到底有没有某条链：只要前缀不符合，就不需要再判断，因为必然没有（同一深度、同一父亲，边与边必定互异）</p>
-<p>在这里，我选择用结构体来存树，具体解释见注释：</p>
-<p>&#x2F;&#x2F;建树（其实就是存点啦）<br>struct nodes{<br>	int son[26];<br>&#x2F;&#x2F;此处只考虑小写字母字典树<br>    bool mark;<br>&#x2F;&#x2F; 此为标记，作用下面说<br>}trie[10001];<br>int root&#x3D;0,num&#x3D;0;<br>&#x2F;&#x2F;根节点永久为0 qwq<br>bool insert_check(char *str)<br>{<br>	int position&#x3D;root;&#x2F;&#x2F;初始化位置,跟深度没有直接关系<br>	for(int i&#x3D;0;str[i];i++)<br>	{<br>		int symbol&#x3D;(int)str[i]-‘a’;<br>&#x2F;*此处实际是因为我们的trie都是存int的,如果贸然存char会<br>很别扭qwq，并且此处由于都是小写字母，所以 -‘a’ ,如果<br>存了别的类型的字符，需要特判，保证字符容易确定 *&#x2F;	<br>	    if(!trie[position].son[symbol]) &#x2F;&#x2F;还没有被编号<br>	    trie[position].son[symbol]&#x3D;++num;&#x2F;&#x2F;编一个号<br>		<br>		position&#x3D;trie[position].son[symbol] ;<br>		&#x2F;&#x2F;更新迭代位置，直到字符链的最末端<br>	}<br>	int temp&#x3D;trie[position].mark;<br>	trie[position].mark &#x3D;1;<br>&#x2F;&#x2F;将这条链的最末端置为1，如果还有重复的串，那么一定会出现<br>&#x2F;&#x2F;最末端相同 ;反之，最末端节点的mark相同也可以推出链相同，<br>&#x2F;&#x2F;借此来判断串是否相同<br>	return temp!&#x3D;0;<br>&#x2F;<em>最后说一下为什么要编号：我们根据程序可以看出，字符串是<br>按秩插入树，所以一条链上的编号肯定满足单调，便于我们查找<br>和比对</em>&#x2F;<br>} </p>
-<p>于是便可以通过这种方式比对字符串，期望时间复杂度O（n）大多用于比对。</p>
-<p>3、关于字典树的查找<br>查找前缀比较好写，只需要一边判断是否符合要求，一边判断是否继续迭代即可。</p>
-<p>int root&#x3D;0;<br>bool find(char* str)<br>{<br> int pos&#x3D;root;<br> for(int i&#x3D;0;str[i];i++)<br> {<br> 	int x&#x3D;str[i]-‘a’;<br> 	if(trie[pos].son[x]&#x3D;&#x3D;0)return false;<br> 	&#x2F;&#x2F;如果在建完树之后这个点还没有被编号，<br> 	&#x2F;&#x2F;那么就肯定不存在这条链。（互异性）<br> 	pos&#x3D;trie[pos].son[x] ;&#x2F;&#x2F;继续迭代<br> }<br> return true;<br>}</p>
-<p>其实查询单词和查询前缀差别不大，只是我们每次都需要维护一个check[i]（bool），存在单词链的末尾。</p>
-<p>每当一个新字符已经被标记时（即所查询单词的这个字母及其前缀都在树的某条链上），我们使这个字符check异于它祖先们的check，最后判断<strong>该条匹配链结尾字符的check是否异于链上其他字符的check</strong>即可判断是否有这个单词（如果没有的话，末尾的check肯定与链上其他的相同啊qwq）</p>
-<p>至于前缀出现次数，很简单，只要将每一个前缀的出现次数存到它相连的子节点，最后输出前缀最后一个字符所带的次数即可（可以用数组维护，也可以直接写在结构体里）</p>
-<p>好啦，就是这样，希望对大家有所帮助</p>
-<p>日拱一卒，功不唐捐！</p>
-<p>引入<br>考虑以下问题。</p>
-<p>DX 给了你一个字符串 aadead，请你用自己的方式，将其表示为十进制数。</p>
-<p>聪明的你很快想到，将原串拆分成六个字母，得到a，a，d，e，a，d。</p>
-<p>然后考虑将每个字母分别转成十进制数。你选择最直观的方式——采用字母表中每个字母的编号，于是你得到了 1,1,4,5,1,4 这六个数字。</p>
-<p>接下来，你把六个数字写到一起，得到了 114514，解决了问题。</p>
-<p>从哈希的角度来看，你所做的操作，实际上就是求出了字符串 aadead 的 哈希值。</p>
-<p>这中间有一些细节，我们接下来展开探讨。</p>
-<p>基本概念<br>哈希值<br>通俗来讲，就是将一个字符串映射成整数后，得到的值。我们将其记为 hashh。</p>
-<p>一般地，我们认为”两字符串相等”与“两字符串哈希值相等”互为充要条件。这就提供了一个机会，使得我们可以在预处理后以 O(1) 的复杂度判断两串是否相等。</p>
-<p>这一结论的主要应用在于代替传统的字符串比较方式，即一位一位地判断。容易发现，后者的复杂度是线性的。</p>
-<p>基数<br>我们回到你得到的六个数字：1,1,4,5,1,4。</p>
-<p>你是如何从它们得到 114514 的呢？很简单，将已得到的值（初始为 0）乘以 10，再加上下一个数。</p>
-<p>用文字可能不太直观，我们写成代码来看。</p>
-<p>inline int calc(){<br>	int sum&#x3D;0;<br>	int a[]&#x3D;{1,1,4,5,1,4};<br>	for(int i&#x3D;0;i&lt;6;++i)sum&#x3D;sum*10+a[i];<br>	return sum;<br>}</p>
-<p>相信你能够完全理解这一步骤了。但是，我们思考一个问题：为什么统计下一个数的贡献时，我们会将已有结果乘以 10，而不是别的数呢？</p>
-<p>答案是显然的——我们要得到的是十进制数。</p>
-<p>这就引出了哈希中的一个重要概念——基数。通俗来讲，它决定了你得到的哈希值的进制。我们记它为 base。</p>
-<p>认识到这一点，我们就可以给 base 随意取值，以计算任意进制下字符串的哈希值。</p>
-<p>容易发现，我们已经有了一个通用的公式。具体地，我们记 s 为任意字符串，n 为 s 的长度。于是有：</p>
-<p>hashh&#x3D;<br>i&#x3D;1<br>∑<br>n<br>​<br> s<br>i<br>​<br> ⋅base<br>n−i</p>
-<p>其中 ∀s<br>i<br>​<br>  在转为整数后参与运算。有了上面的解释，这个式子很好理解了。把它写成代码，就类似于这样：</p>
-<p>inline int get(string s,int base){&#x2F;&#x2F;给定以 1 为起始位置的长度为 n 的字符串，返回它在 base 进制下的哈希值。<br>	int hashh&#x3D;0;<br>	for(int i&#x3D;1;i&lt;&#x3D;n;++i)hashh&#x3D;hashh*base+(int)s[i];<br>	return hashh;<br>}</p>
-<p>模数<br>注意到上面的代码有一个缺陷：我们得到的哈希值可能很大，可能炸 int，甚至达到任何一种数据类型都无法存储的地步。因此，我们需要指定一个 模数，随时将得到的哈希值对它取模。我们记模数为 p，那么我们计算哈希值的公式就变成了：</p>
-<p>hashh&#x3D;(<br>i&#x3D;1<br>∑<br>n<br>​<br> s<br>i<br>​<br> ⋅base<br>n−i<br> )modp<br>容易发现，必然有 hashh∈[0,p)，也就是说，上面的式子只能生成 p 种不同的哈希值。这时候，可能出现 哈希冲突，也就是两个不同字符串的哈希值相同。这就是哈希身上玄学色彩的来源。</p>
-<p>举个例子，现在 A 串的哈希值原本为 201，B 串的哈希值原本为 101。对 100 取模后，两串的哈希值都变成了 1，这就是哈希冲突。</p>
-<p>为避免哈希冲突，我们显然希望 p 有以下特征：</p>
-<p>大，这样区间更大，能生成的不同哈希值更多；</p>
-<p>p∈P，这样 p 的因子最少，取模后结果相等的可能性最小。</p>
-<p>所以，我们一般选取 998244353,19491001,1145141 这样的数作为模数。</p>
-<p>但是，我们可以偷个懒——用 ull 存储哈希值，不进行取模。这种写法被称为 自然溢出。</p>
-<p>一来，ull 的存储范围很大，一定程度上可以提高正确率；另一方面，它溢出后直接从 0 重新开始，相当于我们将 p 设成了 ull 的上界 。</p>
-<p>题外话：敢在 CF 上写自然溢出的都是勇士。</p>
-<p>容易发现，自然溢出的优点在于简单好写，但缺点在于容易被卡。其实不影响它能够通过此题。</p>
-<p>另外，还有一种写法——双模数，可以看我的 这篇题解 进行了解。它正与自然溢出相反——难写，但正确率高。</p>
-
+        <li class="card-archive-list-item">
+          <a class="card-archive-list-link" href="archives/2025/12/">
+            <span class="card-archive-list-date">
+              十二月 2025
+            </span>
+            <span class="card-archive-list-count">1</span>
+          </a>
+        </li>
       
-    </div>
-    <footer class="article-footer">
-      <a data-url="https://moliangxx.github.io/2025/12/10/%E5%93%88%E5%B8%8C/" data-id="cuidtd3-zLnQfBIn_SyPYnidj" data-title="哈希" class="article-share-link"><span class="fa fa-share">分享</span></a>
-      
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
-    <article id="post-c++冒泡排序" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="2025/12/09/c++%E5%86%92%E6%B3%A1%E6%8E%92%E5%BA%8F/" class="article-date">
-  <time class="dt-published" datetime="2025-12-09T11:59:40.000Z" itemprop="datePublished">2025-12-09</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="2025/12/09/c++%E5%86%92%E6%B3%A1%E6%8E%92%E5%BA%8F/">C-Mopao-Sort</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <p>#include<iostream><br>#include<vector><br>using namespace std;</p>
-<p>int main(){<br>	ios::sync_with_stdio(false);<br>	cin.tie(nullptr);<br>	cout.tie(nullptr);<br>	<br>	int n;<br>	cin&gt;&gt;n;<br>	vector<int> num(n);<br>	for(int i&#x3D;0;i&lt;n;i++){<br>		cin&gt;&gt;num[i];<br>	}<br>	for(int i&#x3D;1;i&lt;n;i++){<br>		bool flag &#x3D; true;<br>		for(int j&#x3D;1;j&lt;n-i;j++){<br>			if(num[j-1]&gt;num[j]){<br>				int c&#x3D;num[j-1];<br>				num[j-1] &#x3D; num[j];<br>				num[j] &#x3D; c;<br>				flag &#x3D;false;<br>			}<br>		}<br>		if(flag){<br>			break;<br>		}<br>	}<br>	for(int i&#x3D;0;i&lt;n;i++){<br>		cout&lt;&lt;num[i]&lt;&lt;” “;<br>	}<br>	return 0;<br>}<br><img src="cto.jpg" alt="rumen"></p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="https://moliangxx.github.io/2025/12/09/c++%E5%86%92%E6%B3%A1%E6%8E%92%E5%BA%8F/" data-id="cuidH1KpIrwYt3JVUDCnRVLGP" data-title="C-Mopao-Sort" class="article-share-link"><span class="fa fa-share">分享</span></a>
-      
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
-    <article id="post-hello-world" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="2025/12/09/hello-world/" class="article-date">
-  <time class="dt-published" datetime="2025-12-09T11:56:47.898Z" itemprop="datePublished">2025-12-09</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="2025/12/09/hello-world/">Hello</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <p>Welcome to My blog.<br>Give a like before you go!</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">&quot;My New Post&quot;</span></span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/writing.html">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/server.html">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/generating.html">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="https://moliangxx.github.io/2025/12/09/hello-world/" data-id="cuidPsEtBdigpb1OD1HB8PWux" data-title="Hello" class="article-share-link"><span class="fa fa-share">分享</span></a>
-      
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
-
-
-</section>
-        
-          <aside id="sidebar">
-  
-    
-
-  
-    
-
-  
-    
-  
-    
-  <div class="widget-wrap">
-    <h3 class="widget-title">归档</h3>
-    <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="archives/2025/12/">十二月 2025</a></li></ul>
-    </div>
-  </div>
-
-
-  
-    
-  <div class="widget-wrap">
-    <h3 class="widget-title">最新文章</h3>
-    <div class="widget">
-      <ul>
-        
-          <li>
-            <a href="2025/12/10/%E5%93%88%E5%B8%8C/">哈希</a>
-          </li>
-        
-          <li>
-            <a href="2025/12/09/c++%E5%86%92%E6%B3%A1%E6%8E%92%E5%BA%8F/">C-Mopao-Sort</a>
-          </li>
-        
-          <li>
-            <a href="2025/12/09/hello-world/">Hello</a>
-          </li>
-        
-      </ul>
-    </div>
-  </div>
-
-  
-</aside>
-        
-      </div>
-      <footer id="footer">
-  
-  <div class="outer">
-    <div id="footer-info" class="inner">
-      
-      &copy; 2025 Liang_Mo<br>
-      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
-    </div>
-  </div>
-</footer>
-
-    </div>
-    <nav id="mobile-nav">
-  
-    <a href="index.html" class="mobile-nav-link">Home</a>
-  
-    <a href="/archives" class="mobile-nav-link">Archives</a>
-  
-</nav>
-    
-
-
-<script src="js/jquery-3.6.4.min.js"></script>
-
-
-
-  
-<script src="fancybox/jquery.fancybox.min.js"></script>
-
-
-
-
-<script src="js/script.js"></script>
-
-
-
-
-
-  </div>
-<script src="/js/hero.js"></script>
-</body>
-</html>
+    </ul>
+  </div><div class="card-widget card-webinfo"><div class="item-headline"><i class="fas fa-chart-line"></i><span>网站信息</span></div><div class="webinfo"><div class="webinfo-item"><div class="item-name">文章数目 :</div><div class="item-count">1</div></div><div class="webinfo-item"><div class="item-name">本站访客数 :</div><div class="item-count" id="busuanzi_value_site_uv"><i class="fa-solid fa-spinner fa-spin"></i></div></div><div class="webinfo-item"><div class="item-name">本站总浏览量 :</div><div class="item-count" id="busuanzi_value_site_pv"><i class="fa-solid fa-spinner fa-spin"></i></div></div><div class="webinfo-item"><div class="item-name">最后更新时间 :</div><div class="item-count" id="last-push-date" data-lastPushDate="2025-12-17T15:31:46.125Z"><i class="fa-solid fa-spinner fa-spin"></i></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 By Liang_Mo</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.1</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.3</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="js/utils.js?v=5.5.3"></script><script src="js/main.js?v=5.5.3"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><script src="/js/hero.js"></script>
+</body></html>

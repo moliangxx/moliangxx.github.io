@@ -32,46 +32,25 @@
     }
   }
   document.addEventListener('DOMContentLoaded', ()=>{
-    const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if(el) tick();
 
-    if(el){
-      if(prefersReduced){
-        // Respect reduced motion: show first phrase statically and avoid cursor animation
-        el.textContent = phrases[0] || '';
-        const cursor = document.querySelector('.cursor');
-        if(cursor) cursor.style.display = 'none';
-      } else {
-        tick();
-      }
-    }
-
-    // optional mouse parallax: set CSS variables on hero element (throttled via rAF)
+    // optional mouse parallax: set CSS variables on hero element
     const hero = document.querySelector('.hero');
     const bg = document.querySelector('.hero-bg');
-    if(hero && bg && !prefersReduced){
-      let rafId = null;
-      const onMove = (e)=>{
-        if(rafId) return;
-        rafId = requestAnimationFrame(()=>{
-          const rect = hero.getBoundingClientRect();
-          const mx = e.clientX - rect.left - rect.width/2;
-          const my = e.clientY - rect.top - rect.height/2;
-          hero.style.setProperty('--mx', mx);
-          hero.style.setProperty('--my', my);
-          hero.setAttribute('data-mx','1');
-          rafId = null;
-        });
-      };
-      const onLeave = ()=>{
-        if(rafId) cancelAnimationFrame(rafId);
+    if(hero && bg){
+      hero.addEventListener('mousemove', (e)=>{
+        const rect = hero.getBoundingClientRect();
+        const mx = e.clientX - rect.left - rect.width/2;
+        const my = e.clientY - rect.top - rect.height/2;
+        hero.style.setProperty('--mx', mx);
+        hero.style.setProperty('--my', my);
+        hero.setAttribute('data-mx','1');
+      });
+      hero.addEventListener('mouseleave', ()=>{
         hero.style.setProperty('--mx', 0);
         hero.style.setProperty('--my', 0);
         hero.removeAttribute('data-mx');
-        rafId = null;
-      };
-
-      hero.addEventListener('mousemove', onMove);
-      hero.addEventListener('mouseleave', onLeave);
+      });
     }
   });
 })();

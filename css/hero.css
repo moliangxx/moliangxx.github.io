@@ -28,10 +28,3 @@ html,body{height:100%;margin:0;font-family: -apple-system, BlinkMacSystemFont, '
 
 /* Add a soft gradient overlay for readability */
 .hero-bg::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg, rgba(0,0,0,0.15), rgba(0,0,0,0.45));}
-
-/* Respect users who prefer reduced motion */
-@media (prefers-reduced-motion: reduce){
-  .hero-bg{animation:none!important;transition:none!important;transform:none!important}
-  .hero-bg::after{background:linear-gradient(180deg, rgba(0,0,0,0.25), rgba(0,0,0,0.45));}
-  .cursor{display:none}
-}
