@@ -1,0 +1,8 @@
+---
+title: 分类
+date: 2026-01-08 00:00:00
+type: "categories"
+layout: "categories"
+comments: false  # 可选：关闭分类页评论z
+---
+配置导航栏：在主题配置文件
