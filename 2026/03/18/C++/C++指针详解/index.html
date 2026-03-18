@@ -1,0 +1,356 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>C++指针详解 | 莫良的小窝</title><meta name="author" content="Liang_Mo"><meta name="copyright" content="Liang_Mo"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="C++中指针的核心概念讲解一、指针的核心概念（基础）指针的本质是存储内存地址的变量，就像一个 “门牌号”，通过它可以找到对应内存位置的数据。 1. 基本语法12345678910111213141516171819202122232425262728293031#include &lt;iostream&gt;using namespace std;int main() &#123;   &#x2F;&#x2F; 普">
+<meta property="og:type" content="article">
+<meta property="og:title" content="C++指针详解">
+<meta property="og:url" content="https://moliangxx.github.io/2026/03/18/C++/C++%E6%8C%87%E9%92%88%E8%AF%A6%E8%A7%A3/index.html">
+<meta property="og:site_name" content="莫良的小窝">
+<meta property="og:description" content="C++中指针的核心概念讲解一、指针的核心概念（基础）指针的本质是存储内存地址的变量，就像一个 “门牌号”，通过它可以找到对应内存位置的数据。 1. 基本语法12345678910111213141516171819202122232425262728293031#include &lt;iostream&gt;using namespace std;int main() &#123;   &#x2F;&#x2F; 普">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://moliangxx.github.io/images/cover_c.jpg">
+<meta property="article:published_time" content="2026-03-18T07:48:40.000Z">
+<meta property="article:modified_time" content="2026-03-18T08:41:45.543Z">
+<meta property="article:author" content="Liang_Mo">
+<meta property="article:tag" content="C++">
+<meta property="article:tag" content="指针，pointer">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://moliangxx.github.io/images/cover_c.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "C++指针详解",
+  "url": "https://moliangxx.github.io/2026/03/18/C++/C++%E6%8C%87%E9%92%88%E8%AF%A6%E8%A7%A3/",
+  "image": "https://moliangxx.github.io/images/cover_c.jpg",
+  "datePublished": "2026-03-18T07:48:40.000Z",
+  "dateModified": "2026-03-18T08:41:45.543Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "Liang_Mo",
+      "url": "https://moliangxx.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="../../../../../img/favicon.webp"><link rel="canonical" href="https://moliangxx.github.io/2026/03/18/C++/C++%E6%8C%87%E9%92%88%E8%AF%A6%E8%A7%A3/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="../../../../../css/index.css?v=5.5.3"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          const mediaQueryDark = window.matchMedia('(prefers-color-scheme: dark)')
+          const mediaQueryLight = window.matchMedia('(prefers-color-scheme: light)')
+
+          if (theme === undefined) {
+            if (mediaQueryLight.matches) activateLightMode()
+            else if (mediaQueryDark.matches) activateDarkMode()
+            else {
+              const hour = new Date().getHours()
+              const isNight = hour <= 6 || hour >= 18
+              isNight ? activateDarkMode() : activateLightMode()
+            }
+            mediaQueryDark.addEventListener('change', () => {
+              if (saveToLocal.get('theme') === undefined) {
+                e.matches ? activateDarkMode() : activateLightMode()
+              }
+            })
+          } else {
+            theme === 'light' ? activateLightMode() : activateDarkMode()
+          }
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"簡"},
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":500,"highlightFullpage":true,"highlightMacStyle":true},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":50,"languages":{"author":"作者: Liang_Mo","link":"链接: ","source":"来源: 莫良的小窝","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'medium_zoom',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.12.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'C++指针详解',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.1"></head><body><div class="bg-animation" id="web_bg"></div><script>(() => {
+  const arr = ["background-image: url(../../../../../img/bg1.jpg);"]
+  const webBgDiv = document.getElementById('web_bg')
+
+  const setRandomBg = () => {
+    webBgDiv.style = arr[Math.floor(Math.random() * arr.length)]
+    requestAnimationFrame(() => webBgDiv.classList.add('bg-animation'))
+  }
+
+  document.addEventListener('pjax:send', () => {
+    webBgDiv.style = ''
+    webBgDiv.classList.remove('bg-animation')
+  })
+
+  document.addEventListener('pjax:complete', setRandomBg)
+  document.addEventListener('DOMContentLoaded', setRandomBg)
+})()
+</script><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.jpg" onerror="this.onerror=null;this.src='/img/error2.gif'" alt="avatar"/ loading='lazy'></div><div class="site-data text-center"><a href="archives/"><div class="headline">文章</div><div class="length-num">45</div></a><a href="tags/"><div class="headline">标签</div><div class="length-num">56</div></a><a href="categories/"><div class="headline">分类</div><div class="length-num">19</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="index.html"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> 列表</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> 电影</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/lidong/"><i class="fa-fw fas fa-user"></i><span> 礼物</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(../../../../../images/top_c.jpg);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="../../../../../index.html"><span class="site-name">莫良的小窝</span></a><a class="nav-page-title" href="../../../../../index.html"><span class="site-name">C++指针详解</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="index.html"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> 列表</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> 电影</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/lidong/"><i class="fa-fw fas fa-user"></i><span> 礼物</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">C++指针详解<a class="post-edit-link" href="https://github.com/moliangxx/moliangxx.github.io/edit/main/source/_posts_posts/C++/C++指针详解.md" title="编辑" target="_blank"><i class="fas fa-pencil-alt"></i></a></h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-03-18T07:48:40.000Z" title="发表于 2026-03-18 15:48:40">2026-03-18</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-03-18T08:41:45.543Z" title="更新于 2026-03-18 16:41:45">2026-03-18</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="../../../../../categories/C/">C++</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="../../../../../categories/C/pointer/">pointer</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="C-中指针的核心概念讲解"><a href="#C-中指针的核心概念讲解" class="headerlink" title="C++中指针的核心概念讲解"></a>C++中指针的核心概念讲解</h1><h2 id="一、指针的核心概念（基础）"><a href="#一、指针的核心概念（基础）" class="headerlink" title="一、指针的核心概念（基础）"></a>一、指针的核心概念（基础）</h2><p>指针的本质是<strong>存储内存地址的变量</strong>，就像一个 “门牌号”，通过它可以找到对应内存位置的数据。</p>
+<h3 id="1-基本语法"><a href="#1-基本语法" class="headerlink" title="1. 基本语法"></a>1. 基本语法</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;iostream&gt;</span><br><span class="line"></span><br><span class="line">using namespace std;</span><br><span class="line"></span><br><span class="line">int main() &#123;</span><br><span class="line"></span><br><span class="line">   // 普通变量：存储数值</span><br><span class="line"></span><br><span class="line">   int a = 10;</span><br><span class="line"></span><br><span class="line">   // 指针变量：存储a的内存地址，类型要匹配（int* 表示指向int类型的指针）</span><br><span class="line"></span><br><span class="line">   int* p = &amp;a;     //注意这里如果p = a;则p指向10这个非法地址会报错</span><br><span class="line"></span><br><span class="line">   cout &lt;&lt; &quot;变量a的值：&quot; &lt;&lt; a &lt;&lt; endl;          // 输出：10</span><br><span class="line"></span><br><span class="line">   cout &lt;&lt; &quot;变量a的地址：&quot; &lt;&lt; &amp;a &lt;&lt; endl;       // 输出：0x7ffee3b558ac（示例地址，实际不同）</span><br><span class="line"></span><br><span class="line">   cout &lt;&lt; &quot;指针p的值（a的地址）：&quot; &lt;&lt; p &lt;&lt; endl;  // 输出：和&amp;a相同</span><br><span class="line"></span><br><span class="line">   cout &lt;&lt; &quot;通过指针访问a的值：&quot; &lt;&lt; *p &lt;&lt; endl; // *是解引用运算符，输出：10</span><br><span class="line"></span><br><span class="line">   // 修改指针指向的值（会直接修改原变量）</span><br><span class="line"></span><br><span class="line">   *p = 20;     //*号解引用，*p对应变量a地址中的数</span><br><span class="line"></span><br><span class="line">   cout &lt;&lt; &quot;修改后a的值：&quot; &lt;&lt; a &lt;&lt; endl;        // 输出：20</span><br><span class="line"></span><br><span class="line">   return 0;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-关键术语"><a href="#2-关键术语" class="headerlink" title="2. 关键术语"></a>2. 关键术语</h3><ul>
+<li><p><code>&amp;</code>：取地址运算符，获取变量的内存地址。</p>
+</li>
+<li><p><code>*</code>：解引用运算符，通过地址访问对应内存的数据。</p>
+</li>
+<li><p>指针的类型：<code>int*</code>、<code>char*</code>、<code>float*</code> 等，决定了解引用时访问的内存大小（如<code>int*</code>访问 4 字节）。</p>
+</li>
+</ul>
+<h2 id="二、二阶指针（二级指针）"><a href="#二、二阶指针（二级指针）" class="headerlink" title="二、二阶指针（二级指针）"></a>二、二阶指针（二级指针）</h2><p>二阶指针是<strong>存储指针变量地址的指针</strong>，可以理解为 “门牌号的门牌号”，常用于多层数据传递（如函数中修改指针本身）。</p>
+<h4 id="1-语法与示例"><a href="#1-语法与示例" class="headerlink" title="1. 语法与示例"></a>1. 语法与示例</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;iostream&gt;</span><br><span class="line"></span><br><span class="line">using namespace std;</span><br><span class="line"></span><br><span class="line">int main() &#123;</span><br><span class="line"></span><br><span class="line">   int a = 100;</span><br><span class="line"></span><br><span class="line">   int* p1 = &amp;a;    // 一级指针：指向a</span><br><span class="line"></span><br><span class="line">   int** p2 = &amp;p1;  // 二级指针：指向p1</span><br><span class="line"></span><br><span class="line">   // 访问层级</span><br><span class="line"></span><br><span class="line">   cout &lt;&lt; &quot;a的值：&quot; &lt;&lt; a &lt;&lt; endl;          // 100</span><br><span class="line"></span><br><span class="line">   cout &lt;&lt; &quot;*p1（a的值）：&quot; &lt;&lt; *p1 &lt;&lt; endl; // 100</span><br><span class="line"></span><br><span class="line">   cout &lt;&lt; &quot;**p2（a的值）：&quot; &lt;&lt; **p2 &lt;&lt; endl; // 100</span><br><span class="line"></span><br><span class="line">   // 修改值：通过二级指针</span><br><span class="line"></span><br><span class="line">   **p2 = 200;</span><br><span class="line"></span><br><span class="line">   cout &lt;&lt; &quot;修改后a的值：&quot; &lt;&lt; a &lt;&lt; endl;    // 200</span><br><span class="line"></span><br><span class="line">   return 0;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-核心用途"><a href="#2-核心用途" class="headerlink" title="2. 核心用途"></a>2. 核心用途</h3><ul>
+<li>函数中修改指针的指向（如动态分配内存）：</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">void allocateMemory(int** p) &#123;</span><br><span class="line"></span><br><span class="line">   *p = new int(50); // 给一级指针分配内存</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">int main() &#123;</span><br><span class="line"></span><br><span class="line">   int* ptr = nullptr;</span><br><span class="line"></span><br><span class="line">   allocateMemory(&amp;ptr); // 传入二级指针</span><br><span class="line"></span><br><span class="line">   cout &lt;&lt; *ptr &lt;&lt; endl; // 50</span><br><span class="line"></span><br><span class="line">   delete ptr;</span><br><span class="line"></span><br><span class="line">   return 0;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="三、指针数组"><a href="#三、指针数组" class="headerlink" title="三、指针数组"></a>三、指针数组</h2><p>指针数组是<strong>数组的每个元素都是指针</strong>，语法：<code>类型* 数组名[长度]</code>（注意优先级：<code>[]</code> &gt; <code>*</code>）。</p>
+<h3 id="1-基础示例（指向普通变量）"><a href="#1-基础示例（指向普通变量）" class="headerlink" title="1. 基础示例（指向普通变量）"></a>1. 基础示例（指向普通变量）</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;iostream&gt;</span><br><span class="line"></span><br><span class="line">using namespace std;</span><br><span class="line"></span><br><span class="line">int main() &#123;</span><br><span class="line"></span><br><span class="line">   int a = 1, b = 2, c = 3;</span><br><span class="line"></span><br><span class="line">   // 指针数组：3个int*类型的指针，分别指向a、b、c</span><br><span class="line"></span><br><span class="line">   int* arr[3] = &#123;&amp;a, &amp;b, &amp;c&#125;;</span><br><span class="line"></span><br><span class="line">   // 遍历指针数组</span><br><span class="line"></span><br><span class="line">   for (int i = 0; i &lt; 3; i++) &#123;</span><br><span class="line"></span><br><span class="line">       cout &lt;&lt; *arr[i] &lt;&lt; &quot; &quot;; // 解引用，输出：1 2 3</span><br><span class="line"></span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   return 0;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-常用场景：指向字符串（字符数组）"><a href="#2-常用场景：指向字符串（字符数组）" class="headerlink" title="2. 常用场景：指向字符串（字符数组）"></a>2. 常用场景：指向字符串（字符数组）</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;iostream&gt;</span><br><span class="line"></span><br><span class="line">using namespace std;</span><br><span class="line"></span><br><span class="line">int main() &#123;</span><br><span class="line"></span><br><span class="line">   // 指针数组：每个元素指向一个字符串常量的首地址</span><br><span class="line"></span><br><span class="line">   const char* strArr[] = &#123;&quot;Apple&quot;, &quot;Banana&quot;, &quot;Cherry&quot;&#125;;</span><br><span class="line"></span><br><span class="line">   for (int i = 0; i &lt; 3; i++) &#123;</span><br><span class="line"></span><br><span class="line">       cout &lt;&lt; strArr[i] &lt;&lt; endl; // 输出：Apple / Banana / Cherry</span><br><span class="line"></span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   return 0;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="四、指针与数组（一维-二维）"><a href="#四、指针与数组（一维-二维）" class="headerlink" title="四、指针与数组（一维 &#x2F; 二维）"></a>四、指针与数组（一维 &#x2F; 二维）</h2><p>数组名本质是<strong>指向数组第一个元素的常量指针</strong>（不能修改指向），这是指针与数组的核心关联。</p>
+<h3 id="1-指针与一维数组"><a href="#1-指针与一维数组" class="headerlink" title="1. 指针与一维数组"></a>1. 指针与一维数组</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;iostream&gt;</span><br><span class="line"></span><br><span class="line">using namespace std;</span><br><span class="line"></span><br><span class="line">int main() &#123;</span><br><span class="line"></span><br><span class="line">   int arr[5] = &#123;10, 20, 30, 40, 50&#125;;</span><br><span class="line"></span><br><span class="line">   int* p = arr; // 数组名arr等价于&amp;arr[0]，无需加&amp;</span><br><span class="line"></span><br><span class="line">   // 两种访问方式：数组下标 vs 指针</span><br><span class="line"></span><br><span class="line">   cout &lt;&lt; arr[2] &lt;&lt; endl;  // 30（下标访问）</span><br><span class="line"></span><br><span class="line">   cout &lt;&lt; *(p + 2) &lt;&lt; endl; // 30（指针偏移：p+2指向第3个元素）</span><br><span class="line"></span><br><span class="line">   // 遍历数组（指针方式）</span><br><span class="line"></span><br><span class="line">   for (int i = 0; i &lt; 5; i++) &#123;</span><br><span class="line"></span><br><span class="line">       cout &lt;&lt; *(p + i) &lt;&lt; &quot; &quot;; // 10 20 30 40 50</span><br><span class="line"></span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   return 0;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-指针与二维数组"><a href="#2-指针与二维数组" class="headerlink" title="2. 指针与二维数组"></a>2. 指针与二维数组</h3><p>二维数组可以理解为 “数组的数组”，指针操作需注意维度：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;iostream&gt;</span><br><span class="line"></span><br><span class="line">using namespace std;</span><br><span class="line"></span><br><span class="line">int main() &#123;</span><br><span class="line"></span><br><span class="line">   int arr[2][3] = &#123;&#123;1,2,3&#125;, &#123;4,5,6&#125;&#125;;</span><br><span class="line"></span><br><span class="line">   // 方式1：数组名 + 下标</span><br><span class="line"></span><br><span class="line">   cout &lt;&lt; arr[1][2] &lt;&lt; endl; // 6</span><br><span class="line"></span><br><span class="line">   // 方式2：指针（核心：arr是指向一维数组的指针，类型为int (*)[3]）</span><br><span class="line"></span><br><span class="line">   int (*p)[3] = arr; // p指向包含3个int的一维数组</span><br><span class="line"></span><br><span class="line">   cout &lt;&lt; *(*(p + 1) + 2) &lt;&lt; endl; // 6：p+1指向第二行，*(p+1)是第二行首地址，+2指向第3个元素</span><br><span class="line"></span><br><span class="line">   return 0;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-二阶指针与二维数组"><a href="#3-二阶指针与二维数组" class="headerlink" title="3. 二阶指针与二维数组"></a>3. 二阶指针与二维数组</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;iostream&gt;</span><br><span class="line"></span><br><span class="line">using namespace std;</span><br><span class="line"></span><br><span class="line">int main() &#123;</span><br><span class="line"></span><br><span class="line">   // 二维数组：2行3列，内存中连续存储：1 2 3 4 5 6</span><br><span class="line"></span><br><span class="line">   int arr[2][3] = &#123;&#123;1,2,3&#125;, &#123;4,5,6&#125;&#125;;</span><br><span class="line"></span><br><span class="line">   // 正确的指针类型：指向包含3个int的一维数组</span><br><span class="line"></span><br><span class="line">   int (*p)[3] = arr;</span><br><span class="line"></span><br><span class="line">   // 错误写法：int** p = arr; （类型不匹配，编译警告/错误）</span><br><span class="line">   // arr 等价于 &amp;a[0] int(*)[3]类型</span><br><span class="line"></span><br><span class="line">   // 访问arr[1][2]（值为6）</span><br><span class="line"></span><br><span class="line">   cout &lt;&lt; *(*(p + 1) + 2) &lt;&lt; endl; // 正确</span><br><span class="line"></span><br><span class="line">   // 等价于：p+1 指向第二行，*(p+1) 是第二行首地址，+2 指向第3个元素</span><br><span class="line"></span><br><span class="line">   // 验证内存连续性</span><br><span class="line"></span><br><span class="line">   cout &lt;&lt; &quot;arr[0][0]地址：&quot; &lt;&lt; &amp;arr[0][0] &lt;&lt; endl;</span><br><span class="line"></span><br><span class="line">   cout &lt;&lt; &quot;arr[0][1]地址：&quot; &lt;&lt; &amp;arr[0][1] &lt;&lt; endl; // 地址+4（int占4字节）</span><br><span class="line"></span><br><span class="line">   cout &lt;&lt; &quot;arr[1][0]地址：&quot; &lt;&lt; &amp;arr[1][0] &lt;&lt; endl; // 地址+12（3个int）</span><br><span class="line"></span><br><span class="line">   return 0;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="五、指针与字符串"><a href="#五、指针与字符串" class="headerlink" title="五、指针与字符串"></a>五、指针与字符串</h2><p>C++ 中字符串有两种形式：<strong>字符数组</strong> 和 <strong>字符串常量</strong>，指针是操作字符串的核心方式。</p>
+<h3 id="1-字符数组与指针"><a href="#1-字符数组与指针" class="headerlink" title="1. 字符数组与指针"></a>1. 字符数组与指针</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;iostream&gt;</span><br><span class="line"></span><br><span class="line">#include &lt;cstring&gt; // 字符串函数头文件</span><br><span class="line"></span><br><span class="line">using namespace std;</span><br><span class="line"></span><br><span class="line">int main() &#123;</span><br><span class="line"></span><br><span class="line">   char str[] = &quot;Hello&quot;; // 字符数组（可修改）</span><br><span class="line"></span><br><span class="line">   char* p = str;        // p指向字符串首地址</span><br><span class="line"></span><br><span class="line">   // 遍历字符串（直到&#x27;0&#x27;结束）</span><br><span class="line"></span><br><span class="line">   while (*p != &#x27;0&#x27;) &#123;</span><br><span class="line"></span><br><span class="line">       cout &lt;&lt; *p; // 输出：Hello</span><br><span class="line"></span><br><span class="line">       p++;</span><br><span class="line"></span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   // 修改字符数组</span><br><span class="line"></span><br><span class="line">   str[1] = &#x27;a&#x27;;</span><br><span class="line"></span><br><span class="line">   cout &lt;&lt; endl &lt;&lt; str; // 输出：Hallo</span><br><span class="line"></span><br><span class="line">   return 0;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-字符串常量与指针（注意只读）"><a href="#2-字符串常量与指针（注意只读）" class="headerlink" title="2. 字符串常量与指针（注意只读）"></a>2. 字符串常量与指针（注意只读）</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;iostream&gt;</span><br><span class="line"></span><br><span class="line">using namespace std;</span><br><span class="line"></span><br><span class="line">int main() &#123;</span><br><span class="line"></span><br><span class="line">   // 指针指向字符串常量（存储在只读区，不可修改）</span><br><span class="line"></span><br><span class="line">   const char* str = &quot;World&quot;;</span><br><span class="line"></span><br><span class="line">   cout &lt;&lt; str &lt;&lt; endl; // 输出：World</span><br><span class="line"></span><br><span class="line">   // str[1] = &#x27;a&#x27;; // 错误！字符串常量不可修改，会触发运行时错误</span><br><span class="line"></span><br><span class="line">   str = &quot;Hello&quot;;     // 合法：修改指针的指向（指向新的字符串常量）</span><br><span class="line"></span><br><span class="line">   cout &lt;&lt; str &lt;&lt; endl; // 输出：Hello</span><br><span class="line"></span><br><span class="line">   return 0;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-常用字符串指针操作"><a href="#3-常用字符串指针操作" class="headerlink" title="3. 常用字符串指针操作"></a>3. 常用字符串指针操作</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">// 字符串复制（手动实现，替代strcpy）</span><br><span class="line"></span><br><span class="line">void myStrcpy(char* dest, const char* src) &#123;</span><br><span class="line"></span><br><span class="line">   while (*src != &#x27;0&#x27;) &#123;</span><br><span class="line"></span><br><span class="line">       *dest = *src;</span><br><span class="line"></span><br><span class="line">       dest++;</span><br><span class="line"></span><br><span class="line">       src++;</span><br><span class="line"></span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   *dest = &#x27;0&#x27;; // 补结束符</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">int main() &#123;</span><br><span class="line"></span><br><span class="line">   char dest[20];</span><br><span class="line"></span><br><span class="line">   const char* src = &quot;Test String&quot;;</span><br><span class="line"></span><br><span class="line">   myStrcpy(dest, src);</span><br><span class="line"></span><br><span class="line">   cout &lt;&lt; dest &lt;&lt; endl; // Test String</span><br><span class="line"></span><br><span class="line">   return 0;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="六、指针与结构体"><a href="#六、指针与结构体" class="headerlink" title="六、指针与结构体"></a>六、指针与结构体</h2><p>指针可以指向结构体，用于高效访问 &#x2F; 修改结构体成员，尤其适合传递大结构体（避免拷贝）。</p>
+<h3 id="1-基础用法"><a href="#1-基础用法" class="headerlink" title="1. 基础用法"></a>1. 基础用法</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;iostream&gt;</span><br><span class="line"></span><br><span class="line">#include &lt;cstring&gt;</span><br><span class="line"></span><br><span class="line">using namespace std;</span><br><span class="line"></span><br><span class="line">// 定义结构体</span><br><span class="line"></span><br><span class="line">struct Student &#123;</span><br><span class="line"></span><br><span class="line">   char name[20];</span><br><span class="line"></span><br><span class="line">   int age;</span><br><span class="line"></span><br><span class="line">   float score;</span><br><span class="line"></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">int main() &#123;</span><br><span class="line"></span><br><span class="line">   Student stu = &#123;&quot;Zhang San&quot;, 18, 90.5&#125;;</span><br><span class="line"></span><br><span class="line">   Student* p = &amp;stu; // 指针指向结构体</span><br><span class="line"></span><br><span class="line">   // 访问成员：三种方式</span><br><span class="line"></span><br><span class="line">   cout &lt;&lt; stu.age &lt;&lt; endl;    // 18（普通方式：.）</span><br><span class="line"></span><br><span class="line">   cout &lt;&lt; p-&gt;age &lt;&lt; endl;     // 18（指针方式：-&gt;，等价于(*p).age）</span><br><span class="line">   </span><br><span class="line">   cout &lt;&lt; (*p).age &lt;&lt; endl;   </span><br><span class="line"></span><br><span class="line">   // 修改成员</span><br><span class="line"></span><br><span class="line">   p-&gt;age = 19;</span><br><span class="line"></span><br><span class="line">   strcpy(p-&gt;name, &quot;Li Si&quot;);</span><br><span class="line"></span><br><span class="line">   cout &lt;&lt; p-&gt;name &lt;&lt; &quot; &quot; &lt;&lt; p-&gt;age &lt;&lt; endl; // Li Si 19</span><br><span class="line"></span><br><span class="line">   return 0;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-结构体指针数组（常用场景）"><a href="#2-结构体指针数组（常用场景）" class="headerlink" title="2. 结构体指针数组（常用场景）"></a>2. 结构体指针数组（常用场景）</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">int main() &#123;</span><br><span class="line"></span><br><span class="line">   Student stu1 = &#123;&quot;A&quot;, 18, 88&#125;;</span><br><span class="line"></span><br><span class="line">   Student stu2 = &#123;&quot;B&quot;, 19, 92&#125;;</span><br><span class="line"></span><br><span class="line">   // 结构体指针数组：每个元素指向一个Student对象</span><br><span class="line"></span><br><span class="line">   Student* stuArr[] = &#123;&amp;stu1, &amp;stu2&#125;;</span><br><span class="line"></span><br><span class="line">   for (int i = 0; i &lt; 2; i++) &#123;</span><br><span class="line"></span><br><span class="line">       cout &lt;&lt; stuArr[i]-&gt;name &lt;&lt; &quot; &quot; &lt;&lt; stuArr[i]-&gt;score &lt;&lt; endl;</span><br><span class="line"></span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   return 0;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="七-总结"><a href="#七-总结" class="headerlink" title="七. 总结"></a>七. 总结</h2><ol>
+<li><p><strong>核心本质</strong>：指针是存储内存地址的变量，<code>&amp;</code>取地址、<code>*</code>解引用是核心操作；</p>
+</li>
+<li><p><strong>关键扩展</strong>：</p>
+</li>
+</ol>
+<ul>
+<li><p>数组本身就是指针 int a[10]  a等价与&amp;a[0]  类型为int*；</p>
+</li>
+<li><p>二维数组 int a[3][4] a等价与&amp;a[0] 类型为int(*)[4]</p>
+</li>
+<li><p>二维数组 int a[4][5] a[3]等价与&amp;a[3][0] 类型为int*(a[3]本身为int[5],退化为指针)</p>
+</li>
+<li><p>二阶指针：指向指针的指针，用于修改指针本身（如动态分配内存）；</p>
+</li>
+<li><p>指针数组：数组元素是指针，常用于管理多个字符串 &#x2F; 结构体；</p>
+</li>
+</ul>
+<ol>
+<li><strong>关联场景</strong>：</li>
+</ol>
+<ul>
+<li><p>数组名是常量指针，一维数组可用<code>*(p+i)</code>替代<code>arr[i]</code>，二维数组需注意指针类型（<code>int (*)[n]</code>）；</p>
+</li>
+<li><p>字符串本质是字符数组，指针可高效遍历 &#x2F; 操作，字符串常量不可修改；</p>
+</li>
+<li><p>结构体指针用<code>-&gt;</code>访问成员，适合传递大结构体（减少拷贝开销）。</p>
+</li>
+</ul>
+<hr>
+<h3 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h3><blockquote>
+<p>制作不易</p>
+<p>鼓励一下吧<br><em><strong><del>请我喝杯奶茶好吗</del></strong></em></p>
+<ul>
+<li>₍˄·͈༝·͈˄*₎◞ ̑̑</li>
+</ul>
+</blockquote>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://moliangxx.github.io">Liang_Mo</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://moliangxx.github.io/2026/03/18/C++/C++%E6%8C%87%E9%92%88%E8%AF%A6%E8%A7%A3/">https://moliangxx.github.io/2026/03/18/C++/C++%E6%8C%87%E9%92%88%E8%AF%A6%E8%A7%A3/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://moliangxx.github.io" target="_blank">莫良的小窝</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="../../../../../tags/C/">C++</a><a class="post-meta__tags" href="../../../../../tags/%E6%8C%87%E9%92%88%EF%BC%8Cpointer/">指针，pointer</a></div><div class="post-share"><div class="social-share" data-image="../../../../../images/cover_c.jpg" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><div class="post-reward"><div class="reward-button"><i class="fas fa-qrcode"></i>“请我喝杯奶茶~”</div><div class="reward-main"><ul class="reward-all"><li class="reward-item"><a href="../../../../img/wechat.jpg" target="_blank"><img class="post-qr-code-img" src="../../../../img/wechat.jpg"/ loading='lazy'></a><div class="post-qr-code-desc"></div></li></ul></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width" href="../../../17/Android/%E7%AC%AC%E4%B8%83%E7%AB%A0/Android%20%E6%9D%83%E9%99%90%E6%9C%BA%E5%88%B6%E8%AE%B2%E8%A7%A3/" title="Android 权限机制讲解"><img class="cover" src="../../../../../images/cover_android.jpg" onerror="onerror=null;src='../../../../../img/error2.jpg'" alt="cover of next post" loading='lazy'><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Android 权限机制讲解</div></div><div class="info-2"><div class="info-item-1">主题：Android 权限机制讲解，包括核心概念、权限分类、授权流程及不同版本的差异和完整的权限使用流程（以相机权限为例）🛡️ Android 权限机制核心讲解Android 权限机制是系统为了保护用户隐私、设备安全和应用稳定性设计的「访问控制规则」—— 应用必须获得用户授权，才能访问设备的敏感资源（如相机、通讯录）或执行高危操作（如联网、修改系统设置）。 从 Android 6.0（API 23）开始，权限机制经历了重大升级，核心分为「安装时权限」和「运行时权限」，后续版本又不断强化隐私保护，下面从核心概念、权限分类、授权流程、最佳实践四个维度讲清楚：  一、核心概念与权限分类1. 按「授权时机」分类   类型 适用版本 授权方式 示例    安装时权限（Install-Time） Android 5.1 及以下（API ≤22） 用户安装应用时自动授权（仅弹窗告知） 网络访问、振动、WiFi 状态   运行时权限（Runtime） Android 6.0 及以上（API ≥23） 应用运行中主动申请，用户手动同意 &#x2F; 拒绝 相机、通讯录、定位、存储   2. 按「...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="../../../../../2025/01/01/C++/C++%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%AD%A6%E4%B9%A0%E6%8C%87%E5%8D%97/" title="C++数据结构学习指南"><img class="cover" src="../../../../../images/cover_c.jpg" alt="cover" loading='lazy'><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-01-01</div><div class="info-item-2">C++数据结构学习指南</div></div><div class="info-2"><div class="info-item-1">C++数据结构学习指南一、前置基础（1-2 周）：夯实 C++ 核心能力数据结构的实现依赖 C++ 语法特性，需先掌握以下核心内容：  C++ 基础语法：变量、指针、引用、数组、结构体（struct）、枚举  面向对象编程（OOP）：类（class）、构造 &#x2F; 析构函数、继承、多态、封装  STL 核心容器与算法：    容器：vector（动态数组）、list（双向链表）、stack（栈）、queue（队列）、map&#x2F;unordered_map（映射）  算法：迭代器遍历、sort排序、find查找（理解 STL 底层实现思路，为手写数据结构打基础）    常用工具：指针操作（new&#x2F;delete）、模板（template）、异常处理（可选）  实践任务： 用 C++ 实现简单结构体（如Person），完成增删改查  熟练使用 STL 容器解决基础问题（如用vector存储数据并排序）   二、线性数据结构（2-3 周）：入门核心基础线性结构是数据结构的基石，重点掌握「存储逻辑」和「增删改查效率」： 1. 数组与动态数组 核心要点：静态数组（固定大...</div></div></div></a><a class="pagination-related" href="../../../../../2025/12/18/C++/C-%E5%B8%B8%E7%94%A8STL%E5%AE%B9%E5%99%A8/" title="C++常用STL容器"><img class="cover" src="../../../../../images/cover_c.jpg" alt="cover" loading='lazy'><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-12-18</div><div class="info-item-2">C++常用STL容器</div></div><div class="info-2"><div class="info-item-1">C++ STL 容器函数及适用场景整理以下是C++ STL中vector、map、set、pair等容器的函数、作用及适用范围整理： 一、vector（动态数组）核心特性：动态扩容、随机访问高效，适合元素数量变化且需快速访问的场景。    类别 函数 作用 适用范围    构造与赋值 vector&lt;T&gt; v; 默认构造空vector。 初始化空容器    vector&lt;T&gt; v(n, val); 构造含n个val的vector。 初始化固定大小的初始元素    vector&lt;T&gt; v(other); 拷贝构造，复制另一个vector的内容。 容器间复制    v.assign(n, val); 将n个val赋值给vector，覆盖原有内容。 批量重置元素   元素访问 v[i] 随机访问第i个元素（无越界检查）。 需快速随机访问元素时    v.at(i) 随机访问第i个元素（有越界检查，抛出out_of_range异常）。 需安全访问元素时    v.front() 返回第一个元素的引用。 获取容器首元素    v.back() 返回最后一个...</div></div></div></a><a class="pagination-related" href="../../../../../2025/12/28/C++/C++%20list%E4%B8%8Eunordered_map%E6%90%AD%E9%85%8D%E4%BD%BF%E7%94%A8/" title="C++ List 搭配 Unordered_map使用"><img class="cover" src="../../../../../images/cover_c.jpg" alt="cover" loading='lazy'><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-12-28</div><div class="info-item-2">C++ List 搭配 Unordered_map使用</div></div><div class="info-2"><div class="info-item-1">C++ list 搭配 unordered _map使用list（双向链表）与 unordered _map（哈希表）的搭配是 “互补短板、放大优势” 的经典组合，核心逻辑是：用 unordered_map 解决 list 的 “查找慢” 问题，用 list 解决 unordered_map 的 “插入删除（中间元素）低效”“无法维护顺序” 问题，最终实现 “O (1) 查找 + O (1) 插入删除 + 可维护自定义顺序” 的高效数据结构。 一、核心作用：解决 “快速查找 + 高效增删 + 顺序维护” 的复合需求单独使用 list 或 unordered_map 都有明显短板，搭配后可覆盖两类容器无法单独满足的场景：    单独使用的问题 list 特性 unordered _map 特性 搭配后解决方案    list 查找元素需遍历（O (n)） 插入 &#x2F; 删除高效（O (1)）、可维护顺序 查找 &#x2F; 键值映射（O (1)） unordered _map 存 “键 → list 迭代器”，直接定位元素（O (1)）   unordered _map 无序...</div></div></div></a><a class="pagination-related" href="../../../../../2025/12/28/C++/C++%20STL%20list%20%E5%85%A8%E9%9D%A2%E8%AF%A6%E8%A7%A3/" title="C++  List全面详解"><img class="cover" src="../../../../../images/cover_c.jpg" alt="cover" loading='lazy'><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-12-28</div><div class="info-item-2">C++  List全面详解</div></div><div class="info-2"><div class="info-item-1">C++  list全面详解一、核心基础：头文件与 list 特性1. 头文件（必须包含）1234567 #include  // list 容器核心头文件 #include   // 配合算法库使用（如 for _each、find） #include  &lt;iostream&gt;using namespace std;  // 简化写法，否则需写 std::list  2. list 核心特性（双向链表） 存储结构：非连续内存，每个元素是独立节点（包含数据 + 前后指针）  核心优势：任意位置插入 &#x2F; 删除高效（时间复杂度 O (1)，仅需修改指针）  核心劣势：不支持随机访问（不能用 [] 或 at() 访问元素，需遍历）  迭代器类型：双向迭代器（支持 ++&#x2F;--，不支持 +=n&#x2F;-=n）  适用场景：插入 &#x2F; 删除频繁、无需随机访问的场景（如任务队列、频繁修改的列表）   二、完整语法：构造、迭代器、成员函数1. 构造函数（5 种常用方式）   语法格式 说明 示例代码    list lst; 默认构造，空链表 list&l...</div></div></div></a><a class="pagination-related" href="../../../../../2025/12/18/C++/C-%E4%B8%8EPython%E5%85%B3%E8%81%94%E5%AE%B9%E5%99%A8%E6%AF%94%E8%BE%83/" title="C++与Python关联容器比较"><img class="cover" src="../../../../../images/cover_c.jpg" alt="cover" loading='lazy'><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-12-18</div><div class="info-item-2">C++与Python关联容器比较</div></div><div class="info-2"><div class="info-item-1">C++与Python关联容器比较一、C++ map 与 Python dict 的区别与联系核心联系（功能定位一致）两者都是键值对（key-value）关联容器，核心用途是通过唯一键快速查找、存储对应的值，支持插入、删除、更新操作，且键具有唯一性（重复插入会覆盖旧值）。 核心区别（底层实现决定所有差异）   对比维度 C++ map Python dict    底层实现 红黑树（自平衡二叉搜索树） 哈希表（哈希桶 + 链地址法解决冲突）   元素顺序 自动按 键升序排列（与插入顺序无关） Python 3.7+ 保留 插入顺序，3.7前无序   时间复杂度（插入&#x2F;查询&#x2F;删除） 稳定 O(log n)（树高决定） 平均 O(1)，最坏 O(n)（哈希冲突严重时）   键（key）的要求 需支持比较操作（重载 operator&lt;） 需是 可哈希类型（不可变类型：int、str、tuple 等）   功能扩展 支持范围查询（lower_bound&#x2F;upper_bound）、有序遍历 内置方法更丰富（keys()&#x2F;values()&#x2F...</div></div></div></a></div></div><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="giscus-wrap"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content is-expand"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#C-%E4%B8%AD%E6%8C%87%E9%92%88%E7%9A%84%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E8%AE%B2%E8%A7%A3"><span class="toc-number">1.</span> <span class="toc-text">C++中指针的核心概念讲解</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E6%8C%87%E9%92%88%E7%9A%84%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%EF%BC%88%E5%9F%BA%E7%A1%80%EF%BC%89"><span class="toc-number">1.1.</span> <span class="toc-text">一、指针的核心概念（基础）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E5%9F%BA%E6%9C%AC%E8%AF%AD%E6%B3%95"><span class="toc-number">1.1.1.</span> <span class="toc-text">1. 基本语法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%85%B3%E9%94%AE%E6%9C%AF%E8%AF%AD"><span class="toc-number">1.1.2.</span> <span class="toc-text">2. 关键术语</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E4%BA%8C%E9%98%B6%E6%8C%87%E9%92%88%EF%BC%88%E4%BA%8C%E7%BA%A7%E6%8C%87%E9%92%88%EF%BC%89"><span class="toc-number">1.2.</span> <span class="toc-text">二、二阶指针（二级指针）</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-%E8%AF%AD%E6%B3%95%E4%B8%8E%E7%A4%BA%E4%BE%8B"><span class="toc-number">1.2.1.</span> <span class="toc-text">1. 语法与示例</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E6%A0%B8%E5%BF%83%E7%94%A8%E9%80%94"><span class="toc-number">1.2.2.</span> <span class="toc-text">2. 核心用途</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E6%8C%87%E9%92%88%E6%95%B0%E7%BB%84"><span class="toc-number">1.3.</span> <span class="toc-text">三、指针数组</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E5%9F%BA%E7%A1%80%E7%A4%BA%E4%BE%8B%EF%BC%88%E6%8C%87%E5%90%91%E6%99%AE%E9%80%9A%E5%8F%98%E9%87%8F%EF%BC%89"><span class="toc-number">1.3.1.</span> <span class="toc-text">1. 基础示例（指向普通变量）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%B8%B8%E7%94%A8%E5%9C%BA%E6%99%AF%EF%BC%9A%E6%8C%87%E5%90%91%E5%AD%97%E7%AC%A6%E4%B8%B2%EF%BC%88%E5%AD%97%E7%AC%A6%E6%95%B0%E7%BB%84%EF%BC%89"><span class="toc-number">1.3.2.</span> <span class="toc-text">2. 常用场景：指向字符串（字符数组）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E6%8C%87%E9%92%88%E4%B8%8E%E6%95%B0%E7%BB%84%EF%BC%88%E4%B8%80%E7%BB%B4-%E4%BA%8C%E7%BB%B4%EF%BC%89"><span class="toc-number">1.4.</span> <span class="toc-text">四、指针与数组（一维 &#x2F; 二维）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%8C%87%E9%92%88%E4%B8%8E%E4%B8%80%E7%BB%B4%E6%95%B0%E7%BB%84"><span class="toc-number">1.4.1.</span> <span class="toc-text">1. 指针与一维数组</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E6%8C%87%E9%92%88%E4%B8%8E%E4%BA%8C%E7%BB%B4%E6%95%B0%E7%BB%84"><span class="toc-number">1.4.2.</span> <span class="toc-text">2. 指针与二维数组</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E4%BA%8C%E9%98%B6%E6%8C%87%E9%92%88%E4%B8%8E%E4%BA%8C%E7%BB%B4%E6%95%B0%E7%BB%84"><span class="toc-number">1.4.3.</span> <span class="toc-text">3. 二阶指针与二维数组</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E6%8C%87%E9%92%88%E4%B8%8E%E5%AD%97%E7%AC%A6%E4%B8%B2"><span class="toc-number">1.5.</span> <span class="toc-text">五、指针与字符串</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E5%AD%97%E7%AC%A6%E6%95%B0%E7%BB%84%E4%B8%8E%E6%8C%87%E9%92%88"><span class="toc-number">1.5.1.</span> <span class="toc-text">1. 字符数组与指针</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%B8%B8%E9%87%8F%E4%B8%8E%E6%8C%87%E9%92%88%EF%BC%88%E6%B3%A8%E6%84%8F%E5%8F%AA%E8%AF%BB%EF%BC%89"><span class="toc-number">1.5.2.</span> <span class="toc-text">2. 字符串常量与指针（注意只读）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%B8%B8%E7%94%A8%E5%AD%97%E7%AC%A6%E4%B8%B2%E6%8C%87%E9%92%88%E6%93%8D%E4%BD%9C"><span class="toc-number">1.5.3.</span> <span class="toc-text">3. 常用字符串指针操作</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AD%E3%80%81%E6%8C%87%E9%92%88%E4%B8%8E%E7%BB%93%E6%9E%84%E4%BD%93"><span class="toc-number">1.6.</span> <span class="toc-text">六、指针与结构体</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E5%9F%BA%E7%A1%80%E7%94%A8%E6%B3%95"><span class="toc-number">1.6.1.</span> <span class="toc-text">1. 基础用法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E7%BB%93%E6%9E%84%E4%BD%93%E6%8C%87%E9%92%88%E6%95%B0%E7%BB%84%EF%BC%88%E5%B8%B8%E7%94%A8%E5%9C%BA%E6%99%AF%EF%BC%89"><span class="toc-number">1.6.2.</span> <span class="toc-text">2. 结构体指针数组（常用场景）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%83-%E6%80%BB%E7%BB%93"><span class="toc-number">1.7.</span> <span class="toc-text">七. 总结</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9C%80%E5%90%8E"><span class="toc-number">1.7.1.</span> <span class="toc-text">最后</span></a></li></ol></li></ol></li></ol></div></div></div></div></main><footer id="footer" style="background-image: url(../../../../../img/bg1.jpg);"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By Liang_Mo</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.1</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.3</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="../../../../../js/utils.js?v=5.5.3"></script><script src="../../../../../js/main.js?v=5.5.3"></script><script src="../../../../../js/tw_cn.js?v=5.5.3"></script><script src="https://cdn.jsdelivr.net/npm/medium-zoom@1.1.0/dist/medium-zoom.min.js"></script><div class="js-pjax"><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = {"mapping":"pathname","crossorigin":"anonymous"}
+
+  const getGiscusTheme = theme => theme === 'dark' ? 'dark' : 'light'
+
+  const createScriptElement = config => {
+    const ele = document.createElement('script')
+    Object.entries(config).forEach(([key, value]) => {
+      ele.setAttribute(key, value)
+    })
+    return ele
+  }
+
+  const loadGiscus = (el = document, key) => {
+    const mappingConfig = isShuoshuo
+      ? { 'data-mapping': 'specific', 'data-term': key }
+      : { 'data-mapping': (option && option['data-mapping']) || 'pathname' }
+
+    const giscusConfig = {
+      src: 'https://giscus.app/client.js',
+      'data-repo': 'moliangxx/moliangxx.github.io',
+      'data-repo-id': 'R_kgDOQkNdpQ',
+      'data-category-id': 'DIC_kwDOQkNdpc4C0z4Q',
+      'data-theme': getGiscusTheme(document.documentElement.getAttribute('data-theme')),
+      'data-reactions-enabled': '1',
+      crossorigin: 'anonymous',
+      async: true,
+      ...option,
+      ...mappingConfig
+    }
+
+    const scriptElement = createScriptElement(giscusConfig)
+
+    el.querySelector('#giscus-wrap').appendChild(scriptElement)
+
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyGiscus = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+  }
+
+  const changeGiscusTheme = theme => {
+    const iframe = document.querySelector('#giscus-wrap iframe')
+    if (iframe) {
+      const message = {
+        giscus: {
+          setConfig: {
+            theme: getGiscusTheme(theme)
+          }
+        }
+      }
+      iframe.contentWindow.postMessage(message, 'https://giscus.app')
+    }
+  }
+
+  btf.addGlobalFn('themeChange', changeGiscusTheme, 'giscus')
+
+  if (isShuoshuo) {
+    'Giscus' === 'Giscus'
+      ? window.shuoshuoComment = { loadComment: loadGiscus }
+      : window.loadOtherComment = loadGiscus
+    return
+  }
+
+  if ('Giscus' === 'Giscus' || !false) {
+    if (false) btf.loadComment(document.getElementById('giscus-wrap'), loadGiscus)
+    else loadGiscus()
+  } else {
+    window.loadOtherComment = loadGiscus
+  }
+})()</script></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js"></script><script src="https://cdn.jsdelivr.net/npm/meting@2/dist/Meting.min.js"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
