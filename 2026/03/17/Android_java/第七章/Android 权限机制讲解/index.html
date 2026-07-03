@@ -1,0 +1,526 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="dark"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Android 权限机制讲解 | 莫良的小窝</title><meta name="author" content="Liang_Mo"><meta name="copyright" content="Liang_Mo"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#0d0d0d"><meta name="description" content="主题：Android 权限机制讲解，包括核心概念、权限分类、授权流程及不同版本的差异和完整的权限使用流程（以相机权限为例）🛡️ Android 权限机制核心讲解Android 权限机制是系统为了保护用户隐私、设备安全和应用稳定性设计的「访问控制规则」—— 应用必须获得用户授权，才能访问设备的敏感资源（如相机、通讯录）或执行高危操作（如联网、修改系统设置）。 从 Android 6.0（API 2">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android 权限机制讲解">
+<meta property="og:url" content="https://moliangxx.github.io/2026/03/17/Android_java/%E7%AC%AC%E4%B8%83%E7%AB%A0/Android%20%E6%9D%83%E9%99%90%E6%9C%BA%E5%88%B6%E8%AE%B2%E8%A7%A3/index.html">
+<meta property="og:site_name" content="莫良的小窝">
+<meta property="og:description" content="主题：Android 权限机制讲解，包括核心概念、权限分类、授权流程及不同版本的差异和完整的权限使用流程（以相机权限为例）🛡️ Android 权限机制核心讲解Android 权限机制是系统为了保护用户隐私、设备安全和应用稳定性设计的「访问控制规则」—— 应用必须获得用户授权，才能访问设备的敏感资源（如相机、通讯录）或执行高危操作（如联网、修改系统设置）。 从 Android 6.0（API 2">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://moliangxx.github.io/images/cover_android5.jpg">
+<meta property="article:published_time" content="2026-03-17T07:11:09.000Z">
+<meta property="article:modified_time" content="2026-03-23T13:59:28.735Z">
+<meta property="article:author" content="Liang_Mo">
+<meta property="article:tag" content="权限">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://moliangxx.github.io/images/cover_android5.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Android 权限机制讲解",
+  "url": "https://moliangxx.github.io/2026/03/17/Android_java/%E7%AC%AC%E4%B8%83%E7%AB%A0/Android%20%E6%9D%83%E9%99%90%E6%9C%BA%E5%88%B6%E8%AE%B2%E8%A7%A3/",
+  "image": "https://moliangxx.github.io/images/cover_android5.jpg",
+  "datePublished": "2026-03-17T07:11:09.000Z",
+  "dateModified": "2026-03-23T13:59:28.735Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "Liang_Mo",
+      "url": "https://moliangxx.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="../../../../../../img/favicon.webp"><link rel="canonical" href="https://moliangxx.github.io/2026/03/17/Android_java/%E7%AC%AC%E4%B8%83%E7%AB%A0/Android%20%E6%9D%83%E9%99%90%E6%9C%BA%E5%88%B6%E8%AE%B2%E8%A7%A3/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="../../../../../../css/index.css?v=5.5.3"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!true && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"簡"},
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":500,"highlightFullpage":true,"highlightMacStyle":true},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":50,"languages":{"author":"作者: Liang_Mo","link":"链接: ","source":"来源: 莫良的小窝","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'medium_zoom',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.12.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Android 权限机制讲解',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css"><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 8.1.1"></head><body><div class="bg-animation" id="web_bg" style="background-image: url(../../../../../../img/bg1.jpg);"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.jpg" onerror="this.onerror=null;this.src='/img/error2.gif'" alt="avatar"/ loading='lazy'></div><div class="site-data text-center"><a href="archives/"><div class="headline">文章</div><div class="length-num">65</div></a><a href="tags/"><div class="headline">标签</div><div class="length-num">77</div></a><a href="categories/"><div class="headline">分类</div><div class="length-num">32</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="index.html"><i class="fa-fw ri-home-4-line"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw ri-archive-line"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw ri-tags-line"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw ri-folder-open-line"></i><span> 分类</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw ri-list-unordered"></i><span> 列表</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw ri-music-2-line"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw ri-video-line"></i><span> 电影</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw ri-link-unlink-line"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/lidong/"><i class="fa-fw ri-user-line"></i><span> 礼物</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(../../../../../../images/top_android2.jpg);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="../../../../../../index.html"><span class="site-name">莫良的小窝</span></a><a class="nav-page-title" href="../../../../../../index.html"><span class="site-name">Android 权限机制讲解</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="index.html"><i class="fa-fw ri-home-4-line"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw ri-archive-line"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw ri-tags-line"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw ri-folder-open-line"></i><span> 分类</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw ri-list-unordered"></i><span> 列表</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw ri-music-2-line"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw ri-video-line"></i><span> 电影</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw ri-link-unlink-line"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/lidong/"><i class="fa-fw ri-user-line"></i><span> 礼物</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Android 权限机制讲解<a class="post-edit-link" href="https://github.com/moliangxx/moliangxx.github.io/edit/main/source/_posts_posts/Android_java/第七章/Android 权限机制讲解.md" title="编辑" target="_blank"><i class="fas fa-pencil-alt"></i></a></h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-03-17T07:11:09.000Z" title="发表于 2026-03-17 15:11:09">2026-03-17</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-03-23T13:59:28.735Z" title="更新于 2026-03-23 21:59:28">2026-03-23</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="../../../../../../categories/Android/">Android</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="../../../../../../categories/Android/%E7%AC%AC%E4%B8%83%E7%AB%A0/">第七章</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="主题：Android-权限机制讲解，包括核心概念、权限分类、授权流程及不同版本的差异和完整的权限使用流程（以相机权限为例）"><a href="#主题：Android-权限机制讲解，包括核心概念、权限分类、授权流程及不同版本的差异和完整的权限使用流程（以相机权限为例）" class="headerlink" title="主题：Android 权限机制讲解，包括核心概念、权限分类、授权流程及不同版本的差异和完整的权限使用流程（以相机权限为例）"></a><strong>主题</strong>：Android 权限机制讲解，包括核心概念、权限分类、授权流程及不同版本的差异和完整的权限使用流程（以相机权限为例）</h1><h3 id="🛡️-Android-权限机制核心讲解"><a href="#🛡️-Android-权限机制核心讲解" class="headerlink" title="🛡️ Android 权限机制核心讲解"></a>🛡️ Android 权限机制核心讲解</h3><p>Android 权限机制是系统为了保护用户隐私、设备安全和应用稳定性设计的「访问控制规则」—— 应用必须获得用户授权，才能访问设备的敏感资源（如相机、通讯录）或执行高危操作（如联网、修改系统设置）。</p>
+<p>从 Android 6.0（API 23）开始，权限机制经历了重大升级，核心分为「安装时权限」和「运行时权限」，后续版本又不断强化隐私保护，下面从<strong>核心概念、权限分类、授权流程、最佳实践</strong>四个维度讲清楚：</p>
+<hr>
+<h3 id="一、核心概念与权限分类"><a href="#一、核心概念与权限分类" class="headerlink" title="一、核心概念与权限分类"></a>一、核心概念与权限分类</h3><h4 id="1-按「授权时机」分类"><a href="#1-按「授权时机」分类" class="headerlink" title="1. 按「授权时机」分类"></a>1. 按「授权时机」分类</h4><table>
+<thead>
+<tr>
+<th>类型</th>
+<th>适用版本</th>
+<th>授权方式</th>
+<th>示例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>安装时权限（Install-Time）</strong></td>
+<td>Android 5.1 及以下（API ≤22）</td>
+<td>用户安装应用时自动授权（仅弹窗告知）</td>
+<td>网络访问、振动、WiFi 状态</td>
+</tr>
+<tr>
+<td><strong>运行时权限（Runtime）</strong></td>
+<td>Android 6.0 及以上（API ≥23）</td>
+<td>应用运行中主动申请，用户手动同意 &#x2F; 拒绝</td>
+<td>相机、通讯录、定位、存储</td>
+</tr>
+</tbody></table>
+<h4 id="2-按「保护级别」分类（系统层面）"><a href="#2-按「保护级别」分类（系统层面）" class="headerlink" title="2. 按「保护级别」分类（系统层面）"></a>2. 按「保护级别」分类（系统层面）</h4><p>这是 Android 对权限风险的分级，决定了授权方式和审核严格程度：</p>
+<table>
+<thead>
+<tr>
+<th>级别</th>
+<th>风险程度</th>
+<th>授权方式</th>
+<th>示例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Normal（普通权限）</strong></td>
+<td>低风险（不涉及隐私 &#x2F; 设备安全）</td>
+<td>安装时自动授权，无需用户确认</td>
+<td><code>INTERNET</code>（联网）、<code>VIBRATE</code>（振动）、<code>ACCESS_WIFI_STATE</code>（WiFi 状态）</td>
+</tr>
+<tr>
+<td><strong>Dangerous（危险权限）</strong></td>
+<td>高风险（涉及隐私 &#x2F; 设备控制）</td>
+<td>运行时手动申请，用户必须确认</td>
+<td><code>CAMERA</code>（相机）、<code>READ_CONTACTS</code>（读取通讯录）、<code>ACCESS_FINE_LOCATION</code>（精确定位）</td>
+</tr>
+<tr>
+<td><strong>Signature（签名权限）</strong></td>
+<td>仅信任应用可用</td>
+<td>只有和系统 &#x2F; 目标应用签名一致的应用才能使用</td>
+<td>系统级权限（如 <code>INSTALL_PACKAGES</code> 安装应用）</td>
+</tr>
+<tr>
+<td><strong>Special（特殊权限）</strong></td>
+<td>极高风险（系统级操作）</td>
+<td>需跳转到系统设置页面手动授权</td>
+<td><code>SYSTEM_ALERT_WINDOW</code>（悬浮窗）、<code>WRITE_SETTINGS</code>（修改系统设置）</td>
+</tr>
+</tbody></table>
+<h4 id="3-危险权限「权限组」（关键！）"><a href="#3-危险权限「权限组」（关键！）" class="headerlink" title="3. 危险权限「权限组」（关键！）"></a>3. 危险权限「权限组」（关键！）</h4><p>危险权限会按「功能组」归类，<strong>用户授权一个组内的任意权限，整个组都会被授权</strong>（无需重复申请）：</p>
+<table>
+<thead>
+<tr>
+<th>权限组</th>
+<th>包含的核心权限</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>CALENDAR</code></td>
+<td><code>READ_CALENDAR</code>、<code>WRITE_CALENDAR</code></td>
+</tr>
+<tr>
+<td><code>CAMERA</code></td>
+<td><code>CAMERA</code></td>
+</tr>
+<tr>
+<td><code>CONTACTS</code></td>
+<td><code>READ_CONTACTS</code>、<code>WRITE_CONTACTS</code>、<code>GET_ACCOUNTS</code></td>
+</tr>
+<tr>
+<td><code>LOCATION</code></td>
+<td><code>ACCESS_FINE_LOCATION</code>（精确定位）、<code>ACCESS_COARSE_LOCATION</code>（粗略定位）</td>
+</tr>
+<tr>
+<td><code>MICROPHONE</code></td>
+<td><code>RECORD_AUDIO</code></td>
+</tr>
+<tr>
+<td><code>PHONE</code></td>
+<td><code>READ_PHONE_STATE</code>、<code>CALL_PHONE</code>、<code>READ_CALL_LOG</code> 等</td>
+</tr>
+<tr>
+<td><code>SENSORS</code></td>
+<td><code>BODY_SENSORS</code>（身体传感器，如心率）</td>
+</tr>
+<tr>
+<td><code>SMS</code></td>
+<td><code>SEND_SMS</code>、<code>READ_SMS</code>、<code>RECEIVE_SMS</code> 等</td>
+</tr>
+<tr>
+<td><code>STORAGE</code></td>
+<td>Android 10 前：<code>READ_EXTERNAL_STORAGE</code>、<code>WRITE_EXTERNAL_STORAGE</code>；Android 10+ 被 <code>MANAGE_EXTERNAL_STORAGE</code> 替代</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="二、不同-Android-版本的权限机制差异（避坑重点）"><a href="#二、不同-Android-版本的权限机制差异（避坑重点）" class="headerlink" title="二、不同 Android 版本的权限机制差异（避坑重点）"></a>二、不同 Android 版本的权限机制差异（避坑重点）</h3><table>
+<thead>
+<tr>
+<th>版本</th>
+<th>核心变化</th>
+<th>关键注意事项</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Android 6.0（API 23）</td>
+<td>引入运行时权限，危险权限需手动申请</td>
+<td>必须在代码中检查 + 申请权限，否则直接崩溃</td>
+</tr>
+<tr>
+<td>Android 10（API 29）</td>
+<td>存储权限分区：Scoped Storage（作用域存储）</td>
+<td>访问外部存储不再需要 <code>WRITE_EXTERNAL_STORAGE</code>，仅能访问应用私有目录</td>
+</tr>
+<tr>
+<td>Android 11（API 30）</td>
+<td>强化权限一次性授权：用户可选择「仅本次允许」</td>
+<td>每次启动应用可能需要重新申请权限</td>
+</tr>
+<tr>
+<td>Android 13（API 33）</td>
+<td>危险权限细分：如存储拆分为 <code>READ_MEDIA_IMAGES</code>&#x2F;<code>READ_MEDIA_VIDEO</code></td>
+<td>旧的 <code>READ_EXTERNAL_STORAGE</code> 被废弃，需用新权限</td>
+</tr>
+<tr>
+<td>Android 14（API 34）</td>
+<td>新增「临时权限」：仅授予单次使用权限</td>
+<td>敏感权限（如照片访问）可申请临时授权，用完即收回</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="三、权限使用完整流程（以相机权限为例）"><a href="#三、权限使用完整流程（以相机权限为例）" class="headerlink" title="三、权限使用完整流程（以相机权限为例）"></a>三、权限使用完整流程（以相机权限为例）</h3><h4 id="步骤-1：在-AndroidManifest-xml-声明权限"><a href="#步骤-1：在-AndroidManifest-xml-声明权限" class="headerlink" title="步骤 1：在 AndroidManifest.xml 声明权限"></a>步骤 1：在 AndroidManifest.xml 声明权限</h4><p>无论普通 &#x2F; 危险权限，都需要先在清单文件中声明（系统才会识别）：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">&lt;manifest ...&gt;</span><br><span class="line"></span><br><span class="line">   &lt;!-- 1. 声明普通权限（安装时自动授权） --&gt;</span><br><span class="line"></span><br><span class="line">   &lt;uses-permission android:name=&quot;android.permission.INTERNET&quot; /&gt;</span><br><span class="line"></span><br><span class="line">  </span><br><span class="line"></span><br><span class="line">   &lt;!-- 2. 声明危险权限（运行时申请） --&gt;</span><br><span class="line"></span><br><span class="line">   &lt;uses-permission android:name=&quot;android.permission.CAMERA&quot; /&gt;</span><br><span class="line"></span><br><span class="line">  </span><br><span class="line"></span><br><span class="line">   &lt;!-- 3. 声明特殊权限（需跳转设置） --&gt;</span><br><span class="line"></span><br><span class="line">   &lt;uses-permission android:name=&quot;android.permission.SYSTEM_ALERT_WINDOW&quot; /&gt;</span><br><span class="line"></span><br><span class="line">&lt;/manifest&gt;</span><br></pre></td></tr></table></figure>
+
+<h4 id="步骤-2：代码中检查并申请运行时权限"><a href="#步骤-2：代码中检查并申请运行时权限" class="headerlink" title="步骤 2：代码中检查并申请运行时权限"></a>步骤 2：代码中检查并申请运行时权限</h4><p>以 Java 为例，封装权限申请工具类（BaseActivity 中使用更方便）：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">package com.example.myapplication.base;</span><br><span class="line"></span><br><span class="line">import android.app.Activity;</span><br><span class="line"></span><br><span class="line">import android.content.pm.PackageManager;</span><br><span class="line"></span><br><span class="line">import androidx.core.app.ActivityCompat;</span><br><span class="line"></span><br><span class="line">import androidx.core.content.ContextCompat;</span><br><span class="line"></span><br><span class="line">// 权限申请工具类</span><br><span class="line"></span><br><span class="line">public class PermissionUtils &#123;</span><br><span class="line"></span><br><span class="line">   // 权限请求码（自定义，需唯一）</span><br><span class="line"></span><br><span class="line">   public static final int REQUEST_CAMERA_PERMISSION = 1001;</span><br><span class="line"></span><br><span class="line">   // 检查权限是否已授权</span><br><span class="line"></span><br><span class="line">   public static boolean checkPermission(Activity activity, String permission) &#123;</span><br><span class="line"></span><br><span class="line">       return ContextCompat.checkSelfPermission(activity, permission)</span><br><span class="line"></span><br><span class="line">               == PackageManager.PERMISSION_GRANTED;</span><br><span class="line"></span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   // 申请权限</span><br><span class="line"></span><br><span class="line">   public static void requestPermission(Activity activity, String[] permissions, int requestCode) &#123;</span><br><span class="line"></span><br><span class="line">       ActivityCompat.requestPermissions(activity, permissions, requestCode);</span><br><span class="line"></span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="步骤-3：在-Activity-中调用权限检查-申请"><a href="#步骤-3：在-Activity-中调用权限检查-申请" class="headerlink" title="步骤 3：在 Activity 中调用权限检查 + 申请"></a>步骤 3：在 Activity 中调用权限检查 + 申请</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br></pre></td><td class="code"><pre><span class="line">package com.example.myapplication;</span><br><span class="line"></span><br><span class="line">import android.content.pm.PackageManager;</span><br><span class="line"></span><br><span class="line">import android.os.Bundle;</span><br><span class="line"></span><br><span class="line">import android.widget.Toast;</span><br><span class="line"></span><br><span class="line">import com.example.myapplication.base.BaseActivity;</span><br><span class="line"></span><br><span class="line">import com.example.myapplication.base.PermissionUtils;</span><br><span class="line"></span><br><span class="line">public class CameraActivity extends BaseActivity &#123;</span><br><span class="line"></span><br><span class="line">   @Override</span><br><span class="line"></span><br><span class="line">   protected void onCreate(Bundle savedInstanceState) &#123;</span><br><span class="line"></span><br><span class="line">       super.onCreate(savedInstanceState);</span><br><span class="line"></span><br><span class="line">      </span><br><span class="line"></span><br><span class="line">       // 1. 检查相机权限是否已授权</span><br><span class="line"></span><br><span class="line">       if (!PermissionUtils.checkPermission(this, android.Manifest.permission.CAMERA)) &#123;</span><br><span class="line"></span><br><span class="line">           // 2. 未授权，申请权限</span><br><span class="line"></span><br><span class="line">           PermissionUtils.requestPermission(</span><br><span class="line"></span><br><span class="line">               this,</span><br><span class="line"></span><br><span class="line">               new String[]&#123;android.Manifest.permission.CAMERA&#125;,</span><br><span class="line"></span><br><span class="line">               PermissionUtils.REQUEST_CAMERA_PERMISSION</span><br><span class="line"></span><br><span class="line">           );</span><br><span class="line"></span><br><span class="line">       &#125; else &#123;</span><br><span class="line"></span><br><span class="line">           // 3. 已授权，直接使用相机</span><br><span class="line"></span><br><span class="line">           openCamera();</span><br><span class="line"></span><br><span class="line">       &#125;</span><br><span class="line"></span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   // 4. 处理权限申请结果（必须重写）</span><br><span class="line"></span><br><span class="line">   @Override</span><br><span class="line"></span><br><span class="line">   public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) &#123;</span><br><span class="line"></span><br><span class="line">       super.onRequestPermissionsResult(requestCode, permissions, grantResults);</span><br><span class="line"></span><br><span class="line">       if (requestCode == PermissionUtils.REQUEST_CAMERA_PERMISSION) &#123;</span><br><span class="line"></span><br><span class="line">           if (grantResults.length &gt; 0 &amp;&amp; grantResults[0] == PackageManager.PERMISSION_GRANTED) &#123;</span><br><span class="line"></span><br><span class="line">               // 用户同意，打开相机</span><br><span class="line"></span><br><span class="line">               openCamera();</span><br><span class="line"></span><br><span class="line">           &#125; else &#123;</span><br><span class="line"></span><br><span class="line">               // 用户拒绝，提示并引导到设置页面</span><br><span class="line"></span><br><span class="line">               Toast.makeText(this, &quot;需要相机权限才能使用该功能&quot;, Toast.LENGTH_SHORT).show();</span><br><span class="line"></span><br><span class="line">               // 可选：跳转到应用设置页面让用户手动授权</span><br><span class="line"></span><br><span class="line">               // Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);</span><br><span class="line"></span><br><span class="line">               // intent.setData(Uri.parse(&quot;package:&quot; + getPackageName()));</span><br><span class="line"></span><br><span class="line">               // startActivity(intent);</span><br><span class="line"></span><br><span class="line">           &#125;</span><br><span class="line"></span><br><span class="line">       &#125;</span><br><span class="line"></span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   // 打开相机的业务逻辑</span><br><span class="line"></span><br><span class="line">   private void openCamera() &#123;</span><br><span class="line"></span><br><span class="line">       Toast.makeText(this, &quot;相机权限已授权，可打开相机&quot;, Toast.LENGTH_SHORT).show();</span><br><span class="line"></span><br><span class="line">       // 这里写打开相机的代码...</span><br><span class="line"></span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="步骤-4：处理「特殊权限」（如悬浮窗）"><a href="#步骤-4：处理「特殊权限」（如悬浮窗）" class="headerlink" title="步骤 4：处理「特殊权限」（如悬浮窗）"></a>步骤 4：处理「特殊权限」（如悬浮窗）</h4><p>特殊权限无法通过 <code>requestPermissions</code> 申请，需跳转到系统设置页面：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">// 申请悬浮窗权限</span><br><span class="line"></span><br><span class="line">private void requestOverlayPermission() &#123;</span><br><span class="line"></span><br><span class="line">   if (!Settings.canDrawOverlays(this)) &#123;</span><br><span class="line"></span><br><span class="line">       Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);</span><br><span class="line"></span><br><span class="line">       intent.setData(Uri.parse(&quot;package:&quot; + getPackageName()));</span><br><span class="line"></span><br><span class="line">       startActivityForResult(intent, REQUEST_OVERLAY_PERMISSION);</span><br><span class="line"></span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// 处理设置页面返回结果</span><br><span class="line"></span><br><span class="line">@Override</span><br><span class="line"></span><br><span class="line">protected void onActivityResult(int requestCode, int resultCode, Intent data) &#123;</span><br><span class="line"></span><br><span class="line">   super.onActivityResult(requestCode, resultCode, data);</span><br><span class="line"></span><br><span class="line">   if (requestCode == REQUEST_OVERLAY_PERMISSION) &#123;</span><br><span class="line"></span><br><span class="line">       if (Settings.canDrawOverlays(this)) &#123;</span><br><span class="line"></span><br><span class="line">           Toast.makeText(this, &quot;悬浮窗权限已授权&quot;, Toast.LENGTH_SHORT).show();</span><br><span class="line"></span><br><span class="line">       &#125; else &#123;</span><br><span class="line"></span><br><span class="line">           Toast.makeText(this, &quot;拒绝悬浮窗权限将无法使用悬浮窗功能&quot;, Toast.LENGTH_SHORT).show();</span><br><span class="line"></span><br><span class="line">       &#125;</span><br><span class="line"></span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<hr>
+<h3 id="四、权限机制最佳实践（避坑-合规）"><a href="#四、权限机制最佳实践（避坑-合规）" class="headerlink" title="四、权限机制最佳实践（避坑 + 合规）"></a>四、权限机制最佳实践（避坑 + 合规）</h3><h4 id="1-权限申请「最小必要原则」"><a href="#1-权限申请「最小必要原则」" class="headerlink" title="1. 权限申请「最小必要原则」"></a>1. 权限申请「最小必要原则」</h4><ul>
+<li><p>只申请应用功能必需的权限，不申请无关权限（如仅展示图片无需申请相机权限）；</p>
+</li>
+<li><p>避免一次性申请多个权限，分场景申请（如打开相机时才申请相机权限，而非启动页一次性申请所有）。</p>
+</li>
+</ul>
+<h4 id="2-友好的权限引导"><a href="#2-友好的权限引导" class="headerlink" title="2. 友好的权限引导"></a>2. 友好的权限引导</h4><ul>
+<li><p>申请权限前，先向用户说明「为什么需要这个权限」（如 “需要相机权限扫描二维码”），而非直接弹窗；</p>
+</li>
+<li><p>用户拒绝权限后，提供清晰的引导（如按钮跳转到设置页面），而非直接崩溃或隐藏功能。</p>
+</li>
+</ul>
+<h4 id="3-兼容不同-Android-版本"><a href="#3-兼容不同-Android-版本" class="headerlink" title="3. 兼容不同 Android 版本"></a>3. 兼容不同 Android 版本</h4><ul>
+<li><p>针对 Android 13+ 适配新的媒体权限（<code>READ_MEDIA_IMAGES</code> 替代 <code>READ_EXTERNAL_STORAGE</code>）；</p>
+</li>
+<li><p>针对 Android 10+ 适配作用域存储，避免直接访问外部存储根目录。</p>
+</li>
+</ul>
+<h4 id="4-处理权限永久拒绝"><a href="#4-处理权限永久拒绝" class="headerlink" title="4. 处理权限永久拒绝"></a>4. 处理权限永久拒绝</h4><ul>
+<li><p>如果用户勾选「不再询问」并拒绝权限，后续 <code>requestPermissions</code> 会直接返回拒绝，需引导用户到设置页面手动开启；</p>
+</li>
+<li><p>核心功能依赖的权限被拒绝时，需友好提示，而非强制退出应用。</p>
+</li>
+</ul>
+<h4 id="5-权限与隐私合规"><a href="#5-权限与隐私合规" class="headerlink" title="5. 权限与隐私合规"></a>5. 权限与隐私合规</h4><ul>
+<li><p>遵循 GDPR &#x2F; 工信部等隐私法规，在隐私政策中明确说明权限用途；</p>
+</li>
+<li><p>敏感权限（如定位、通讯录）使用完毕后，及时停止访问（如定位功能关闭后，停止获取位置）。</p>
+</li>
+</ul>
+<hr>
+<h3 id="五、核心总结"><a href="#五、核心总结" class="headerlink" title="五、核心总结"></a>五、核心总结</h3><table>
+<thead>
+<tr>
+<th>关键点</th>
+<th>核心信息</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>权限分级</strong></td>
+<td>普通权限（安装授权）、危险权限（运行时授权）、签名权限（仅信任应用）、特殊权限（设置授权）</td>
+</tr>
+<tr>
+<td><strong>核心变化</strong></td>
+<td>Android 6.0 引入运行时权限，Android 10+ 强化存储隐私，Android 13+ 细分媒体权限</td>
+</tr>
+<tr>
+<td><strong>使用流程</strong></td>
+<td>清单声明 → 代码检查 → 申请权限 → 处理结果 → 兼容不同版本</td>
+</tr>
+<tr>
+<td><strong>最佳实践</strong></td>
+<td>最小必要、分场景申请、友好引导、兼容版本、合规使用</td>
+</tr>
+</tbody></table>
+<p>Android 权限机制的核心是「用户可控」—— 所有敏感操作必须经过用户授权，这也是应用上架应用商店的基本要求。掌握权限申请的流程和版本兼容技巧，能避免大部分因权限导致的崩溃和合规问题。</p>
+<hr>
+<h3 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h3><blockquote>
+<p><em><strong><del>请我喝杯奶茶好吗</del></strong></em></p>
+<ul>
+<li>₍˄·͈༝·͈˄*₎◞ ̑̑</li>
+</ul>
+</blockquote>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://moliangxx.github.io">Liang_Mo</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://moliangxx.github.io/2026/03/17/Android_java/%E7%AC%AC%E4%B8%83%E7%AB%A0/Android%20%E6%9D%83%E9%99%90%E6%9C%BA%E5%88%B6%E8%AE%B2%E8%A7%A3/">https://moliangxx.github.io/2026/03/17/Android_java/%E7%AC%AC%E4%B8%83%E7%AB%A0/Android%20%E6%9D%83%E9%99%90%E6%9C%BA%E5%88%B6%E8%AE%B2%E8%A7%A3/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://moliangxx.github.io" target="_blank">莫良的小窝</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="../../../../../../tags/%E6%9D%83%E9%99%90/">权限</a></div><div class="post-share"><div class="social-share" data-image="../../../../../../images/cover_android5.jpg" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><div class="post-reward"><div class="reward-button"><i class="fas fa-qrcode"></i>“请我喝杯奶茶~”</div><div class="reward-main"><ul class="reward-all"><li class="reward-item"><a href="../../../../../img/wechat.jpg" target="_blank"><img class="post-qr-code-img" src="../../../../../img/wechat.jpg"/ loading='lazy'></a><div class="post-qr-code-desc"></div></li></ul></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="../../../../18/C++/C++%E6%8C%87%E9%92%88%E8%AF%A6%E8%A7%A3/" title="C++指针详解"><img class="cover" src="../../../../../../images/cover_c.jpg" onerror="onerror=null;src='../../../../../../img/error2.jpg'" alt="cover of previous post" loading='lazy'><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">C++指针详解</div></div><div class="info-2"><div class="info-item-1">C++中指针的核心概念讲解一、指针的核心概念（基础）指针的本质是存储内存地址的变量，就像一个 “门牌号”，通过它可以找到对应内存位置的数据。 1. 基本语法12345678910111213141516171819202122232425262728293031#include &lt;iostream&gt;using namespace std;int main() &#123;   // 普通变量：存储数值   int a = 10;   // 指针变量：存储a的内存地址，类型要匹配（int* 表示指向int类型的指针）   int* p = &amp;a;     //注意这里如果p = a;则p指向10这个非法地址会报错   cout &lt;&lt; &quot;变量a的值：&quot; &lt;&lt; a &lt;&lt; endl;          // 输出：10   cout &lt;&lt; &quot;变量a的地址：&quot; &lt;&lt; &amp;a &lt;&lt; endl;       // 输出：0x7ffee3b558ac（示例地址...</div></div></div></a><a class="pagination-related" href="../../../../12/Android_java/%E7%AC%AC%E4%BA%8C%E7%AB%A0/%E6%9B%B4%E5%A4%9A%E4%BD%BF%E7%94%A8%E6%8A%80%E5%B7%A7/" title="Android 一些使用技巧"><img class="cover" src="../../../../../../images/cover_android2.jpg" onerror="onerror=null;src='../../../../../../img/error2.jpg'" alt="cover of next post" loading='lazy'><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Android 一些使用技巧</div></div><div class="info-2"><div class="info-item-1">使用技巧 常用的封装注意将复杂逻辑单独化，先分割在整合，便于维护和写复杂逻辑  1. 跳转逻辑 “统一封装”（减少冗余）在 BaseActivity 中封装跳转方法，所有子 Activity 复用，避免重复写 Intent： 1234567891011121314151617181920212223242526272829303132333435// BaseActivity.javapublic abstract class BaseActivity extends AppCompatActivity &#123;    // 通用跳转方法（无参数）    protected void jumpToActivity(Class&lt;?&gt; targetClass) &#123;        startActivity(new Intent(this, targetClass));    &#125;    // 通用跳转方法（带参数）    protected void jumpToActivity(Class&lt;?&gt; targetClass, Bundle ...</div></div></div></a></nav><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="giscus-wrap"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content is-expand"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%BB%E9%A2%98%EF%BC%9AAndroid-%E6%9D%83%E9%99%90%E6%9C%BA%E5%88%B6%E8%AE%B2%E8%A7%A3%EF%BC%8C%E5%8C%85%E6%8B%AC%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E3%80%81%E6%9D%83%E9%99%90%E5%88%86%E7%B1%BB%E3%80%81%E6%8E%88%E6%9D%83%E6%B5%81%E7%A8%8B%E5%8F%8A%E4%B8%8D%E5%90%8C%E7%89%88%E6%9C%AC%E7%9A%84%E5%B7%AE%E5%BC%82%E5%92%8C%E5%AE%8C%E6%95%B4%E7%9A%84%E6%9D%83%E9%99%90%E4%BD%BF%E7%94%A8%E6%B5%81%E7%A8%8B%EF%BC%88%E4%BB%A5%E7%9B%B8%E6%9C%BA%E6%9D%83%E9%99%90%E4%B8%BA%E4%BE%8B%EF%BC%89"><span class="toc-number">1.</span> <span class="toc-text">主题：Android 权限机制讲解，包括核心概念、权限分类、授权流程及不同版本的差异和完整的权限使用流程（以相机权限为例）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%F0%9F%9B%A1%EF%B8%8F-Android-%E6%9D%83%E9%99%90%E6%9C%BA%E5%88%B6%E6%A0%B8%E5%BF%83%E8%AE%B2%E8%A7%A3"><span class="toc-number">1.1.</span> <span class="toc-text">🛡️ Android 权限机制核心讲解</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E4%B8%8E%E6%9D%83%E9%99%90%E5%88%86%E7%B1%BB"><span class="toc-number">1.2.</span> <span class="toc-text">一、核心概念与权限分类</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-%E6%8C%89%E3%80%8C%E6%8E%88%E6%9D%83%E6%97%B6%E6%9C%BA%E3%80%8D%E5%88%86%E7%B1%BB"><span class="toc-number">1.2.1.</span> <span class="toc-text">1. 按「授权时机」分类</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-%E6%8C%89%E3%80%8C%E4%BF%9D%E6%8A%A4%E7%BA%A7%E5%88%AB%E3%80%8D%E5%88%86%E7%B1%BB%EF%BC%88%E7%B3%BB%E7%BB%9F%E5%B1%82%E9%9D%A2%EF%BC%89"><span class="toc-number">1.2.2.</span> <span class="toc-text">2. 按「保护级别」分类（系统层面）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-%E5%8D%B1%E9%99%A9%E6%9D%83%E9%99%90%E3%80%8C%E6%9D%83%E9%99%90%E7%BB%84%E3%80%8D%EF%BC%88%E5%85%B3%E9%94%AE%EF%BC%81%EF%BC%89"><span class="toc-number">1.2.3.</span> <span class="toc-text">3. 危险权限「权限组」（关键！）</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E4%B8%8D%E5%90%8C-Android-%E7%89%88%E6%9C%AC%E7%9A%84%E6%9D%83%E9%99%90%E6%9C%BA%E5%88%B6%E5%B7%AE%E5%BC%82%EF%BC%88%E9%81%BF%E5%9D%91%E9%87%8D%E7%82%B9%EF%BC%89"><span class="toc-number">1.3.</span> <span class="toc-text">二、不同 Android 版本的权限机制差异（避坑重点）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E6%9D%83%E9%99%90%E4%BD%BF%E7%94%A8%E5%AE%8C%E6%95%B4%E6%B5%81%E7%A8%8B%EF%BC%88%E4%BB%A5%E7%9B%B8%E6%9C%BA%E6%9D%83%E9%99%90%E4%B8%BA%E4%BE%8B%EF%BC%89"><span class="toc-number">1.4.</span> <span class="toc-text">三、权限使用完整流程（以相机权限为例）</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%AD%A5%E9%AA%A4-1%EF%BC%9A%E5%9C%A8-AndroidManifest-xml-%E5%A3%B0%E6%98%8E%E6%9D%83%E9%99%90"><span class="toc-number">1.4.1.</span> <span class="toc-text">步骤 1：在 AndroidManifest.xml 声明权限</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%AD%A5%E9%AA%A4-2%EF%BC%9A%E4%BB%A3%E7%A0%81%E4%B8%AD%E6%A3%80%E6%9F%A5%E5%B9%B6%E7%94%B3%E8%AF%B7%E8%BF%90%E8%A1%8C%E6%97%B6%E6%9D%83%E9%99%90"><span class="toc-number">1.4.2.</span> <span class="toc-text">步骤 2：代码中检查并申请运行时权限</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%AD%A5%E9%AA%A4-3%EF%BC%9A%E5%9C%A8-Activity-%E4%B8%AD%E8%B0%83%E7%94%A8%E6%9D%83%E9%99%90%E6%A3%80%E6%9F%A5-%E7%94%B3%E8%AF%B7"><span class="toc-number">1.4.3.</span> <span class="toc-text">步骤 3：在 Activity 中调用权限检查 + 申请</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%AD%A5%E9%AA%A4-4%EF%BC%9A%E5%A4%84%E7%90%86%E3%80%8C%E7%89%B9%E6%AE%8A%E6%9D%83%E9%99%90%E3%80%8D%EF%BC%88%E5%A6%82%E6%82%AC%E6%B5%AE%E7%AA%97%EF%BC%89"><span class="toc-number">1.4.4.</span> <span class="toc-text">步骤 4：处理「特殊权限」（如悬浮窗）</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E6%9D%83%E9%99%90%E6%9C%BA%E5%88%B6%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%EF%BC%88%E9%81%BF%E5%9D%91-%E5%90%88%E8%A7%84%EF%BC%89"><span class="toc-number">1.5.</span> <span class="toc-text">四、权限机制最佳实践（避坑 + 合规）</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-%E6%9D%83%E9%99%90%E7%94%B3%E8%AF%B7%E3%80%8C%E6%9C%80%E5%B0%8F%E5%BF%85%E8%A6%81%E5%8E%9F%E5%88%99%E3%80%8D"><span class="toc-number">1.5.1.</span> <span class="toc-text">1. 权限申请「最小必要原则」</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-%E5%8F%8B%E5%A5%BD%E7%9A%84%E6%9D%83%E9%99%90%E5%BC%95%E5%AF%BC"><span class="toc-number">1.5.2.</span> <span class="toc-text">2. 友好的权限引导</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-%E5%85%BC%E5%AE%B9%E4%B8%8D%E5%90%8C-Android-%E7%89%88%E6%9C%AC"><span class="toc-number">1.5.3.</span> <span class="toc-text">3. 兼容不同 Android 版本</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-%E5%A4%84%E7%90%86%E6%9D%83%E9%99%90%E6%B0%B8%E4%B9%85%E6%8B%92%E7%BB%9D"><span class="toc-number">1.5.4.</span> <span class="toc-text">4. 处理权限永久拒绝</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#5-%E6%9D%83%E9%99%90%E4%B8%8E%E9%9A%90%E7%A7%81%E5%90%88%E8%A7%84"><span class="toc-number">1.5.5.</span> <span class="toc-text">5. 权限与隐私合规</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E6%A0%B8%E5%BF%83%E6%80%BB%E7%BB%93"><span class="toc-number">1.6.</span> <span class="toc-text">五、核心总结</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9C%80%E5%90%8E"><span class="toc-number">1.7.</span> <span class="toc-text">最后</span></a></li></ol></li></ol></div></div></div></div></main><footer id="footer" style="background-image: url(../../../../../../img/bg1.jpg);"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By Liang_Mo</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.1</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.3</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="../../../../../../js/utils.js?v=5.5.3"></script><script src="../../../../../../js/main.js?v=5.5.3"></script><script src="../../../../../../js/tw_cn.js?v=5.5.3"></script><script src="https://cdn.jsdelivr.net/npm/medium-zoom@1.1.0/dist/medium-zoom.min.js"></script><div class="js-pjax"><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = {"mapping":"pathname","crossorigin":"anonymous"}
+
+  const getGiscusTheme = theme => theme === 'dark' ? 'dark' : 'light'
+
+  const createScriptElement = config => {
+    const ele = document.createElement('script')
+    Object.entries(config).forEach(([key, value]) => {
+      ele.setAttribute(key, value)
+    })
+    return ele
+  }
+
+  const loadGiscus = (el = document, key) => {
+    const mappingConfig = isShuoshuo
+      ? { 'data-mapping': 'specific', 'data-term': key }
+      : { 'data-mapping': (option && option['data-mapping']) || 'pathname' }
+
+    const giscusConfig = {
+      src: 'https://giscus.app/client.js',
+      'data-repo': 'moliangxx/moliangxx.github.io',
+      'data-repo-id': 'R_kgDOQkNdpQ',
+      'data-category-id': 'DIC_kwDOQkNdpc4C0z4Q',
+      'data-theme': getGiscusTheme(document.documentElement.getAttribute('data-theme')),
+      'data-reactions-enabled': '1',
+      crossorigin: 'anonymous',
+      async: true,
+      ...option,
+      ...mappingConfig
+    }
+
+    const scriptElement = createScriptElement(giscusConfig)
+
+    el.querySelector('#giscus-wrap').appendChild(scriptElement)
+
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyGiscus = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+  }
+
+  const changeGiscusTheme = theme => {
+    const iframe = document.querySelector('#giscus-wrap iframe')
+    if (iframe) {
+      const message = {
+        giscus: {
+          setConfig: {
+            theme: getGiscusTheme(theme)
+          }
+        }
+      }
+      iframe.contentWindow.postMessage(message, 'https://giscus.app')
+    }
+  }
+
+  btf.addGlobalFn('themeChange', changeGiscusTheme, 'giscus')
+
+  if (isShuoshuo) {
+    'Giscus' === 'Giscus'
+      ? window.shuoshuoComment = { loadComment: loadGiscus }
+      : window.loadOtherComment = loadGiscus
+    return
+  }
+
+  if ('Giscus' === 'Giscus' || !false) {
+    if (false) btf.loadComment(document.getElementById('giscus-wrap'), loadGiscus)
+    else loadGiscus()
+  } else {
+    window.loadOtherComment = loadGiscus
+  }
+})()</script></div><script src="/js/custom.js"></script><script src="https://fastly.jsdelivr.net/npm/live2d-widgets@1.0.1/dist/autoload.js"></script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js"></script><script src="https://cdn.jsdelivr.net/npm/meting@2/dist/Meting.min.js"></script><script>(() => {
+  const destroyAplayer = () => {
+    if (window.aplayers) {
+      for (let i = 0; i < window.aplayers.length; i++) {
+        if (!window.aplayers[i].options.fixed) {
+          window.aplayers[i].destroy()
+        }
+      }
+    }
+  }
+
+  const runMetingJS = () => {
+    typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+  }
+
+  btf.addGlobalFn('pjaxSend', destroyAplayer, 'destroyAplayer')
+  btf.addGlobalFn('pjaxComplete', loadMeting, 'runMetingJS')
+})()</script><script src="https://cdn.jsdelivr.net/npm/pjax@0.2.8/pjax.min.js" defer="defer"></script><script>document.addEventListener('DOMContentLoaded', () => {
+  const pjaxSelectors = ["meta[property=\"og:image\"]","meta[property=\"og:title\"]","meta[property=\"og:url\"]","meta[property=\"og:description\"]","link[rel=\"canonical\"]","head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+
+  window.pjax = new Pjax({
+    elements: 'a:not([target="_blank"])',
+    selectors: pjaxSelectors,
+    cacheBust: false,
+    analytics: false,
+    scrollRestoration: false
+  })
+
+  const triggerPjaxFn = (val) => {
+    if (!val) return
+    Object.values(val).forEach(fn => {
+      try {
+        fn()
+      } catch (err) {
+        console.debug('Pjax callback failed:', err)
+      }
+    })
+  }
+
+  document.addEventListener('pjax:send', () => {
+    // removeEventListener
+    btf.removeGlobalFnEvent('pjaxSendOnce')
+    btf.removeGlobalFnEvent('themeChange')
+
+    // reset readmode
+    const $bodyClassList = document.body.classList
+    if ($bodyClassList.contains('read-mode')) $bodyClassList.remove('read-mode')
+
+    triggerPjaxFn(window.globalFn.pjaxSend)
+  })
+
+  document.addEventListener('pjax:complete', () => {
+    btf.removeGlobalFnEvent('pjaxCompleteOnce')
+    document.querySelectorAll('script[data-pjax]').forEach(item => {
+      const newScript = document.createElement('script')
+      const content = item.text || item.textContent || item.innerHTML || ""
+      Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+      newScript.appendChild(document.createTextNode(content))
+      item.parentNode.replaceChild(newScript, item)
+    })
+
+    triggerPjaxFn(window.globalFn.pjaxComplete)
+  })
+
+  document.addEventListener('pjax:error', e => {
+    if (e.request.status === 404) {
+      true
+        ? pjax.loadUrl('/404.html')
+        : window.location.href = e.request.responseURL
+    }
+  })
+})</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

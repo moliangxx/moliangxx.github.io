@@ -1,0 +1,339 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="dark"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Android | 莫良的小窝</title><meta name="author" content="Liang_Mo"><meta name="copyright" content="Liang_Mo"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#0d0d0d"><meta name="description" content="Android 天气项目实战一、获取API二、配置各项依赖和权限申请1. 权限申请打开 AndroidManifest.xml   2. 依赖配置打开build.gradle.kt(moudle)  1.API在android-deaultConfig下添加  12345buildConfigField(            type &#x3D; &quot;String&quot;,">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android">
+<meta property="og:url" content="https://moliangxx.github.io/2026/04/07/Android_java/%E7%BB%93%E8%AF%BEdemo/%E5%A4%A9%E6%B0%94%E5%AE%9E%E6%88%98/index.html">
+<meta property="og:site_name" content="莫良的小窝">
+<meta property="og:description" content="Android 天气项目实战一、获取API二、配置各项依赖和权限申请1. 权限申请打开 AndroidManifest.xml   2. 依赖配置打开build.gradle.kt(moudle)  1.API在android-deaultConfig下添加  12345buildConfigField(            type &#x3D; &quot;String&quot;,">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://moliangxx.github.io/images/cover_android4.jpg">
+<meta property="article:published_time" content="2026-04-07T13:43:59.000Z">
+<meta property="article:modified_time" content="2026-04-09T13:59:41.806Z">
+<meta property="article:author" content="Liang_Mo">
+<meta property="article:tag" content="Glide">
+<meta property="article:tag" content="Gson">
+<meta property="article:tag" content="OkHttp">
+<meta property="article:tag" content="Retrofit">
+<meta property="article:tag" content="Room">
+<meta property="article:tag" content="实战">
+<meta property="article:tag" content="控件">
+<meta property="article:tag" content="网络">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://moliangxx.github.io/images/cover_android4.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Android",
+  "url": "https://moliangxx.github.io/2026/04/07/Android_java/%E7%BB%93%E8%AF%BEdemo/%E5%A4%A9%E6%B0%94%E5%AE%9E%E6%88%98/",
+  "image": "https://moliangxx.github.io/images/cover_android4.jpg",
+  "datePublished": "2026-04-07T13:43:59.000Z",
+  "dateModified": "2026-04-09T13:59:41.806Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "Liang_Mo",
+      "url": "https://moliangxx.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="../../../../../../img/favicon.webp"><link rel="canonical" href="https://moliangxx.github.io/2026/04/07/Android_java/%E7%BB%93%E8%AF%BEdemo/%E5%A4%A9%E6%B0%94%E5%AE%9E%E6%88%98/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="../../../../../../css/index.css?v=5.5.3"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!true && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"簡"},
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":500,"highlightFullpage":true,"highlightMacStyle":true},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":50,"languages":{"author":"作者: Liang_Mo","link":"链接: ","source":"来源: 莫良的小窝","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'medium_zoom',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.12.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Android',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css"><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 8.1.1"></head><body><div class="bg-animation" id="web_bg" style="background-image: url(../../../../../../img/bg1.jpg);"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.jpg" onerror="this.onerror=null;this.src='/img/error2.gif'" alt="avatar"/ loading='lazy'></div><div class="site-data text-center"><a href="archives/"><div class="headline">文章</div><div class="length-num">65</div></a><a href="tags/"><div class="headline">标签</div><div class="length-num">77</div></a><a href="categories/"><div class="headline">分类</div><div class="length-num">32</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="index.html"><i class="fa-fw ri-home-4-line"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw ri-archive-line"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw ri-tags-line"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw ri-folder-open-line"></i><span> 分类</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw ri-list-unordered"></i><span> 列表</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw ri-music-2-line"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw ri-video-line"></i><span> 电影</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw ri-link-unlink-line"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/lidong/"><i class="fa-fw ri-user-line"></i><span> 礼物</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(../../../../../../images/top_android2.jpg);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="../../../../../../index.html"><span class="site-name">莫良的小窝</span></a><a class="nav-page-title" href="../../../../../../index.html"><span class="site-name">Android</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="index.html"><i class="fa-fw ri-home-4-line"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw ri-archive-line"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw ri-tags-line"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw ri-folder-open-line"></i><span> 分类</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw ri-list-unordered"></i><span> 列表</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw ri-music-2-line"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw ri-video-line"></i><span> 电影</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw ri-link-unlink-line"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/lidong/"><i class="fa-fw ri-user-line"></i><span> 礼物</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Android<a class="post-edit-link" href="https://github.com/moliangxx/moliangxx.github.io/edit/main/source/_posts_posts/Android_java/结课demo/天气实战.md" title="编辑" target="_blank"><i class="fas fa-pencil-alt"></i></a></h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-04-07T13:43:59.000Z" title="发表于 2026-04-07 21:43:59">2026-04-07</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-04-09T13:59:41.806Z" title="更新于 2026-04-09 21:59:41">2026-04-09</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="../../../../../../categories/Android/">Android</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="../../../../../../categories/Android/%E7%AC%AC%E5%8D%81%E5%9B%9B%E7%AB%A0/">第十四章</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="../../../../../../categories/Android/%E7%AC%AC%E5%8D%81%E5%9B%9B%E7%AB%A0/java/">java</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="Android-天气项目实战"><a href="#Android-天气项目实战" class="headerlink" title="Android 天气项目实战"></a>Android 天气项目实战</h1><h2 id="一、获取API"><a href="#一、获取API" class="headerlink" title="一、获取API"></a>一、获取API</h2><h2 id="二、配置各项依赖和权限申请"><a href="#二、配置各项依赖和权限申请" class="headerlink" title="二、配置各项依赖和权限申请"></a>二、配置各项依赖和权限申请</h2><h3 id="1-权限申请"><a href="#1-权限申请" class="headerlink" title="1. 权限申请"></a>1. 权限申请</h3><pre><code>打开 AndroidManifest.xml
+</code></pre>
+<hr>
+<h3 id="2-依赖配置"><a href="#2-依赖配置" class="headerlink" title="2. 依赖配置"></a>2. 依赖配置</h3><pre><code>打开build.gradle.kt(moudle)
+</code></pre>
+<h4 id="1-API"><a href="#1-API" class="headerlink" title="1.API"></a>1.API</h4><pre><code>在android-deaultConfig下添加
+</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">buildConfigField(</span><br><span class="line">            type = &quot;String&quot;,</span><br><span class="line">            name = &quot;WEATHER_API_KEY&quot;,</span><br><span class="line">            value = &quot;填你的API_Key&quot;</span><br><span class="line">        )</span><br></pre></td></tr></table></figure>
+
+<pre><code>在android下添加
+</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">用于开启相关配置</span><br><span class="line">buildFeatures&#123;</span><br><span class="line">        viewBinding = true</span><br><span class="line">        buildConfig = true</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+
+<hr>
+<h4 id="2-依赖项"><a href="#2-依赖项" class="headerlink" title="2.依赖项"></a>2.依赖项</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">// Room</span><br><span class="line"></span><br><span class="line">implementation(&quot;androidx.room:room-runtime:2.8.4&quot;)</span><br><span class="line"></span><br><span class="line">annotationProcessor(&quot;androidx.room:room-compiler:2.8.4&quot;)</span><br><span class="line"></span><br><span class="line">// Gson</span><br><span class="line"></span><br><span class="line">implementation(&quot;com.google.code.gson:gson:2.11.0&quot;)</span><br><span class="line"></span><br><span class="line">//okHttp</span><br><span class="line"></span><br><span class="line">implementation(&quot;com.squareup.okhttp3:okhttp:4.12.0&quot;)</span><br><span class="line"></span><br><span class="line">// Retrofit</span><br><span class="line"></span><br><span class="line">implementation(&quot;com.squareup.retrofit2:retrofit:2.9.0&quot;)</span><br><span class="line"></span><br><span class="line">// Glide 加载天气图标（可选，用在线图标）</span><br><span class="line"></span><br><span class="line">implementation(&quot;com.github.bumptech.glide:glide:4.16.0&quot;)</span><br></pre></td></tr></table></figure>
+
+
+<hr>
+<h2 id="三、Java-核心基础代码"><a href="#三、Java-核心基础代码" class="headerlink" title="三、Java 核心基础代码"></a>三、Java 核心基础代码</h2><h3 id="1"><a href="#1" class="headerlink" title="1."></a>1.</h3><h3 id="2"><a href="#2" class="headerlink" title="2."></a>2.</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<hr>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://moliangxx.github.io">Liang_Mo</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://moliangxx.github.io/2026/04/07/Android_java/%E7%BB%93%E8%AF%BEdemo/%E5%A4%A9%E6%B0%94%E5%AE%9E%E6%88%98/">https://moliangxx.github.io/2026/04/07/Android_java/%E7%BB%93%E8%AF%BEdemo/%E5%A4%A9%E6%B0%94%E5%AE%9E%E6%88%98/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://moliangxx.github.io" target="_blank">莫良的小窝</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="../../../../../../tags/%E7%BD%91%E7%BB%9C/">网络</a><a class="post-meta__tags" href="../../../../../../tags/%E6%8E%A7%E4%BB%B6/">控件</a><a class="post-meta__tags" href="../../../../../../tags/Room/">Room</a><a class="post-meta__tags" href="../../../../../../tags/%E5%AE%9E%E6%88%98/">实战</a><a class="post-meta__tags" href="../../../../../../tags/OkHttp/">OkHttp</a><a class="post-meta__tags" href="../../../../../../tags/Retrofit/">Retrofit</a><a class="post-meta__tags" href="../../../../../../tags/Gson/">Gson</a><a class="post-meta__tags" href="../../../../../../tags/Glide/">Glide</a></div><div class="post-share"><div class="social-share" data-image="../../../../../../images/cover_android4.jpg" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><div class="post-reward"><div class="reward-button"><i class="fas fa-qrcode"></i>“请我喝杯奶茶~”</div><div class="reward-main"><ul class="reward-all"><li class="reward-item"><a href="../../../../../img/wechat.jpg" target="_blank"><img class="post-qr-code-img" src="../../../../../img/wechat.jpg"/ loading='lazy'></a><div class="post-qr-code-desc"></div></li></ul></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="../../%E7%AC%AC%E5%8D%81%E7%AB%A0-%E6%9C%8D%E5%8A%A1/Android%20%E4%B8%8B%E8%BD%BD%E6%9C%8D%E5%8A%A1%E7%A4%BA%E4%BE%8B/" title=""><img class="cover" src="../../../../../../img/bg1.jpg" onerror="onerror=null;src='../../../../../../img/error2.jpg'" alt="cover of previous post" loading='lazy'><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2"></div></div><div class="info-2"><div class="info-item-1">Android下载服务实战 一、build.gradle 依赖1implementation(&quot;com.squareup.okhttp3:okhttp:4.12.0&quot;)     二、AndroidManifest.xml（完整正确版）12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152535455565758596061626364656667&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&lt;manifest xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;&gt;   &lt;!-- 网络 --&gt;   &lt;uses-permission android:name=&quot;android.permission.INTERNET&quot; ...</div></div></div></a><a class="pagination-related" href="../../%E6%96%B9%E6%B3%95%E8%BE%A8%E6%9E%90/Android%20%E4%B8%AD%20getContext()%20%E5%92%8C%20getActivity()%20%E7%9A%84%E5%8C%BA%E5%88%AB%E4%B8%8E%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF/" title="Android getContext() 和 getActivity() 的区别与使用场景"><img class="cover" src="../../../../../../images/cover_android3.jpg" onerror="onerror=null;src='../../../../../../img/error2.jpg'" alt="cover of next post" loading='lazy'><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Android getContext() 和 getActivity() 的区别与使用场景</div></div><div class="info-2"><div class="info-item-1">Android 中 getContext() 和 getActivity() 的区别与使用场景在 Android 开发中，getContext()和getActivity()是Fragment专用的两个核心方法（Activity 中直接用this即可，不需要这两个方法），它们的作用是获取 Fragment 绑定的「上下文 &#x2F; 宿主 Activity」，但返回类型、功能、使用场景有明确区分，是新手最容易混淆的点。  一、核心前提这两个方法仅能在 Fragment 中调用：  Activity 本身就是 Context 的子类，同时也是 Activity 实例，所以 Activity 里直接用 this 就能替代两者；  Fragment 没有自己的上下文，必须依赖宿主 Activity，因此需要这两个方法获取关联对象。    二、方法详细讲解1. getContext() 返回值：Context 对象（Android 系统的上下文基类）  核心作用：提供通用的上下文能力，用于和 Android 系统交互、访问应用资源。  本质：Context 是抽象类，是所有 Andro...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="../../../../../03/27/Android_java/%E7%AC%AC%E4%B9%9D%E7%AB%A0/Android%20WebView%20%E5%9F%BA%E7%A1%80%E7%94%A8%E6%B3%95%E5%8F%8A%E5%85%B3%E9%94%AE%E8%AE%BE%E7%BD%AE/" title="Android  WebView"><img class="cover" src="../../../../../../images/cover_android4.jpg" alt="cover" loading='lazy'><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-03-27</div><div class="info-item-2">Android  WebView</div></div><div class="info-2"><div class="info-item-1">Android WebView一、先配权限（必加）1. AndroidManifest.xml1234567&lt;!-- 联网必须 --&gt;&lt;uses-permission android:name=&quot;android.permission.INTERNET&quot; /&gt;&lt;!-- 可选：加载本地文件/相册/定位 --&gt;&lt;uses-permission android:name=&quot;android.permission.ACCESS_NETWORK_STATE&quot; /&gt;  2. 适配明文流量（Android 9+）如果访问 HTTP 网址（非 HTTPS），在 application 标签加： 1android:usesCleartextTraffic=&quot;true&quot;     二、布局加 WebViewxml（activity_main.xml&#x2F;fragment 布局通用） 12345678910111213141516171819&lt;?xml version=&quot;1.0&...</div></div></div></a><a class="pagination-related" href="../../../../../03/27/Android_java/%E7%AC%AC%E4%B9%9D%E7%AB%A0/Android%20%E4%B8%AD%20HTTP%20%E8%AF%B7%E6%B1%82%E7%9A%84%E6%A0%87%E5%87%86%E4%B8%8E%E7%8E%B0%E4%BB%A3%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/" title="Android  HTTP请求"><img class="cover" src="../../../../../../images/cover_android1.jpg" alt="cover" loading='lazy'><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-03-27</div><div class="info-item-2">Android  HTTP请求</div></div><div class="info-2"><div class="info-item-1">Android 发送 HTTP 请求：标准方法 + 现代最佳实践Android 开发中发送 HTTP 请求分传统标准方法（官方原生、兼容老版本）和现代主流方法（简洁高效、行业标配），我会按使用场景→代码示例→优缺点清晰整理，直接可落地使用。 一、核心前提 必须添加网络权限（AndroidManifest.xml）：  1234567891011&lt;!-- 基础网络权限 --&gt;&lt;uses-permission android:name=&quot;android.permission.INTERNET&quot; /&gt;&lt;!-- 允许明文 HTTP 请求（Android 9+ 默认禁止，开发测试用） --&gt;&lt;application   ...   android:usesCleartextTraffic=&quot;true&quot;&gt;     所有 HTTP 请求必须在子线程执行（Android 禁止主线程网络请求）。   二、标准原生方法（官方原生，无第三方依赖）1. HttpURLConnection（Android 官方标准原生...</div></div></div></a><a class="pagination-related" href="../../../../../03/12/Android_java/%E7%AC%AC%E4%B8%89%E7%AB%A0/ImageView/" title="Android ImageView"><img class="cover" src="../../../../../../images/cover_android1.jpg" alt="cover" loading='lazy'><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-03-12</div><div class="info-item-2">Android ImageView</div></div><div class="info-2"><div class="info-item-1">ImageView核心需求响应ImageView 核心用于「显示图片」，核心属性围绕「图片加载、缩放、样式」设计。以下按「核心属性（分场景）+ 基础使用 + 关键技巧」梳理，与之前控件结构保持一致，精炼覆盖开发高频场景，无冗余内容。  一、核心属性（分场景，仅列高频）   分类 属性名 作用（精炼版） 示例值    图片加载 android:src 加载图片（本地 &#x2F; 资源） @drawable/ic_logo&#x2F;@mipmap/img_banner    android:background 背景图片 &#x2F; 颜色（与 src 区分） #F5F5F5&#x2F;@drawable/bg_shape   缩放模式 android:scaleType 图片缩放 &#x2F; 裁剪规则（核心） centerCrop&#x2F;fitCenter&#x2F;fitXY   尺寸控制 android:layout_width 控件宽度 match_parent&#x2F;wrap_content&#x2F;100dp    android:layout_heigh...</div></div></div></a><a class="pagination-related" href="../../../../../03/12/Android_java/%E7%AC%AC%E4%B8%89%E7%AB%A0/ProgressDialog/" title="Android ProgressDialog"><img class="cover" src="../../../../../../images/cover_android1.jpg" alt="cover" loading='lazy'><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-03-12</div><div class="info-item-2">Android ProgressDialog</div></div><div class="info-2"><div class="info-item-1">ProgressDialog核心需求响应ProgressDialog 是 系统封装的 “弹窗式进度组件”（结合 ProgressBar + AlertDialog），核心用于「弹窗显示任务进度」（如加载、下载），使用比单独组合 Dialog+ProgressBar 更简洁。但注意：API 26 起被弃用（官方推荐用 AlertDialog + ProgressBar 替代），但新手仍需掌握基础使用，以下按「核心配置 + 基础使用 + 弃用替代方案」梳理，结构与之前控件一致，精炼无冗余。  一、核心配置（代码动态配置，分场景高频）ProgressDialog 无需 XML 布局，完全通过代码配置，核心方法按场景分类：    分类 配置方法 作用（精炼版） 示例代码    进度类型 setProgressStyle(int style) 设置进度条样式（核心） setProgressStyle(ProgressDialog.STYLE_SPINNER)（圆形）&#x2F; STYLE_HORIZONTAL（水平）   标题 &#x2F; 消息 setTitle(String titl...</div></div></div></a><a class="pagination-related" href="../../../../../03/12/Android_java/%E7%AC%AC%E4%B8%89%E7%AB%A0/EditText/" title="Android EditText"><img class="cover" src="../../../../../../images/cover_android1.jpg" alt="cover" loading='lazy'><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-03-12</div><div class="info-item-2">Android EditText</div></div><div class="info-2"><div class="info-item-1">EditText核心需求响应EditText 是 TextView 子类，核心用于「用户输入」，新增「输入控制、交互反馈」特有属性。以下按「核心属性（分场景）+ 基础使用 + 关键技巧」梳理，精炼覆盖开发高频场景，无冗余内容，与之前 TextView&#x2F;Button 结构保持一致。  一、核心属性（分场景，仅列高频）   分类 属性名 作用（精炼版） 示例值    基础文本（继承 TextView） android:text 初始输入文本 默认内容&#x2F;@string/default    android:hint 输入提示（无内容时显示） 请输入用户名    android:textSize 字体大小（单位 sp） 16sp    android:textColor 输入文本颜色 #333333&#x2F;@color/text_black    android:textColorHint 提示文本颜色 #999999   输入控制 android:inputType 输入类型（限制输入格式） text&#x2F;number&#x2F;textPassword ...</div></div></div></a><a class="pagination-related" href="../../../../../03/12/Android_java/%E7%AC%AC%E4%B8%89%E7%AB%A0/RecyclerView/" title="Android RecyclerView"><img class="cover" src="../../../../../../images/cover_android2.jpg" alt="cover" loading='lazy'><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-03-12</div><div class="info-item-2">Android RecyclerView</div></div><div class="info-2"><div class="info-item-1">RecyclerView一、RecyclerView 核心概念RecyclerView 是 Android 提供的更高效、更灵活的列表展示控件，替代了传统的 ListView。它把列表项的复用、布局、动画、点击事件 解耦，通过不同的组件（LayoutManager、Adapter、ViewHolder）分工协作，实现各种样式的列表 &#x2F; 网格展示。 二、环境准备 最低配置：Android 7 (API 24)，Java 语言，Android Studio  添加依赖（Module 级别的 build.gradle）： 注意：Android 7 对应的 RecyclerView 依赖版本建议选择 28.0.0（与 AndroidX 兼容且适配 API 24），避免高版本兼容性问题。   1234567891011dependencies &#123;   // RecyclerView核心依赖（AndroidX版本，兼容Android 7）   implementation &#x27;androidx.recyclerview:recyclerview:28.0.0&#x...</div></div></div></a><a class="pagination-related" href="../../../../../03/12/Android_java/%E7%AC%AC%E4%B8%89%E7%AB%A0/Button/" title="Android Button"><img class="cover" src="../../../../../../images/cover_android1.jpg" alt="cover" loading='lazy'><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-03-12</div><div class="info-item-2">Android Button</div></div><div class="info-2"><div class="info-item-1">Button核心需求响应Button 是 TextView 子类，继承其核心属性，新增「状态样式、交互反馈」特有属性。以下按「核心属性（分场景）+ 基础使用 + 关键技巧」梳理，精炼覆盖开发高频场景，无冗余内容。  一、核心属性（分场景，仅列高频）   分类 属性名 作用（精炼版） 示例值    基础文本（继承 TextView） android:text 按钮文本 确定&#x2F;@string/btn_confirm    android:textSize 字体大小（单位 sp） 16sp    android:textColor 文本颜色（优先用选择器） @color/btn_text_selector   外观样式 android:background 背景（颜色 &#x2F; 图片 &#x2F; 选择器） @drawable/btn_bg_selector    android:backgroundTint 背景着色（替代 background） #2196F3&#x2F;@color/blue    android:cornerRadius 圆角（需配合 backgr...</div></div></div></a><a class="pagination-related" href="../../../../../03/12/Android_java/%E7%AC%AC%E4%B8%89%E7%AB%A0/AlertDialog/" title="Android AlertDialog"><img class="cover" src="../../../../../../images/cover_android1.jpg" alt="cover" loading='lazy'><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-03-12</div><div class="info-item-2">Android AlertDialog</div></div><div class="info-2"><div class="info-item-1">主题：AlertDialog 的核心配置、基础使用及关键技巧，包括封装通用确认对话框、自定义对话框样式、加载对话框和避免内存泄漏等内容核心需求响应AlertDialog 核心用于「弹出交互对话框」（提示、确认、输入、选择），核心逻辑围绕「 Builder 构建 + 按钮 &#x2F; 内容配置」。以下按「核心属性 &#x2F; 配置（分场景）+ 基础使用（高频场景）+ 关键技巧」梳理，与之前控件结构保持一致，精炼覆盖开发 95% 高频场景，无冗余内容。  一、核心配置（分场景，仅列高频）AlertDialog 主要通过 AlertDialog.Builder 动态配置（XML 仅需简单布局容器），核心配置按场景分类：    分类 配置方式（Builder 方法） 作用（精炼版） 示例值 &#x2F; 代码    基础信息 setTitle(String title) 设置对话框标题 setTitle(&quot;提示&quot;)    setMessage(String msg) 设置对话框内容 setMessage(&quot;确定要删除吗？&quot;)    setIco...</div></div></div></a></div></div><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="giscus-wrap"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content is-expand"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Android-%E5%A4%A9%E6%B0%94%E9%A1%B9%E7%9B%AE%E5%AE%9E%E6%88%98"><span class="toc-number">1.</span> <span class="toc-text">Android 天气项目实战</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E8%8E%B7%E5%8F%96API"><span class="toc-number">1.1.</span> <span class="toc-text">一、获取API</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E9%85%8D%E7%BD%AE%E5%90%84%E9%A1%B9%E4%BE%9D%E8%B5%96%E5%92%8C%E6%9D%83%E9%99%90%E7%94%B3%E8%AF%B7"><span class="toc-number">1.2.</span> <span class="toc-text">二、配置各项依赖和权限申请</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%9D%83%E9%99%90%E7%94%B3%E8%AF%B7"><span class="toc-number">1.2.1.</span> <span class="toc-text">1. 权限申请</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E4%BE%9D%E8%B5%96%E9%85%8D%E7%BD%AE"><span class="toc-number">1.2.2.</span> <span class="toc-text">2. 依赖配置</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-API"><span class="toc-number">1.2.2.1.</span> <span class="toc-text">1.API</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-%E4%BE%9D%E8%B5%96%E9%A1%B9"><span class="toc-number">1.2.2.2.</span> <span class="toc-text">2.依赖项</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81Java-%E6%A0%B8%E5%BF%83%E5%9F%BA%E7%A1%80%E4%BB%A3%E7%A0%81"><span class="toc-number">1.3.</span> <span class="toc-text">三、Java 核心基础代码</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1"><span class="toc-number">1.3.1.</span> <span class="toc-text">1.</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2"><span class="toc-number">1.3.2.</span> <span class="toc-text">2.</span></a></li></ol></li></ol></li></ol></div></div></div></div></main><footer id="footer" style="background-image: url(../../../../../../img/bg1.jpg);"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By Liang_Mo</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.1</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.3</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="../../../../../../js/utils.js?v=5.5.3"></script><script src="../../../../../../js/main.js?v=5.5.3"></script><script src="../../../../../../js/tw_cn.js?v=5.5.3"></script><script src="https://cdn.jsdelivr.net/npm/medium-zoom@1.1.0/dist/medium-zoom.min.js"></script><div class="js-pjax"><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = {"mapping":"pathname","crossorigin":"anonymous"}
+
+  const getGiscusTheme = theme => theme === 'dark' ? 'dark' : 'light'
+
+  const createScriptElement = config => {
+    const ele = document.createElement('script')
+    Object.entries(config).forEach(([key, value]) => {
+      ele.setAttribute(key, value)
+    })
+    return ele
+  }
+
+  const loadGiscus = (el = document, key) => {
+    const mappingConfig = isShuoshuo
+      ? { 'data-mapping': 'specific', 'data-term': key }
+      : { 'data-mapping': (option && option['data-mapping']) || 'pathname' }
+
+    const giscusConfig = {
+      src: 'https://giscus.app/client.js',
+      'data-repo': 'moliangxx/moliangxx.github.io',
+      'data-repo-id': 'R_kgDOQkNdpQ',
+      'data-category-id': 'DIC_kwDOQkNdpc4C0z4Q',
+      'data-theme': getGiscusTheme(document.documentElement.getAttribute('data-theme')),
+      'data-reactions-enabled': '1',
+      crossorigin: 'anonymous',
+      async: true,
+      ...option,
+      ...mappingConfig
+    }
+
+    const scriptElement = createScriptElement(giscusConfig)
+
+    el.querySelector('#giscus-wrap').appendChild(scriptElement)
+
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyGiscus = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+  }
+
+  const changeGiscusTheme = theme => {
+    const iframe = document.querySelector('#giscus-wrap iframe')
+    if (iframe) {
+      const message = {
+        giscus: {
+          setConfig: {
+            theme: getGiscusTheme(theme)
+          }
+        }
+      }
+      iframe.contentWindow.postMessage(message, 'https://giscus.app')
+    }
+  }
+
+  btf.addGlobalFn('themeChange', changeGiscusTheme, 'giscus')
+
+  if (isShuoshuo) {
+    'Giscus' === 'Giscus'
+      ? window.shuoshuoComment = { loadComment: loadGiscus }
+      : window.loadOtherComment = loadGiscus
+    return
+  }
+
+  if ('Giscus' === 'Giscus' || !false) {
+    if (false) btf.loadComment(document.getElementById('giscus-wrap'), loadGiscus)
+    else loadGiscus()
+  } else {
+    window.loadOtherComment = loadGiscus
+  }
+})()</script></div><script src="/js/custom.js"></script><script src="https://fastly.jsdelivr.net/npm/live2d-widgets@1.0.1/dist/autoload.js"></script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js"></script><script src="https://cdn.jsdelivr.net/npm/meting@2/dist/Meting.min.js"></script><script>(() => {
+  const destroyAplayer = () => {
+    if (window.aplayers) {
+      for (let i = 0; i < window.aplayers.length; i++) {
+        if (!window.aplayers[i].options.fixed) {
+          window.aplayers[i].destroy()
+        }
+      }
+    }
+  }
+
+  const runMetingJS = () => {
+    typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+  }
+
+  btf.addGlobalFn('pjaxSend', destroyAplayer, 'destroyAplayer')
+  btf.addGlobalFn('pjaxComplete', loadMeting, 'runMetingJS')
+})()</script><script src="https://cdn.jsdelivr.net/npm/pjax@0.2.8/pjax.min.js" defer="defer"></script><script>document.addEventListener('DOMContentLoaded', () => {
+  const pjaxSelectors = ["meta[property=\"og:image\"]","meta[property=\"og:title\"]","meta[property=\"og:url\"]","meta[property=\"og:description\"]","link[rel=\"canonical\"]","head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+
+  window.pjax = new Pjax({
+    elements: 'a:not([target="_blank"])',
+    selectors: pjaxSelectors,
+    cacheBust: false,
+    analytics: false,
+    scrollRestoration: false
+  })
+
+  const triggerPjaxFn = (val) => {
+    if (!val) return
+    Object.values(val).forEach(fn => {
+      try {
+        fn()
+      } catch (err) {
+        console.debug('Pjax callback failed:', err)
+      }
+    })
+  }
+
+  document.addEventListener('pjax:send', () => {
+    // removeEventListener
+    btf.removeGlobalFnEvent('pjaxSendOnce')
+    btf.removeGlobalFnEvent('themeChange')
+
+    // reset readmode
+    const $bodyClassList = document.body.classList
+    if ($bodyClassList.contains('read-mode')) $bodyClassList.remove('read-mode')
+
+    triggerPjaxFn(window.globalFn.pjaxSend)
+  })
+
+  document.addEventListener('pjax:complete', () => {
+    btf.removeGlobalFnEvent('pjaxCompleteOnce')
+    document.querySelectorAll('script[data-pjax]').forEach(item => {
+      const newScript = document.createElement('script')
+      const content = item.text || item.textContent || item.innerHTML || ""
+      Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+      newScript.appendChild(document.createTextNode(content))
+      item.parentNode.replaceChild(newScript, item)
+    })
+
+    triggerPjaxFn(window.globalFn.pjaxComplete)
+  })
+
+  document.addEventListener('pjax:error', e => {
+    if (e.request.status === 404) {
+      true
+        ? pjax.loadUrl('/404.html')
+        : window.location.href = e.request.responseURL
+    }
+  })
+})</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
