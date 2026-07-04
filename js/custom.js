@@ -302,4 +302,227 @@ window.loadMeting = window.loadMeting || function () {};
     document.documentElement.classList.add('reduced-motion');
   }
 
+  /* ========== 页面切换过渡动画控制 ========== */
+  function initReimuTransition() {
+    if (prefersReduced) return;
+
+    const TRANSITION_DURATION = 300;
+    const ENTER_DURATION = 350;
+    let isTransitioning = false;
+
+    function triggerExitAnimation() {
+      if (isTransitioning) return;
+      isTransitioning = true;
+
+      document.body.classList.add('reimu-transitioning');
+
+      const contents = document.querySelectorAll('.layout_page, .layout_post, #aside_content');
+      contents.forEach(el => {
+        el.classList.remove('reimu-transition-enter', 'reimu-transition-enter-active');
+        el.classList.add('reimu-transition-exit');
+        requestAnimationFrame(() => {
+          el.classList.add('reimu-transition-exit-active');
+        });
+      });
+    }
+
+    function triggerEnterAnimation() {
+      setTimeout(() => {
+        const contents = document.querySelectorAll('.layout_page, .layout_post, #aside_content');
+        contents.forEach(el => {
+          el.classList.remove('reimu-transition-exit', 'reimu-transition-exit-active');
+          el.classList.add('reimu-transition-enter');
+        });
+
+        requestAnimationFrame(() => {
+          contents.forEach(el => {
+            el.classList.add('reimu-transition-enter-active');
+          });
+
+          setTimeout(() => {
+            contents.forEach(el => {
+              el.classList.remove('reimu-transition-enter', 'reimu-transition-enter-active');
+            });
+            document.body.classList.remove('reimu-transitioning');
+            isTransitioning = false;
+          }, ENTER_DURATION);
+        });
+      }, TRANSITION_DURATION);
+    }
+
+    function initFirstLoadAnimation() {
+      const contents = document.querySelectorAll('.layout_page, .layout_post, #aside_content');
+      contents.forEach(el => {
+        el.classList.add('reimu-transition-enter');
+      });
+
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          contents.forEach(el => {
+            el.classList.add('reimu-transition-enter-active');
+          });
+
+          setTimeout(() => {
+            contents.forEach(el => {
+              el.classList.remove('reimu-transition-enter', 'reimu-transition-enter-active');
+            });
+          }, ENTER_DURATION);
+        });
+      });
+    }
+
+    document.addEventListener('pjax:send', () => {
+      triggerExitAnimation();
+    });
+
+    document.addEventListener('pjax:complete', () => {
+      triggerEnterAnimation();
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initFirstLoadAnimation();
+    });
+  }
+
+  initReimuTransition();
+
+  /* ========== 舞台幕布转场控制逻辑 ========== */
+  function initStageCurtainTransition() {
+    if (prefersReduced) return;
+
+    const CURTAIN_DURATION = 400;
+    const RUNNER_FADE_DURATION = 200;
+    const CONTENT_DELAY = 100;
+    let isTransitioning = false;
+    let timeoutIds = [];
+
+    function clearAllTimeouts() {
+      timeoutIds.forEach(id => clearTimeout(id));
+      timeoutIds = [];
+    }
+
+    function createCurtainElements() {
+      const container = document.createElement('div');
+      container.id = 'stage-curtain';
+
+      const leftCurtain = document.createElement('div');
+      leftCurtain.className = 'stage-curtain-left';
+
+      const rightCurtain = document.createElement('div');
+      rightCurtain.className = 'stage-curtain-right';
+
+      container.appendChild(leftCurtain);
+      container.appendChild(rightCurtain);
+      document.body.appendChild(container);
+
+      return container;
+    }
+
+    function createRunnerElement() {
+      const runner = document.createElement('div');
+      runner.id = 'stage-runner';
+      runner.innerHTML = `
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <g class="stage-runner-body">
+            <circle cx="50" cy="28" r="12" fill="#d4a574"/>
+            <ellipse cx="50" cy="48" rx="10" ry="14" fill="#f5d7a8"/>
+            <line x1="50" y1="62" x2="50" y2="70" stroke="#f5d7a8" stroke-width="3" stroke-linecap="round"/>
+            <g class="stage-runner-arm-left" transform="translate(40, 50)">
+              <path d="M0 0 Q-10 8 -15 18" stroke="#d4a574" stroke-width="4" fill="none" stroke-linecap="round"/>
+            </g>
+            <g class="stage-runner-arm-right" transform="translate(60, 50)">
+              <path d="M0 0 Q10 8 15 18" stroke="#d4a574" stroke-width="4" fill="none" stroke-linecap="round"/>
+            </g>
+            <g class="stage-runner-leg-left" transform="translate(50, 70)">
+              <path d="M0 0 Q-5 12 -8 22" stroke="#ff9f7f" stroke-width="4" fill="none" stroke-linecap="round"/>
+            </g>
+            <g class="stage-runner-leg-right" transform="translate(50, 70)">
+              <path d="M0 0 Q5 12 8 22" stroke="#ff9f7f" stroke-width="4" fill="none" stroke-linecap="round"/>
+            </g>
+          </g>
+        </svg>
+      `;
+      document.body.appendChild(runner);
+      return runner;
+    }
+
+    let curtainContainer = null;
+    let runnerElement = null;
+
+    function initElements() {
+      if (!curtainContainer) {
+        curtainContainer = createCurtainElements();
+      }
+      if (!runnerElement) {
+        runnerElement = createRunnerElement();
+      }
+    }
+
+    function resetState() {
+      clearAllTimeouts();
+      if (curtainContainer) {
+        curtainContainer.classList.remove('closing', 'opening');
+      }
+      if (runnerElement) {
+        runnerElement.classList.remove('visible', 'hidden');
+      }
+      isTransitioning = false;
+    }
+
+    function handlePjaxSend() {
+      if (isTransitioning) {
+        resetState();
+      }
+
+      initElements();
+      isTransitioning = true;
+
+      curtainContainer.classList.add('closing');
+
+      setTimeout(() => {
+        runnerElement.classList.add('visible');
+      }, CURTAIN_DURATION / 2);
+    }
+
+    function handlePjaxComplete() {
+      if (!isTransitioning) return;
+
+      setTimeout(() => {
+        runnerElement.classList.remove('visible');
+        runnerElement.classList.add('hidden');
+
+        setTimeout(() => {
+          curtainContainer.classList.remove('closing');
+          curtainContainer.classList.add('opening');
+
+          setTimeout(() => {
+            resetState();
+          }, CURTAIN_DURATION);
+        }, RUNNER_FADE_DURATION);
+      }, CONTENT_DELAY);
+    }
+
+    function handlePjaxError() {
+      if (!isTransitioning) return;
+
+      runnerElement.classList.remove('visible');
+      runnerElement.classList.add('hidden');
+
+      setTimeout(() => {
+        curtainContainer.classList.remove('closing');
+        curtainContainer.classList.add('opening');
+
+        setTimeout(() => {
+          resetState();
+        }, CURTAIN_DURATION);
+      }, RUNNER_FADE_DURATION);
+    }
+
+    document.addEventListener('pjax:send', handlePjaxSend);
+    document.addEventListener('pjax:complete', handlePjaxComplete);
+    document.addEventListener('pjax:error', handlePjaxError);
+  }
+
+  initStageCurtainTransition();
+
 })();
