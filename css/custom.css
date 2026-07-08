@@ -875,3 +875,264 @@ body.reimu-transitioning #aside_content {
 .friends-link-item .flink-icon:hover {
   color: var(--main-light);
 }
+
+/* ========== 小猫风格-头像猫耳猫尾装饰 ========== */
+.card-widget .avatar-img {
+  position: relative;
+}
+
+.cat-ears {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  height: 30px;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.cat-ear {
+  position: absolute;
+  width: 20px;
+  height: 24px;
+  border: 1.5px solid var(--main-color);
+  border-radius: 50% 50% 40% 40%;
+  background: rgba(255, 182, 193, 0.2);
+  animation: cat-ear-breathe 3s ease-in-out infinite;
+}
+
+.cat-ear-left {
+  left: 15%;
+  transform: rotate(-15deg);
+}
+
+.cat-ear-right {
+  right: 15%;
+  transform: rotate(15deg);
+}
+
+.cat-ear-inner {
+  position: absolute;
+  top: 4px;
+  left: 3px;
+  width: 12px;
+  height: 14px;
+  border-radius: 50% 50% 40% 40%;
+  background: rgba(255, 182, 193, 0.4);
+}
+
+.cat-tail {
+  position: absolute;
+  bottom: -15px;
+  right: -5px;
+  width: 40px;
+  height: 40px;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.cat-tail-path {
+  stroke: var(--main-color);
+  stroke-width: 1.5;
+  fill: none;
+  stroke-linecap: round;
+  animation: cat-tail-swing 4s ease-in-out infinite;
+}
+
+.card-widget .avatar-img:hover .cat-ear {
+  animation: cat-ear-alert 0.3s ease-in-out;
+}
+
+.card-widget .avatar-img:hover .cat-tail-path {
+  animation: cat-tail-excited 1.5s ease-in-out infinite;
+}
+
+@keyframes cat-ear-breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.03); }
+}
+
+.cat-ear-left { animation-delay: 0s; }
+.cat-ear-right { animation-delay: 0.15s; }
+
+@keyframes cat-ear-alert {
+  0%, 100% { transform: rotate(-15deg) scale(1); }
+  25% { transform: rotate(-20deg) scale(1.1); }
+  50% { transform: rotate(-12deg) scale(1.05); }
+  75% { transform: rotate(-18deg) scale(1.08); }
+}
+
+.cat-ear-right {
+  animation-name: cat-ear-alert-right;
+}
+
+@keyframes cat-ear-alert-right {
+  0%, 100% { transform: rotate(15deg) scale(1); }
+  25% { transform: rotate(20deg) scale(1.1); }
+  50% { transform: rotate(12deg) scale(1.05); }
+  75% { transform: rotate(18deg) scale(1.08); }
+}
+
+@keyframes cat-tail-swing {
+  0%, 100% { transform: rotate(-10deg); }
+  50% { transform: rotate(10deg); }
+}
+
+@keyframes cat-tail-excited {
+  0%, 100% { transform: rotate(-25deg); }
+  50% { transform: rotate(25deg); }
+}
+
+/* ========== 小猫风格-自定义猫爪光标 ========== */
+body {
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><path fill="none" stroke="%23d4a574" stroke-width="1.5" d="M6 16c-1.5 0-3-1-3-2.5S4.5 10 6 10s3 1 3 2.5S7.5 16 6 16zm4-6c-1.5 0-3-1-3-2.5S8.5 5 10 5s3 1 3 2.5S11.5 10 10 10zm4 0c-1.5 0-3-1-3-2.5S12.5 5 14 5s3 1 3 2.5S15.5 10 14 10zm4 6c-1.5 0-3-1-3-2.5S16.5 10 18 10s3 1 3 2.5S19.5 16 18 16z"/></svg>'), auto;
+}
+
+a, button, .card-widget, .recent-post-item, .nav-links, #pagination, .article-title, .flink-icon, .tags a, .category-lists a {
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"><path fill="none" stroke="%23f5d7a8" stroke-width="1.5" stroke-opacity="0.9" d="M6 16c-1.5 0-3-1-3-2.5S4.5 10 6 10s3 1 3 2.5S7.5 16 6 16zm4-6c-1.5 0-3-1-3-2.5S8.5 5 10 5s3 1 3 2.5S11.5 10 10 10zm4 0c-1.5 0-3-1-3-2.5S12.5 5 14 5s3 1 3 2.5S15.5 10 14 10zm4 6c-1.5 0-3-1-3-2.5S16.5 10 18 10s3 1 3 2.5S19.5 16 18 16z"/></svg>'), pointer;
+}
+
+input, textarea {
+  cursor: text;
+}
+
+/* ========== 小猫风格-分隔线与图标替换 ========== */
+#article-container hr {
+  border: none;
+  height: 20px;
+  position: relative;
+  margin: 32px auto;
+  width: 60%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#article-container hr::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 50%;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(212, 165, 116, 0.25));
+}
+
+#article-container hr::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  left: 50%;
+  height: 1px;
+  background: linear-gradient(to left, transparent, rgba(212, 165, 116, 0.25));
+}
+
+.cat-paw-divider {
+  width: 24px;
+  height: 20px;
+  position: relative;
+  z-index: 1;
+}
+
+.cat-paw-divider svg {
+  width: 100%;
+  height: 100%;
+}
+
+.card-widget .card-info-data {
+  border-top: 1px solid rgba(212, 165, 116, 0.08);
+}
+
+.card-widget .card-info-data::before {
+  content: '';
+  display: block;
+  width: 16px;
+  height: 1px;
+  background: var(--main-color);
+  margin: 0 auto 8px;
+}
+
+#article-container h3::before {
+  content: '';
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-right: 8px;
+  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"><path fill="rgba(212,165,116,0.3)" stroke="rgba(212,165,116,0.4)" stroke-width="1" d="M6 16c-1.5 0-3-1-3-2.5S4.5 10 6 10s3 1 3 2.5S7.5 16 6 16zm4-6c-1.5 0-3-1-3-2.5S8.5 5 10 5s3 1 3 2.5S11.5 10 10 10zm4 0c-1.5 0-3-1-3-2.5S12.5 5 14 5s3 1 3 2.5S15.5 10 14 10zm4 6c-1.5 0-3-1-3-2.5S16.5 10 18 10s3 1 3 2.5S19.5 16 18 16z"/></svg>') no-repeat center center;
+  background-size: contain;
+}
+
+#article-container ul li::marker {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 8px;
+  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 24 24"><path fill="rgba(212,165,116,0.4)" stroke="rgba(212,165,116,0.5)" stroke-width="0.5" d="M6 16c-1.5 0-3-1-3-2.5S4.5 10 6 10s3 1 3 2.5S7.5 16 6 16zm4-6c-1.5 0-3-1-3-2.5S8.5 5 10 5s3 1 3 2.5S11.5 10 10 10zm4 0c-1.5 0-3-1-3-2.5S12.5 5 14 5s3 1 3 2.5S15.5 10 14 10zm4 6c-1.5 0-3-1-3-2.5S16.5 10 18 10s3 1 3 2.5S19.5 16 18 16z"/></svg>') no-repeat center center;
+  background-size: contain;
+}
+
+.recent-post-item::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  width: 8px;
+  height: 8px;
+  opacity: 0.3;
+  transition: opacity 0.3s ease;
+  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 24 24"><path fill="none" stroke="%23d4a574" stroke-width="1" d="M6 16c-1.5 0-3-1-3-2.5S4.5 10 6 10s3 1 3 2.5S7.5 16 6 16zm4-6c-1.5 0-3-1-3-2.5S8.5 5 10 5s3 1 3 2.5S11.5 10 10 10zm4 0c-1.5 0-3-1-3-2.5S12.5 5 14 5s3 1 3 2.5S15.5 10 14 10zm4 6c-1.5 0-3-1-3-2.5S16.5 10 18 10s3 1 3 2.5S19.5 16 18 16z"/></svg>') no-repeat center center;
+  background-size: contain;
+}
+
+.recent-post-item:hover::before {
+  opacity: 0.6;
+}
+
+/* ========== 小猫风格-转场加载动画 ========== */
+#stage-loader {
+  z-index: 99999;
+}
+
+.stage-loader-icon {
+  width: 80px;
+  height: 40px;
+}
+
+.stage-loader-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.cat-chase-cat {
+  animation: cat-chase-move 1.5s linear infinite;
+}
+
+.cat-chase-mouse {
+  animation: mouse-run 1.5s linear infinite;
+}
+
+.cat-chase-trail {
+  animation: trail-fade 1.5s linear infinite;
+}
+
+@keyframes cat-chase-move {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(15px) translateY(-2px); }
+  50% { transform: translateX(30px) translateY(0); }
+  75% { transform: translateX(15px) translateY(2px); }
+  100% { transform: translateX(0); }
+}
+
+@keyframes mouse-run {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-15px) translateY(-3px); }
+  50% { transform: translateX(-30px) translateY(0); }
+  75% { transform: translateX(-15px) translateY(3px); }
+  100% { transform: translateX(0); }
+}
+
+@keyframes trail-fade {
+  0% { opacity: 0.6; }
+  100% { opacity: 0; }
+}

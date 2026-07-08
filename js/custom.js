@@ -156,6 +156,170 @@ window.loadMeting = window.loadMeting || function () {};
     document.addEventListener('touchstart', handleClick, { passive: true });
   }
 
+  /* ========== 小猫风格-头像猫耳猫尾装饰注入 ========== */
+  function initCatAvatarDecorations() {
+    const avatarImg = document.querySelector('.card-widget .avatar-img');
+    if (!avatarImg) return;
+
+    const earsHtml = `
+      <div class="cat-ears">
+        <div class="cat-ear cat-ear-left">
+          <div class="cat-ear-inner"></div>
+        </div>
+        <div class="cat-ear cat-ear-right">
+          <div class="cat-ear-inner"></div>
+        </div>
+      </div>
+    `;
+
+    const tailHtml = `
+      <div class="cat-tail">
+        <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+          <path class="cat-tail-path" d="M5 35 Q15 20 25 25 Q30 28 35 15" />
+        </svg>
+      </div>
+    `;
+
+    avatarImg.innerHTML = avatarImg.innerHTML + earsHtml + tailHtml;
+  }
+
+  /* ========== 小猫风格-小老鼠逃跑点击特效（方案A） ========== */
+  function initMouseClickEffect() {
+    if (prefersReduced) return;
+
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.style.position = 'fixed';
+    canvas.style.top = '0';
+    canvas.style.left = '0';
+    canvas.style.width = '100%';
+    canvas.style.height = '100%';
+    canvas.style.pointerEvents = 'none';
+    canvas.style.zIndex = '9999';
+    document.body.appendChild(canvas);
+
+    let mice = [];
+    let animationId = null;
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    function drawMouse(ctx, x, y, size, rotation, opacity) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(rotation);
+      ctx.strokeStyle = `rgba(212, 165, 116, ${opacity})`;
+      ctx.lineWidth = 1.5;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+
+      ctx.beginPath();
+      ctx.arc(0, 0, size * 0.6, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(-size * 0.3, -size * 0.5);
+      ctx.lineTo(-size * 0.2, -size * 0.7);
+      ctx.moveTo(size * 0.3, -size * 0.5);
+      ctx.lineTo(size * 0.2, -size * 0.7);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(-size * 0.2, -size * 0.1, size * 0.15, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(212, 165, 116, ${opacity})`;
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(size * 0.2, -size * 0.1, size * 0.15, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.moveTo(-size * 0.5, size * 0.1);
+      ctx.lineTo(-size * 0.9, size * 0.2);
+      ctx.moveTo(size * 0.5, size * 0.1);
+      ctx.lineTo(size * 0.9, size * 0.2);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(0, size * 0.5);
+      ctx.bezierCurveTo(size * 0.3, size * 0.7, size * 0.5, size * 0.6, size * 0.6, size * 0.3);
+      ctx.stroke();
+
+      ctx.restore();
+    }
+
+    function createMouse(x, y) {
+      const angle = Math.random() * Math.PI * 2;
+      const distance = 30 + Math.random() * 20;
+
+      mice.push({
+        x: x,
+        y: y,
+        targetX: x + Math.cos(angle) * distance,
+        targetY: y + Math.sin(angle) * distance,
+        size: 10 + Math.random() * 4,
+        rotation: angle - Math.PI / 2,
+        startTime: performance.now(),
+        duration: 500 + Math.random() * 200,
+        bounceOffset: 0
+      });
+    }
+
+    function animate() {
+      const now = performance.now();
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      mice = mice.filter(mouse => {
+        const elapsed = now - mouse.startTime;
+        const progress = Math.min(elapsed / mouse.duration, 1);
+
+        mouse.bounceOffset = Math.sin(progress * Math.PI * 3) * 4;
+
+        const eased = 1 - Math.pow(1 - progress, 3);
+        const currentX = mouse.x + (mouse.targetX - mouse.x) * eased;
+        const currentY = mouse.y + (mouse.targetY - mouse.y) * eased + mouse.bounceOffset;
+
+        const opacity = 1 - progress;
+        const scale = 1 - progress * 0.4;
+
+        drawMouse(ctx, currentX, currentY, mouse.size * scale, mouse.rotation, opacity);
+
+        return progress < 1;
+      });
+
+      if (mice.length > 0) {
+        animationId = requestAnimationFrame(animate);
+      } else {
+        animationId = null;
+      }
+    }
+
+    function handleClick(e) {
+      const x = e.clientX || e.touches?.[0]?.clientX || 0;
+      const y = e.clientY || e.touches?.[0]?.clientY || 0;
+
+      if (e.target.closest('input') || e.target.closest('textarea')) return;
+
+      createMouse(x, y);
+      if (!animationId) {
+        animate();
+      }
+    }
+
+    document.addEventListener('click', handleClick);
+    document.addEventListener('touchstart', handleClick, { passive: true });
+  }
+
+  /* ========== 开关配置：点击特效切换 ========== */
+  /* 
+     使用方案A（小老鼠逃跑）：取消下方注释，注释 initStarClickEffect 调用
+     使用方案B（星星碎裂）：保持现有 initStarClickEffect 调用
+  */
+  const USE_MOUSE_CLICK_EFFECT = true;
+
   function initPageAnimation() {
     if (prefersReduced) return;
 
@@ -283,7 +447,12 @@ window.loadMeting = window.loadMeting || function () {};
   }, { passive: true });
 
   document.addEventListener('DOMContentLoaded', () => {
-    initStarClickEffect();
+    if (USE_MOUSE_CLICK_EFFECT) {
+      initMouseClickEffect();
+    } else {
+      initStarClickEffect();
+    }
+    initCatAvatarDecorations();
     initPageAnimation();
     setupImages();
     updateHeader();
@@ -296,6 +465,7 @@ window.loadMeting = window.loadMeting || function () {};
     setupImages();
     updateHeader();
     updateProgress();
+    initCatAvatarDecorations();
   });
 
   if (prefersReduced) {
@@ -426,20 +596,34 @@ window.loadMeting = window.loadMeting || function () {};
       loader.id = 'stage-loader';
       loader.innerHTML = `
         <div class="stage-loader-icon">
-          <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-            <g class="stage-loader-ring">
-              <circle cx="50" cy="50" r="38" fill="none" stroke="rgba(255,215,180,0.3)" stroke-width="2.5"/>
-              <circle cx="50" cy="50" r="38" fill="none" stroke="rgba(255,215,180,0.85)" stroke-width="2.5" stroke-dasharray="50 170" stroke-linecap="round" transform="rotate(-90 50 50)"/>
+          <svg viewBox="0 0 100 50" xmlns="http://www.w3.org/2000/svg">
+            <g class="cat-chase-mouse" transform="translate(25, 20)">
+              <circle cx="0" cy="0" r="6" fill="none" stroke="#d4a574" stroke-width="1.5"/>
+              <line x1="-3" y1="-5" x2="-2" y2="-7" stroke="#d4a574" stroke-width="1.5"/>
+              <line x1="3" y1="-5" x2="2" y2="-7" stroke="#d4a574" stroke-width="1.5"/>
+              <circle cx="-2" cy="-1" r="1.5" fill="#d4a574"/>
+              <circle cx="2" cy="-1" r="1.5" fill="#d4a574"/>
+              <line x1="-5" y1="1" x2="-8" y2="1.5" stroke="#d4a574" stroke-width="1"/>
+              <line x1="5" y1="1" x2="8" y2="1.5" stroke="#d4a574" stroke-width="1"/>
+              <path d="M0 5 Q3 7 4 4" fill="none" stroke="#d4a574" stroke-width="1.5" stroke-linecap="round"/>
             </g>
-            <g class="stage-loader-inner">
-              <polygon points="50,15 53,30 68,30 57,40 62,55 50,45 38,55 43,40 32,30 47,30" fill="#ffd700"/>
-              <polygon points="50,20 52,28 62,28 54,35 57,48 50,41 43,48 46,35 38,28 48,28" fill="#fffacd"/>
-              <circle cx="35" cy="25" r="3" fill="#ffb6c1" opacity="0.6"/>
-              <circle cx="65" cy="35" r="2.5" fill="#dda0dd" opacity="0.6"/>
-              <circle cx="40" cy="60" r="2" fill="#ffd700" opacity="0.5"/>
-              <circle cx="60" cy="20" r="2" fill="#ffb6c1" opacity="0.5"/>
-              <circle cx="70" cy="50" r="2" fill="#fff" opacity="0.4"/>
+            <g class="cat-chase-cat" transform="translate(60, 20)">
+              <ellipse cx="0" cy="0" rx="8" ry="7" fill="none" stroke="#d4a574" stroke-width="1.5"/>
+              <line x1="-5" y1="-6" x2="-3" y2="-10" stroke="#d4a574" stroke-width="1.5"/>
+              <line x1="5" y1="-6" x2="3" y2="-10" stroke="#d4a574" stroke-width="1.5"/>
+              <circle cx="-3" cy="-1" r="2" fill="#d4a574"/>
+              <circle cx="3" cy="-1" r="2" fill="#d4a574"/>
+              <circle cx="-2.5" cy="-1.5" r="0.8" fill="#fff"/>
+              <circle cx="3.5" cy="-1.5" r="0.8" fill="#fff"/>
+              <path d="M-2 3 Q0 5 2 3" fill="none" stroke="#d4a574" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="-6" y1="3" x2="-9" y2="4" stroke="#d4a574" stroke-width="1"/>
+              <line x1="6" y1="3" x2="9" y2="4" stroke="#d4a574" stroke-width="1"/>
+              <path d="M-5 6 Q-8 8 -6 10" fill="none" stroke="#d4a574" stroke-width="1.5" stroke-linecap="round"/>
+              <path d="M5 6 Q8 8 6 10" fill="none" stroke="#d4a574" stroke-width="1.5" stroke-linecap="round"/>
             </g>
+            <circle class="cat-chase-trail" cx="42" cy="20" r="2" fill="rgba(212,165,116,0.4)"/>
+            <circle class="cat-chase-trail" cx="45" cy="22" r="1.5" fill="rgba(212,165,116,0.3)"/>
+            <circle class="cat-chase-trail" cx="48" cy="18" r="1" fill="rgba(212,165,116,0.2)"/>
           </svg>
         </div>
         <div class="stage-loader-text" id="stage-loading-text">
@@ -539,7 +723,7 @@ window.loadMeting = window.loadMeting || function () {};
         }
 
         if (loadingTextElement) {
-          loadingTextElement.innerHTML = renderTypingText('正在前往下一页 ✨');
+          loadingTextElement.innerHTML = renderTypingText('小猫正在飞奔过来~');
           loadingTextElement.classList.add('visible', 'typing');
         }
       }, CURTAIN_DURATION / 2);
