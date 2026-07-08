@@ -389,7 +389,7 @@ body.reimu-transitioning #aside_content {
   will-change: opacity, transform;
 }
 
-/* ========== 舞台幕布转场动画深度优化 ========== */
+/* ========== 舞台幕布转场动画整体优化 ========== */
 #stage-curtain {
   position: fixed;
   top: 0;
@@ -407,16 +407,15 @@ body.reimu-transitioning #aside_content {
   bottom: 0;
   width: 52vw;
   height: 100vh;
-  background: rgba(20, 20, 30, 0.2);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  background: rgba(18, 16, 28, 0.32);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .stage-curtain-left {
   left: 0;
   transform: translateX(-100%);
-  border-right: 1px solid rgba(212, 165, 116, 0.15);
 }
 
 .stage-curtain-left::after {
@@ -424,15 +423,14 @@ body.reimu-transitioning #aside_content {
   position: absolute;
   right: 0;
   top: 0;
-  width: 20px;
+  width: 30px;
   height: 100%;
-  background: linear-gradient(to left, rgba(20, 20, 30, 0), rgba(20, 20, 30, 0.2));
+  background: linear-gradient(to left, rgba(18, 16, 28, 0), rgba(18, 16, 28, 0.32));
 }
 
 .stage-curtain-right {
   right: 0;
   transform: translateX(100%);
-  border-left: 1px solid rgba(212, 165, 116, 0.15);
 }
 
 .stage-curtain-right::after {
@@ -440,9 +438,9 @@ body.reimu-transitioning #aside_content {
   position: absolute;
   left: 0;
   top: 0;
-  width: 20px;
+  width: 30px;
   height: 100%;
-  background: linear-gradient(to right, rgba(20, 20, 30, 0), rgba(20, 20, 30, 0.2));
+  background: linear-gradient(to right, rgba(18, 16, 28, 0), rgba(18, 16, 28, 0.32));
 }
 
 #stage-curtain.closing .stage-curtain-left {
@@ -461,113 +459,113 @@ body.reimu-transitioning #aside_content {
   transform: translateX(100%);
 }
 
-#stage-runner {
+#stage-loader {
   position: fixed;
-  top: calc(50% - 30px);
+  top: calc(50% - 35px);
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 99999;
   opacity: 0;
   transition: opacity 0.2s ease;
   pointer-events: none;
-  width: 80px;
-  height: 80px;
+  width: 70px;
+  height: 70px;
 }
 
-#stage-runner.visible {
+#stage-loader.visible {
   opacity: 1;
 }
 
-#stage-runner.hidden {
+#stage-loader.hidden {
   opacity: 0;
 }
 
-#stage-runner svg {
+#stage-loader svg {
   width: 100%;
   height: 100%;
 }
 
-@keyframes runner-bounce {
+@keyframes loader-breathe {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.08);
+    opacity: 1;
+  }
+}
+
+@keyframes loader-float {
   0%, 100% {
     transform: translateY(0);
   }
   50% {
-    transform: translateY(-8px);
+    transform: translateY(-4px);
   }
 }
 
-@keyframes runner-arm {
+@keyframes loader-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes loader-star-twinkle {
   0%, 100% {
-    transform: rotate(-40deg);
+    opacity: 0.3;
+    transform: scale(0.8);
   }
   50% {
-    transform: rotate(40deg);
+    opacity: 1;
+    transform: scale(1.2);
   }
 }
 
-@keyframes runner-leg {
-  0%, 100% {
-    transform: rotate(-50deg);
-  }
-  50% {
-    transform: rotate(50deg);
-  }
+.stage-loader-inner {
+  animation: loader-breathe 2s ease-in-out infinite;
 }
 
-@keyframes runner-head-bob {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-3px);
-  }
+.stage-loader-float {
+  animation: loader-float 3s ease-in-out infinite;
 }
 
-.stage-runner-body {
-  animation: runner-bounce 0.6s ease-in-out infinite;
-  transform-origin: center;
+.stage-loader-ring {
+  animation: loader-spin 1.2s linear infinite;
 }
 
-.stage-runner-head {
-  animation: runner-head-bob 0.3s ease-in-out infinite;
-  transform-origin: center bottom;
+.stage-loader-star {
+  animation: loader-star-twinkle 1.5s ease-in-out infinite;
 }
 
-.stage-runner-arm-left {
-  animation: runner-arm 0.3s ease-in-out infinite;
-  transform-origin: 40px 52px;
+.stage-loader-star:nth-child(2) {
+  animation-delay: 0.3s;
 }
 
-.stage-runner-arm-right {
-  animation: runner-arm 0.3s ease-in-out infinite;
-  animation-delay: 0.15s;
-  transform-origin: 60px 52px;
-}
-
-.stage-runner-leg-left {
-  animation: runner-leg 0.3s ease-in-out infinite;
-  transform-origin: 45px 72px;
-}
-
-.stage-runner-leg-right {
-  animation: runner-leg 0.3s ease-in-out infinite;
-  animation-delay: 0.15s;
-  transform-origin: 50px 70px;
+.stage-loader-star:nth-child(3) {
+  animation-delay: 0.6s;
 }
 
 #stage-loading-text {
   position: fixed;
-  top: calc(50% + 55px);
+  top: calc(50% + 60px);
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 99999;
   opacity: 0;
   transition: opacity 0.2s ease;
   pointer-events: none;
-  font-size: 16px;
+  font-size: 15px;
   font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-  color: #d4a574;
-  text-shadow: 0 0 10px rgba(212, 165, 116, 0.5), 0 0 20px rgba(212, 165, 116, 0.3);
+  color: rgba(255, 215, 180, 0.95);
+  text-shadow: 0 0 8px rgba(255, 215, 180, 0.6);
+  letter-spacing: 1px;
+  line-height: 1.6;
+  max-width: 90vw;
+  word-break: keep-all;
   white-space: nowrap;
 }
 
@@ -581,12 +579,20 @@ body.reimu-transitioning #aside_content {
 
 #stage-loading-text .loading-cursor {
   display: inline-block;
-  width: 8px;
-  height: 16px;
-  background: #d4a574;
+  width: 6px;
+  height: 14px;
+  background: rgba(255, 215, 180, 0.9);
   margin-left: 4px;
-  animation: cursor-blink 1s ease-in-out infinite;
   border-radius: 2px;
+}
+
+#stage-loading-text.typing .loading-cursor {
+  animation: cursor-blink 1s ease-in-out infinite;
+}
+
+#stage-loading-text:not(.typing) .loading-cursor {
+  animation: none;
+  opacity: 0;
 }
 
 @keyframes cursor-blink {
@@ -601,7 +607,7 @@ body.reimu-transitioning #aside_content {
 @keyframes typing-reveal {
   0% {
     opacity: 0;
-    transform: translateY(5px);
+    transform: translateY(4px);
   }
   100% {
     opacity: 1;
@@ -611,20 +617,24 @@ body.reimu-transitioning #aside_content {
 
 #stage-loading-text .typing-char {
   display: inline-block;
-  animation: typing-reveal 0.3s ease-out forwards;
   opacity: 0;
 }
 
+#stage-loading-text.typing .typing-char {
+  animation: typing-reveal 0.25s ease-out forwards;
+}
+
 @media (max-width: 768px) {
-  #stage-runner {
-    width: 60px;
-    height: 60px;
-    top: calc(50% - 25px);
+  #stage-loader {
+    width: 56px;
+    height: 56px;
+    top: calc(50% - 28px);
   }
   
   #stage-loading-text {
-    font-size: 14px;
-    top: calc(50% + 45px);
+    font-size: 13px;
+    top: calc(50% + 52px);
+    max-width: 85vw;
   }
 }
 

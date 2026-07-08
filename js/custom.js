@@ -386,16 +386,18 @@ window.loadMeting = window.loadMeting || function () {};
 
   initReimuTransition();
 
-  /* ========== 舞台幕布转场控制逻辑（深度优化版） ========== */
+  /* ========== 舞台幕布转场控制逻辑（重构优化版） ========== */
   function initStageCurtainTransition() {
     if (prefersReduced) return;
 
     const CURTAIN_DURATION = 400;
-    const RUNNER_FADE_DURATION = 200;
+    const LOADER_FADE_DURATION = 200;
     const STAY_DURATION = 250;
+    const TIMEOUT_MAX = 3000;
     let isTransitioning = false;
     let timeoutIds = [];
     let pjaxCompleted = false;
+    let transitionStartTime = 0;
 
     function clearAllTimeouts() {
       timeoutIds.forEach(id => clearTimeout(id));
@@ -419,109 +421,158 @@ window.loadMeting = window.loadMeting || function () {};
       return container;
     }
 
-    function createRunnerElement() {
-      const runner = document.createElement('div');
-      runner.id = 'stage-runner';
-      runner.innerHTML = `
+    function createLoaderElement() {
+      const loader = document.createElement('div');
+      loader.id = 'stage-loader';
+      loader.innerHTML = `
         <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-          <g class="stage-runner-body">
-            <g class="stage-runner-head">
-              <circle cx="50" cy="25" r="14" fill="#d4a574"/>
-              <circle cx="44" cy="22" r="2" fill="#3d3d3d"/>
-              <circle cx="56" cy="22" r="2" fill="#3d3d3d"/>
-              <path d="M46 28 Q50 32 54 28" stroke="#3d3d3d" stroke-width="2" fill="none" stroke-linecap="round"/>
-              <circle cx="38" cy="20" r="4" fill="#ff9f7f" opacity="0.6"/>
-              <circle cx="62" cy="20" r="4" fill="#ff9f7f" opacity="0.6"/>
+          <g class="stage-loader-ring">
+            <circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,215,180,0.35)" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,215,180,0.9)" stroke-width="3" stroke-linecap="round" stroke-dasharray="60 180" transform="rotate(-90 50 50)"/>
+          </g>
+          <g class="stage-loader-float">
+            <g class="stage-loader-inner">
+              <ellipse cx="50" cy="52" rx="20" ry="22" fill="#ffb6c1"/>
+              <ellipse cx="50" cy="48" rx="18" ry="20" fill="#ffc0cb"/>
+              <ellipse cx="38" cy="38" rx="8" ry="12" fill="#ffb6c1"/>
+              <ellipse cx="62" cy="38" rx="8" ry="12" fill="#ffb6c1"/>
+              <ellipse cx="38" cy="38" rx="4" ry="7" fill="#ffc0cb"/>
+              <ellipse cx="62" cy="38" rx="4" ry="7" fill="#ffc0cb"/>
+              <circle cx="44" cy="46" r="4" fill="#3d3d3d"/>
+              <circle cx="56" cy="46" r="4" fill="#3d3d3d"/>
+              <circle cx="45" cy="45" r="1.5" fill="#fff"/>
+              <circle cx="57" cy="45" r="1.5" fill="#fff"/>
+              <path d="M46 54 Q50 58 54 54" stroke="#3d3d3d" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+              <ellipse cx="50" cy="60" rx="6" ry="4" fill="#ff9f7f" opacity="0.5"/>
+              <circle cx="38" cy="52" r="5" fill="#ff9f7f" opacity="0.4"/>
+              <circle cx="62" cy="52" r="5" fill="#ff9f7f" opacity="0.4"/>
             </g>
-            <ellipse cx="50" cy="48" rx="12" ry="16" fill="#f5d7a8"/>
-            <ellipse cx="50" cy="52" rx="6" ry="8" fill="#ffe4c4"/>
-            <g class="stage-runner-arm-left" transform="translate(38, 48)">
-              <path d="M0 0 Q-8 6 -14 16" stroke="#d4a574" stroke-width="5" fill="none" stroke-linecap="round"/>
-              <circle cx="-14" cy="16" r="4" fill="#d4a574"/>
-            </g>
-            <g class="stage-runner-arm-right" transform="translate(62, 48)">
-              <path d="M0 0 Q8 6 14 16" stroke="#d4a574" stroke-width="5" fill="none" stroke-linecap="round"/>
-              <circle cx="14" cy="16" r="4" fill="#d4a574"/>
-            </g>
-            <g class="stage-runner-leg-left" transform="translate(45, 64)">
-              <path d="M0 0 Q-4 10 -8 22" stroke="#ff9f7f" stroke-width="5" fill="none" stroke-linecap="round"/>
-              <ellipse cx="-8" cy="22" rx="5" ry="3" fill="#ff9f7f"/>
-            </g>
-            <g class="stage-runner-leg-right" transform="translate(55, 64)">
-              <path d="M0 0 Q4 10 8 22" stroke="#ff9f7f" stroke-width="5" fill="none" stroke-linecap="round"/>
-              <ellipse cx="8" cy="22" rx="5" ry="3" fill="#ff9f7f"/>
-            </g>
+          </g>
+          <g class="stage-loader-star">
+            <path d="M50 10 L53 25 L68 25 L56 35 L60 50 L50 40 L40 50 L44 35 L32 25 L47 25 Z" fill="#ffd700" opacity="0.8"/>
+          </g>
+          <g class="stage-loader-star" transform="translate(70, 30)">
+            <path d="M50 10 L53 25 L68 25 L56 35 L60 50 L50 40 L40 50 L44 35 L32 25 L47 25 Z" fill="#ffb6c1" opacity="0.7"/>
+          </g>
+          <g class="stage-loader-star" transform="translate(30, 70)">
+            <path d="M50 10 L53 25 L68 25 L56 35 L60 50 L50 40 L40 50 L44 35 L32 25 L47 25 Z" fill="#dda0dd" opacity="0.7"/>
           </g>
         </svg>
       `;
-      document.body.appendChild(runner);
-      return runner;
+      document.body.appendChild(loader);
+      return loader;
     }
 
     function createLoadingTextElement() {
       const textContainer = document.createElement('div');
       textContainer.id = 'stage-loading-text';
-      const text = '页面加载中ฅ˙Ⱉ˙ฅ';
+      textContainer.innerHTML = '<span class="loading-cursor"></span>';
+      document.body.appendChild(textContainer);
+      return textContainer;
+    }
+
+    function renderTypingText(text) {
       let html = '';
       for (let i = 0; i < text.length; i++) {
         html += `<span class="typing-char" style="animation-delay: ${i * 0.08}s">${text[i]}</span>`;
       }
       html += '<span class="loading-cursor"></span>';
-      textContainer.innerHTML = html;
-      document.body.appendChild(textContainer);
-      return textContainer;
+      return html;
     }
 
     let curtainContainer = null;
-    let runnerElement = null;
+    let loaderElement = null;
     let loadingTextElement = null;
 
     function initElements() {
       if (!curtainContainer) {
         curtainContainer = createCurtainElements();
       }
-      if (!runnerElement) {
-        runnerElement = createRunnerElement();
+      if (!loaderElement) {
+        loaderElement = createLoaderElement();
       }
       if (!loadingTextElement) {
         loadingTextElement = createLoadingTextElement();
       }
     }
 
+    function cleanupElements() {
+      if (loaderElement) {
+        loaderElement.classList.remove('visible', 'hidden');
+      }
+      if (loadingTextElement) {
+        loadingTextElement.classList.remove('visible', 'hidden', 'typing');
+        loadingTextElement.innerHTML = '<span class="loading-cursor"></span>';
+      }
+    }
+
     function resetState() {
       clearAllTimeouts();
       pjaxCompleted = false;
+      isTransitioning = false;
+      transitionStartTime = 0;
+
       if (curtainContainer) {
         curtainContainer.classList.remove('closing', 'opening');
       }
-      if (runnerElement) {
-        runnerElement.classList.remove('visible', 'hidden');
-      }
-      if (loadingTextElement) {
-        loadingTextElement.classList.remove('visible', 'hidden');
-      }
-      isTransitioning = false;
+
+      cleanupElements();
     }
 
     function startOpeningSequence() {
       if (!isTransitioning) return;
 
-      runnerElement.classList.remove('visible');
-      runnerElement.classList.add('hidden');
+      if (loaderElement) {
+        loaderElement.classList.remove('visible');
+        loaderElement.classList.add('hidden');
+      }
 
       if (loadingTextElement) {
-        loadingTextElement.classList.remove('visible');
+        loadingTextElement.classList.remove('visible', 'typing');
         loadingTextElement.classList.add('hidden');
       }
 
       setTimeout(() => {
+        if (!curtainContainer) return;
         curtainContainer.classList.remove('closing');
         curtainContainer.classList.add('opening');
 
         setTimeout(() => {
           resetState();
         }, CURTAIN_DURATION);
-      }, RUNNER_FADE_DURATION);
+      }, LOADER_FADE_DURATION);
+    }
+
+    function startClosingSequence() {
+      if (!curtainContainer) return;
+      curtainContainer.classList.add('closing');
+
+      setTimeout(() => {
+        if (!isTransitioning) return;
+
+        if (loaderElement) {
+          loaderElement.classList.add('visible');
+          loaderElement.classList.remove('hidden');
+        }
+
+        if (loadingTextElement) {
+          loadingTextElement.innerHTML = renderTypingText('正在前往下一页 ✨');
+          loadingTextElement.classList.add('visible', 'typing');
+          loadingTextElement.classList.remove('hidden');
+        }
+      }, CURTAIN_DURATION / 2);
+
+      timeoutIds.push(setTimeout(() => {
+        if (pjaxCompleted && isTransitioning) {
+          startOpeningSequence();
+        }
+      }, CURTAIN_DURATION + STAY_DURATION));
+
+      timeoutIds.push(setTimeout(() => {
+        if (isTransitioning) {
+          startOpeningSequence();
+        }
+      }, TIMEOUT_MAX));
     }
 
     function handlePjaxSend() {
@@ -532,21 +583,9 @@ window.loadMeting = window.loadMeting || function () {};
       initElements();
       isTransitioning = true;
       pjaxCompleted = false;
+      transitionStartTime = Date.now();
 
-      curtainContainer.classList.add('closing');
-
-      setTimeout(() => {
-        runnerElement.classList.add('visible');
-        if (loadingTextElement) {
-          loadingTextElement.classList.add('visible');
-        }
-      }, CURTAIN_DURATION / 2);
-
-      timeoutIds.push(setTimeout(() => {
-        if (pjaxCompleted) {
-          startOpeningSequence();
-        }
-      }, CURTAIN_DURATION + STAY_DURATION));
+      startClosingSequence();
     }
 
     function handlePjaxComplete() {
@@ -569,12 +608,7 @@ window.loadMeting = window.loadMeting || function () {};
       startOpeningSequence();
     }
 
-    let transitionStartTime = 0;
-
-    document.addEventListener('pjax:send', () => {
-      transitionStartTime = Date.now();
-      handlePjaxSend();
-    });
+    document.addEventListener('pjax:send', handlePjaxSend);
     document.addEventListener('pjax:complete', handlePjaxComplete);
     document.addEventListener('pjax:error', handlePjaxError);
   }
