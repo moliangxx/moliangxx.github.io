@@ -223,7 +223,7 @@ window.loadMeting = window.loadMeting || function () {};
     });
   }
 
-  /* ========== 小猫风格-头像猫耳猫尾装饰注入（毛茸茸版） ========== */
+  /* ========== 小猫风格-头像猫耳猫尾装饰注入（极致精致版） ========== */
   function initCatAvatarDecorations() {
     const avatarImg = document.querySelector('.card-widget .avatar-img');
     if (!avatarImg) return;
@@ -233,29 +233,139 @@ window.loadMeting = window.loadMeting || function () {};
         <div class="cat-ear cat-ear-left">
           <div class="cat-ear-inner"></div>
           <div class="cat-ear-fur"></div>
+          <div class="cat-ear-tip"></div>
         </div>
         <div class="cat-ear cat-ear-right">
           <div class="cat-ear-inner"></div>
           <div class="cat-ear-fur"></div>
+          <div class="cat-ear-tip"></div>
         </div>
       </div>
     `;
 
     const tailHtml = `
       <div class="cat-tail">
-        <svg viewBox="0 0 50 50" xmlns="http://www.w3.org/2000/svg">
+        <svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
           <g class="cat-tail-group">
-            <path class="cat-tail-path" d="M8 42 Q18 28 28 32 Q35 36 42 22" />
-            <path class="cat-tail-inner" d="M10 40 Q20 28 30 32 Q36 35 40 24" />
-            <circle class="cat-tail-fluff" cx="10" cy="40" r="3" />
-            <circle class="cat-tail-fluff" cx="42" cy="22" r="4" />
-            <circle class="cat-tail-fluff" cx="28" cy="32" r="2" />
+            <path class="cat-tail-path" d="M10 50 Q20 35 32 38 Q42 42 50 28" />
+            <path class="cat-tail-inner" d="M12 48 Q22 35 34 38 Q44 41 48 30" />
+            <path class="cat-tail-highlight" d="M14 46 Q24 34 36 37 Q45 40 47 32" />
+            <circle class="cat-tail-fluff" cx="12" cy="48" r="4" />
+            <circle class="cat-tail-fluff" cx="50" cy="28" r="5" />
+            <circle class="cat-tail-fluff" cx="32" cy="38" r="3" />
           </g>
         </svg>
       </div>
     `;
 
     avatarImg.innerHTML = avatarImg.innerHTML + earsHtml + tailHtml;
+    initCatIntermittentAnimations();
+  }
+
+  /* ========== 小猫风格-猫耳猫尾间歇性动画（模拟真实猫咪行为） ========== */
+  function initCatIntermittentAnimations() {
+    const earLeft = document.querySelector('.cat-ear-left');
+    const earRight = document.querySelector('.cat-ear-right');
+    const tailGroup = document.querySelector('.cat-tail-group');
+    const avatarImg = document.querySelector('.card-widget .avatar-img');
+    if (!earLeft || !earRight || !tailGroup || !avatarImg) return;
+
+    let earAnimationTimeout = null;
+    let tailAnimationTimeout = null;
+    let isHovering = false;
+
+    function triggerEarTwitch() {
+      if (isHovering) return;
+      
+      earLeft.style.transform = 'rotate(-15deg) scale(1)';
+      earRight.style.transform = 'rotate(15deg) scale(1)';
+      
+      setTimeout(() => {
+        if (isHovering) return;
+        earLeft.style.transform = 'rotate(-5deg) scale(0.98)';
+        earRight.style.transform = 'rotate(5deg) scale(0.98)';
+      }, 50);
+      
+      setTimeout(() => {
+        if (isHovering) return;
+        earLeft.style.transform = 'rotate(-18deg) scale(1.02)';
+        earRight.style.transform = 'rotate(18deg) scale(1.02)';
+      }, 120);
+      
+      setTimeout(() => {
+        if (isHovering) return;
+        earLeft.style.transform = 'rotate(-15deg) scale(1)';
+        earRight.style.transform = 'rotate(15deg) scale(1)';
+        
+        if (!isHovering) {
+          const nextDelay = 3000 + Math.random() * 5000;
+          earAnimationTimeout = setTimeout(triggerEarTwitch, nextDelay);
+        }
+      }, 400);
+    }
+
+    function triggerTailFlick() {
+      if (isHovering) return;
+      
+      tailGroup.style.transform = 'rotate(-8deg)';
+      
+      setTimeout(() => {
+        if (isHovering) return;
+        tailGroup.style.transform = 'rotate(12deg)';
+      }, 80);
+      
+      setTimeout(() => {
+        if (isHovering) return;
+        tailGroup.style.transform = 'rotate(-15deg)';
+      }, 200);
+      
+      setTimeout(() => {
+        if (isHovering) return;
+        tailGroup.style.transform = 'rotate(8deg)';
+      }, 350);
+      
+      setTimeout(() => {
+        if (isHovering) return;
+        tailGroup.style.transform = 'rotate(-8deg)';
+        
+        if (!isHovering) {
+          const nextDelay = 4000 + Math.random() * 6000;
+          tailAnimationTimeout = setTimeout(triggerTailFlick, nextDelay);
+        }
+      }, 600);
+    }
+
+    function startAnimations() {
+      if (earAnimationTimeout) clearTimeout(earAnimationTimeout);
+      if (tailAnimationTimeout) clearTimeout(tailAnimationTimeout);
+      earAnimationTimeout = setTimeout(triggerEarTwitch, 2000);
+      tailAnimationTimeout = setTimeout(triggerTailFlick, 3500);
+    }
+
+    avatarImg.addEventListener('mouseenter', () => {
+      isHovering = true;
+      if (earAnimationTimeout) clearTimeout(earAnimationTimeout);
+      if (tailAnimationTimeout) clearTimeout(tailAnimationTimeout);
+      earLeft.style.transform = 'rotate(-8deg) scale(0.96)';
+      earRight.style.transform = 'rotate(8deg) scale(0.96)';
+      tailGroup.style.transform = 'rotate(-15deg)';
+    });
+
+    avatarImg.addEventListener('mouseleave', () => {
+      isHovering = false;
+      earLeft.style.transform = 'rotate(-15deg) scale(1)';
+      earRight.style.transform = 'rotate(15deg) scale(1)';
+      tailGroup.style.transform = 'rotate(-8deg)';
+      setTimeout(startAnimations, 500);
+    });
+
+    startAnimations();
+
+    document.addEventListener('pjax:complete', () => {
+      if (earAnimationTimeout) clearTimeout(earAnimationTimeout);
+      if (tailAnimationTimeout) clearTimeout(tailAnimationTimeout);
+      setTimeout(initCatIntermittentAnimations, 100);
+    });
   }
 
   /* ========== 小猫风格-小老鼠逃跑点击特效（方案A - 保留备用） ========== */
@@ -830,41 +940,104 @@ window.loadMeting = window.loadMeting || function () {};
       loader.id = 'stage-loader';
       loader.innerHTML = `
         <div class="stage-loader-icon">
-          <svg viewBox="0 0 120 55" xmlns="http://www.w3.org/2000/svg">
-            <g class="cat-chase-mouse" transform="translate(30, 25)">
-              <ellipse cx="0" cy="0" rx="8" ry="7" fill="#f5d7a8" stroke="#d4a574" stroke-width="1.5"/>
-              <ellipse cx="-4" cy="-5" rx="3" ry="4" fill="#ffb6c1" stroke="#d4a574" stroke-width="1"/>
-              <ellipse cx="4" cy="-5" rx="3" ry="4" fill="#ffb6c1" stroke="#d4a574" stroke-width="1"/>
-              <circle cx="-3" cy="-1" r="2" fill="#333"/>
-              <circle cx="3" cy="-1" r="2" fill="#333"/>
-              <circle cx="-2.5" cy="-1.5" r="0.8" fill="#fff"/>
-              <circle cx="3.5" cy="-1.5" r="0.8" fill="#fff"/>
-              <circle cx="0" cy="2" r="1.5" fill="#ffb6c1"/>
+          <svg viewBox="0 0 140 65" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <radialGradient id="catFurGrad" cx="45%" cy="40%" r="60%">
+                <stop offset="0%" stop-color="#fff"/>
+                <stop offset="15%" stop-color="#faf0e0"/>
+                <stop offset="35%" stop-color="#f8e4c4"/>
+                <stop offset="55%" stop-color="#f5d7a8"/>
+                <stop offset="75%" stop-color="#e8c992"/>
+                <stop offset="90%" stop-color="#d4a574"/>
+                <stop offset="100%" stop-color="#b88660"/>
+              </radialGradient>
+              <radialGradient id="catEarInnerGrad" cx="45%" cy="40%" r="60%">
+                <stop offset="0%" stop-color="#fff"/>
+                <stop offset="25%" stop-color="#ffdde1"/>
+                <stop offset="50%" stop-color="#ffc2d1"/>
+                <stop offset="75%" stop-color="#ffb6c1"/>
+                <stop offset="100%" stop-color="#ff91a4"/>
+              </radialGradient>
+              <radialGradient id="mouseFurGrad" cx="45%" cy="40%" r="60%">
+                <stop offset="0%" stop-color="#fff"/>
+                <stop offset="20%" stop-color="#faf0e0"/>
+                <stop offset="45%" stop-color="#f8e4c4"/>
+                <stop offset="70%" stop-color="#f5d7a8"/>
+                <stop offset="90%" stop-color="#d4a574"/>
+                <stop offset="100%" stop-color="#b88660"/>
+              </radialGradient>
+              <radialGradient id="pawPadGrad" cx="40%" cy="35%" r="55%">
+                <stop offset="0%" stop-color="#fff"/>
+                <stop offset="30%" stop-color="#ffdde1"/>
+                <stop offset="60%" stop-color="#ffb6c1"/>
+                <stop offset="100%" stop-color="#ff91a4"/>
+              </radialGradient>
+              <filter id="fluffFilter">
+                <feGaussianBlur stdDeviation="0.6"/>
+                <feDropShadow dx="0" dy="0" stdDeviation="1.2" flood-color="#fff" flood-opacity="0.6"/>
+              </filter>
+              <filter id="fluffFilterSoft">
+                <feGaussianBlur stdDeviation="0.4"/>
+                <feDropShadow dx="0" dy="0" stdDeviation="0.8" flood-color="#fff" flood-opacity="0.4"/>
+              </filter>
+            </defs>
+            <g class="cat-chase-mouse" transform="translate(35, 30)">
+              <ellipse cx="0" cy="0" rx="9" ry="8" fill="url(#mouseFurGrad)" stroke="#d4a574" stroke-width="1.5" filter="url(#fluffFilter)"/>
+              <ellipse cx="0" cy="1" rx="6" ry="4" fill="#faf0e0" opacity="0.3"/>
+              <ellipse cx="-4" cy="-6" rx="3.5" ry="4.5" fill="url(#catEarInnerGrad)" stroke="#d4a574" stroke-width="1" filter="url(#fluffFilterSoft)"/>
+              <ellipse cx="4" cy="-6" rx="3.5" ry="4.5" fill="url(#catEarInnerGrad)" stroke="#d4a574" stroke-width="1" filter="url(#fluffFilterSoft)"/>
+              <ellipse cx="-3.5" cy="-5" rx="2" ry="2.5" fill="#fff" opacity="0.4"/>
+              <ellipse cx="3.5" cy="-5" rx="2" ry="2.5" fill="#fff" opacity="0.4"/>
+              <circle cx="-3" cy="-1" r="2.5" fill="#333"/>
+              <circle cx="3" cy="-1" r="2.5" fill="#333"/>
+              <circle cx="-2.5" cy="-1.8" r="1" fill="#fff"/>
+              <circle cx="3.5" cy="-1.8" r="1" fill="#fff"/>
+              <circle cx="0" cy="2" r="1.8" fill="url(#pawPadGrad)"/>
+              <circle cx="0" cy="1.5" r="0.6" fill="#fff" opacity="0.5"/>
               <line x1="-6" y1="2" x2="-10" y2="1" stroke="#d4a574" stroke-width="1"/>
               <line x1="6" y1="2" x2="10" y2="1" stroke="#d4a574" stroke-width="1"/>
-              <path class="mouse-tail" d="M0 6 Q5 12 8 18 Q5 14 0 10" fill="none" stroke="#d4a574" stroke-width="1.5" stroke-linecap="round"/>
+              <path class="mouse-tail" d="M0 7 Q6 14 10 22 Q6 16 0 11" fill="none" stroke="#d4a574" stroke-width="2" stroke-linecap="round"/>
+              <path d="M0 7 Q7 15 11 23 Q7 17 0 12" fill="none" stroke="#f5d7a8" stroke-width="1" stroke-linecap="round"/>
+              <circle cx="11" cy="23" r="3.5" fill="#faf0e0" opacity="0.7"/>
+              <circle cx="10" cy="22" r="2" fill="#fff" opacity="0.5"/>
             </g>
-            <g class="cat-chase-cat" transform="translate(75, 25)">
-              <ellipse cx="0" cy="0" rx="10" ry="9" fill="#f5d7a8" stroke="#d4a574" stroke-width="1.5"/>
-              <ellipse cx="-5" cy="-7" rx="4" ry="5" fill="#ffb6c1" stroke="#d4a574" stroke-width="1"/>
-              <ellipse cx="5" cy="-7" rx="4" ry="5" fill="#ffb6c1" stroke="#d4a574" stroke-width="1"/>
-              <circle cx="-4" cy="-1" r="3" fill="#333"/>
-              <circle cx="4" cy="-1" r="3" fill="#333"/>
-              <circle cx="-3.5" cy="-1.8" r="1" fill="#fff"/>
-              <circle cx="4.5" cy="-1.8" r="1" fill="#fff"/>
-              <circle cx="0" cy="2" r="2" fill="#ffb6c1"/>
-              <path d="M-2 4 Q0 6 2 4" fill="none" stroke="#333" stroke-width="1.5" stroke-linecap="round"/>
-              <line x1="-7" y1="1" x2="-12" y2="0" stroke="#d4a574" stroke-width="1"/>
-              <line x1="-7" y1="3" x2="-12" y2="3" stroke="#d4a574" stroke-width="1"/>
-              <line x1="7" y1="1" x2="12" y2="0" stroke="#d4a574" stroke-width="1"/>
-              <line x1="7" y1="3" x2="12" y2="3" stroke="#d4a574" stroke-width="1"/>
-              <path class="cat-paw-left" d="M-7 6 Q-9 8 -8 10" fill="none" stroke="#d4a574" stroke-width="1.5" stroke-linecap="round"/>
-              <path class="cat-paw-right" d="M7 6 Q9 8 8 10" fill="none" stroke="#d4a574" stroke-width="1.5" stroke-linecap="round"/>
-              <path class="cat-tail" d="M3 6 Q10 10 8 18 Q6 14 3 12" fill="none" stroke="#d4a574" stroke-width="1.5" stroke-linecap="round"/>
+            <g class="cat-chase-cat" transform="translate(85, 30)">
+              <ellipse cx="0" cy="0" rx="12" ry="10" fill="url(#catFurGrad)" stroke="#d4a574" stroke-width="1.5" filter="url(#fluffFilter)"/>
+              <ellipse cx="0" cy="1" rx="8" ry="5" fill="#faf0e0" opacity="0.25"/>
+              <ellipse cx="-6" cy="-8" rx="5" ry="6" fill="url(#catEarInnerGrad)" stroke="#d4a574" stroke-width="1" filter="url(#fluffFilterSoft)"/>
+              <ellipse cx="6" cy="-8" rx="5" ry="6" fill="url(#catEarInnerGrad)" stroke="#d4a574" stroke-width="1" filter="url(#fluffFilterSoft)"/>
+              <ellipse cx="-5.5" cy="-7" rx="2.5" ry="3" fill="#fff" opacity="0.35"/>
+              <ellipse cx="5.5" cy="-7" rx="2.5" ry="3" fill="#fff" opacity="0.35"/>
+              <path d="M-6 -11 L-4 -8 L-8 -8 Z" fill="#fff" opacity="0.6"/>
+              <path d="M6 -11 L4 -8 L8 -8 Z" fill="#fff" opacity="0.6"/>
+              <circle cx="-5" cy="-1" r="3.5" fill="#333"/>
+              <circle cx="5" cy="-1" r="3.5" fill="#333"/>
+              <circle cx="-4.5" cy="-2" r="1.2" fill="#fff"/>
+              <circle cx="5.5" cy="-2" r="1.2" fill="#fff"/>
+              <circle cx="0" cy="2" r="2.5" fill="url(#pawPadGrad)"/>
+              <circle cx="0" cy="1.5" r="0.8" fill="#fff" opacity="0.5"/>
+              <path d="M-2.5 4.5 Q0 7 2.5 4.5" fill="none" stroke="#333" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="-8" y1="1" x2="-13" y2="0" stroke="#d4a574" stroke-width="1"/>
+              <line x1="-8" y1="3" x2="-13" y2="3" stroke="#d4a574" stroke-width="1"/>
+              <line x1="8" y1="1" x2="13" y2="0" stroke="#d4a574" stroke-width="1"/>
+              <line x1="8" y1="3" x2="13" y2="3" stroke="#d4a574" stroke-width="1"/>
+              <path class="cat-paw-left" d="M-8 7 Q-11 10 -10 13" fill="none" stroke="#d4a574" stroke-width="1.5" stroke-linecap="round"/>
+              <circle cx="-10" cy="13" r="3" fill="url(#pawPadGrad)" opacity="0.8"/>
+              <circle cx="-9.5" cy="12" r="0.8" fill="#fff" opacity="0.4"/>
+              <path class="cat-paw-right" d="M8 7 Q11 10 10 13" fill="none" stroke="#d4a574" stroke-width="1.5" stroke-linecap="round"/>
+              <circle cx="10" cy="13" r="3" fill="url(#pawPadGrad)" opacity="0.8"/>
+              <circle cx="10.5" cy="12" r="0.8" fill="#fff" opacity="0.4"/>
+              <path class="cat-tail" d="M4 7 Q12 12 10 22 Q8 16 4 14" fill="none" stroke="#d4a574" stroke-width="2" stroke-linecap="round"/>
+              <path d="M5 7 Q13 13 11 23 Q9 17 5 15" fill="none" stroke="#f5d7a8" stroke-width="1" stroke-linecap="round"/>
+              <circle cx="11" cy="23" r="4.5" fill="#faf0e0" opacity="0.7"/>
+              <circle cx="10" cy="22" r="2.5" fill="#fff" opacity="0.5"/>
             </g>
-            <circle class="cat-chase-trail trail-1" cx="50" cy="28" r="2" fill="rgba(212,165,116,0.5)"/>
-            <circle class="cat-chase-trail trail-2" cx="55" cy="24" r="1.5" fill="rgba(212,165,116,0.35)"/>
-            <circle class="cat-chase-trail trail-3" cx="60" cy="27" r="1" fill="rgba(212,165,116,0.2)"/>
+            <circle class="cat-chase-trail trail-1" cx="58" cy="33" r="2.5" fill="rgba(212,165,116,0.5)"/>
+            <circle class="cat-chase-trail trail-1" cx="57" cy="32" r="1.5" fill="rgba(255,255,255,0.3)"/>
+            <circle class="cat-chase-trail trail-2" cx="64" cy="29" r="2" fill="rgba(212,165,116,0.35)"/>
+            <circle class="cat-chase-trail trail-2" cx="63" cy="28" r="1" fill="rgba(255,255,255,0.2)"/>
+            <circle class="cat-chase-trail trail-3" cx="70" cy="32" r="1.5" fill="rgba(212,165,116,0.2)"/>
+            <circle class="cat-chase-trail trail-3" cx="69" cy="31" r="0.8" fill="rgba(255,255,255,0.15)"/>
           </svg>
         </div>
         <div class="stage-loader-text" id="stage-loading-text">
@@ -964,7 +1137,7 @@ window.loadMeting = window.loadMeting || function () {};
         }
 
         if (loadingTextElement) {
-          loadingTextElement.innerHTML = renderTypingText('小猫正在飞奔过来~');
+          loadingTextElement.innerHTML = renderTypingText('Liang_Mo正在火速赶来!!!');
           loadingTextElement.classList.add('visible', 'typing');
         }
       }, CURTAIN_DURATION / 2);
