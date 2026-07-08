@@ -283,11 +283,11 @@ i:hover {
 }
 
 .card-widget .avatar-img:hover::before {
-  animation: avatarRotate 1s ease forwards, avatarGlow 3s ease infinite;
+  animation: avatarGlow 3s ease infinite;
 }
 
 .card-widget .avatar-img:hover {
-  transform: scale(1.05);
+  transform: none;
 }
 
 @keyframes avatarGlow {
@@ -991,121 +991,162 @@ body.reimu-transitioning #aside_content {
   color: var(--main-light);
 }
 
-/* ========== 小猫风格-头像猫耳猫尾装饰 ========== */
+/* ========== 小猫风格-头像猫耳猫尾装饰（毛茸茸版） ========== */
 .card-widget .avatar-img {
   position: relative;
 }
 
 .cat-ears {
   position: absolute;
-  top: -8px;
+  top: -10px;
   left: 50%;
   transform: translateX(-50%);
   width: 100%;
-  height: 30px;
+  height: 35px;
   z-index: 2;
   pointer-events: none;
 }
 
 .cat-ear {
   position: absolute;
-  width: 20px;
-  height: 24px;
-  border: 1.5px solid var(--main-color);
-  border-radius: 50% 50% 40% 40%;
-  background: rgba(255, 182, 193, 0.2);
-  animation: cat-ear-breathe 3s ease-in-out infinite;
+  width: 24px;
+  height: 28px;
+  border-radius: 50% 50% 45% 45%;
+  background: linear-gradient(135deg, #fff 0%, #f5d7a8 30%, #d4a574 70%, #c4956a 100%);
+  box-shadow: 
+    0 2px 8px rgba(212, 165, 116, 0.4),
+    inset 0 -2px 4px rgba(255, 255, 255, 0.3),
+    inset 0 2px 4px rgba(0, 0, 0, 0.1);
+  animation: cat-ear-breathe 4s ease-in-out infinite;
 }
 
 .cat-ear-left {
-  left: 15%;
-  transform: rotate(-15deg);
+  left: 12%;
+  transform: rotate(-12deg);
 }
 
 .cat-ear-right {
-  right: 15%;
-  transform: rotate(15deg);
+  right: 12%;
+  transform: rotate(12deg);
 }
 
 .cat-ear-inner {
   position: absolute;
-  top: 4px;
-  left: 3px;
-  width: 12px;
-  height: 14px;
-  border-radius: 50% 50% 40% 40%;
-  background: rgba(255, 182, 193, 0.4);
+  top: 6px;
+  left: 5px;
+  width: 14px;
+  height: 16px;
+  border-radius: 50% 50% 45% 45%;
+  background: linear-gradient(135deg, #fff 0%, #ffd1dc 40%, #ffb6c1 80%, #ff91a4 100%);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.cat-ear-fur {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  box-shadow: 
+    1px 1px 0 rgba(255, 255, 255, 0.5),
+    -1px -1px 0 rgba(0, 0, 0, 0.1),
+    2px 0 2px rgba(255, 255, 255, 0.3);
 }
 
 .cat-tail {
   position: absolute;
-  bottom: -15px;
-  right: -5px;
-  width: 40px;
-  height: 40px;
+  bottom: -20px;
+  right: -8px;
+  width: 50px;
+  height: 50px;
   z-index: 0;
   pointer-events: none;
 }
 
-.cat-tail-path {
-  stroke: var(--main-color);
-  stroke-width: 1.5;
-  fill: none;
-  stroke-linecap: round;
+.cat-tail-group {
+  transform-origin: top left;
   animation: cat-tail-swing 4s ease-in-out infinite;
 }
 
-.card-widget .avatar-img:hover .cat-ear {
-  animation: cat-ear-alert 0.3s ease-in-out;
+.cat-tail-path {
+  fill: none;
+  stroke: #d4a574;
+  stroke-width: 6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.2));
 }
 
-.card-widget .avatar-img:hover .cat-tail-path {
-  animation: cat-tail-excited 1.5s ease-in-out infinite;
+.cat-tail-inner {
+  fill: none;
+  stroke: #f5d7a8;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.cat-tail-fluff {
+  fill: #fff;
+  opacity: 0.4;
+}
+
+.card-widget .avatar-img:hover .cat-ear {
+  animation: cat-ear-cuddle 0.4s ease-in-out;
+}
+
+.card-widget .avatar-img:hover .cat-tail-group {
+  animation: cat-tail-excited 2s ease-in-out infinite;
 }
 
 @keyframes cat-ear-breathe {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.03); }
-}
-
-.cat-ear-left { animation-delay: 0s; }
-.cat-ear-right { animation-delay: 0.15s; }
-
-@keyframes cat-ear-alert {
-  0%, 100% { transform: rotate(-15deg) scale(1); }
-  25% { transform: rotate(-20deg) scale(1.1); }
-  50% { transform: rotate(-12deg) scale(1.05); }
-  75% { transform: rotate(-18deg) scale(1.08); }
+  0%, 100% { transform: rotate(-12deg) scale(1); }
+  50% { transform: rotate(-12deg) scale(1.02); }
 }
 
 .cat-ear-right {
-  animation-name: cat-ear-alert-right;
+  animation-name: cat-ear-breathe-right;
 }
 
-@keyframes cat-ear-alert-right {
-  0%, 100% { transform: rotate(15deg) scale(1); }
-  25% { transform: rotate(20deg) scale(1.1); }
-  50% { transform: rotate(12deg) scale(1.05); }
-  75% { transform: rotate(18deg) scale(1.08); }
+@keyframes cat-ear-breathe-right {
+  0%, 100% { transform: rotate(12deg) scale(1); }
+  50% { transform: rotate(12deg) scale(1.02); }
+}
+
+@keyframes cat-ear-cuddle {
+  0%, 100% { transform: rotate(-12deg) scale(1); }
+  50% { transform: rotate(-8deg) scale(0.98); }
+}
+
+.cat-ear-right:hover,
+.card-widget .avatar-img:hover .cat-ear-right {
+  animation-name: cat-ear-cuddle-right;
+}
+
+@keyframes cat-ear-cuddle-right {
+  0%, 100% { transform: rotate(12deg) scale(1); }
+  50% { transform: rotate(8deg) scale(0.98); }
 }
 
 @keyframes cat-tail-swing {
-  0%, 100% { transform: rotate(-10deg); }
-  50% { transform: rotate(10deg); }
+  0%, 100% { transform: rotate(-8deg); }
+  50% { transform: rotate(8deg); }
 }
 
 @keyframes cat-tail-excited {
-  0%, 100% { transform: rotate(-25deg); }
-  50% { transform: rotate(25deg); }
+  0%, 100% { transform: rotate(-15deg); }
+  50% { transform: rotate(15deg); }
 }
 
-/* ========== 小猫风格-自定义猫爪光标 ========== */
+/* ========== 小猫风格-自定义猫爪光标（毛茸茸版） ========== */
 body {
-  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><defs><radialGradient id="pawGrad" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="%23fff"/><stop offset="40%" stop-color="%23ffb6c1"/><stop offset="100%" stop-color="%23d4a574"/></radialGradient><filter id="fluff"><feGaussianBlur in="SourceGraphic" stdDeviation="0.5"/><feDropShadow dx="0" dy="0" stdDeviation="1.5" flood-color="%23d4a574" flood-opacity="0.4"/></filter></defs><g filter="url(%23fluff)"><circle cx="6" cy="16" r="4" fill="url(%23pawGrad)" stroke="%23d4a574" stroke-width="1"/><circle cx="10" cy="8" r="3.5" fill="url(%23pawGrad)" stroke="%23d4a574" stroke-width="1"/><circle cx="14" cy="8" r="3.5" fill="url(%23pawGrad)" stroke="%23d4a574" stroke-width="1"/><circle cx="18" cy="16" r="4" fill="url(%23pawGrad)" stroke="%23d4a574" stroke-width="1"/><ellipse cx="12" cy="14" rx="5" ry="4" fill="url(%23pawGrad)" stroke="%23d4a574" stroke-width="1.5"/></g></svg>'), auto;
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22"><defs><radialGradient id="pawPadGrad" cx="50%" cy="60%" r="70%"><stop offset="0%" stop-color="%23fff"/><stop offset="30%" stop-color="%23ffd1dc"/><stop offset="70%" stop-color="%23ffb6c1"/><stop offset="100%" stop-color="%23ff91a4"/></radialGradient><radialGradient id="toePadGrad" cx="50%" cy="40%" r="60%"><stop offset="0%" stop-color="%23fff"/><stop offset="40%" stop-color="%23ffd1dc"/><stop offset="100%" stop-color="%23ffb6c1"/></radialGradient><filter id="fluffShadow"><feGaussianBlur in="SourceGraphic" stdDeviation="0.4"/><feDropShadow dx="0" dy="1" stdDeviation="1" flood-color="%23ff91a4" flood-opacity="0.3"/><feDropShadow dx="0" dy="0" stdDeviation="0.8" flood-color="%23fff" flood-opacity="0.5"/></filter><filter id="innerShadow"><feComponentTransfer in="SourceAlpha"><feFuncA type="table" tableValues="1 0"/></feComponentTransfer><feGaussianBlur stdDeviation="0.8"/><feOffset dx="0" dy="0.5"/><feFlood flood-color="%23ff91a4" flood-opacity="0.3"/><feComposite in2="SourceAlpha" operator="in"/><feComposite in2="SourceGraphic" operator="over"/></filter></defs><g filter="url(%23fluffShadow)"><ellipse cx="11" cy="16" rx="6" ry="4.5" fill="url(%23pawPadGrad)"/><ellipse cx="11" cy="16" rx="5" ry="3.5" fill="rgba(255,145,164,0.2)" filter="url(%23innerShadow)"/><circle cx="5" cy="8" r="3.5" fill="url(%23toePadGrad)"/><circle cx="9" cy="6" r="3" fill="url(%23toePadGrad)"/><circle cx="13" cy="6" r="3" fill="url(%23toePadGrad)"/><circle cx="17" cy="8" r="3.5" fill="url(%23toePadGrad)"/></g></svg>'), auto;
+}
+
+body.cat-cursor-clicking {
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 22 22"><defs><radialGradient id="pawPadGradClick" cx="50%" cy="60%" r="70%"><stop offset="0%" stop-color="%23ffe4e1"/><stop offset="30%" stop-color="%23ffb6c1"/><stop offset="70%" stop-color="%23ff91a4"/><stop offset="100%" stop-color="%23ff7b90"/></radialGradient><radialGradient id="toePadGradClick" cx="50%" cy="40%" r="60%"><stop offset="0%" stop-color="%23ffe4e1"/><stop offset="40%" stop-color="%23ffb6c1"/><stop offset="100%" stop-color="%23ff91a4"/></radialGradient><filter id="fluffShadowClick"><feGaussianBlur in="SourceGraphic" stdDeviation="0.3"/><feDropShadow dx="0" dy="1" stdDeviation="0.8" flood-color="%23ff7b90" flood-opacity="0.4"/><feDropShadow dx="0" dy="0" stdDeviation="0.6" flood-color="%23fff" flood-opacity="0.4"/></filter></defs><g filter="url(%23fluffShadowClick)"><ellipse cx="11" cy="16" rx="5.5" ry="4" fill="url(%23pawPadGradClick)"/><circle cx="5" cy="8" r="3" fill="url(%23toePadGradClick)"/><circle cx="9" cy="6" r="2.5" fill="url(%23toePadGradClick)"/><circle cx="13" cy="6" r="2.5" fill="url(%23toePadGradClick)"/><circle cx="17" cy="8" r="3" fill="url(%23toePadGradClick)"/></g></svg>'), auto;
 }
 
 a, button, .card-widget, .recent-post-item, .nav-links, #pagination, .article-title, .flink-icon, .tags a, .category-lists a {
-  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24"><defs><radialGradient id="pawGrad2" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="%23fff"/><stop offset="30%" stop-color="%23ffcdd2"/><stop offset="70%" stop-color="%23f5d7a8"/><stop offset="100%" stop-color="%23d4a574"/></radialGradient><filter id="fluff2"><feGaussianBlur in="SourceGraphic" stdDeviation="0.5"/><feDropShadow dx="0" dy="0" stdDeviation="2" flood-color="%23d4a574" flood-opacity="0.5"/></filter></defs><g filter="url(%23fluff2)"><circle cx="6" cy="16" r="4.5" fill="url(%23pawGrad2)" stroke="%23f5d7a8" stroke-width="1.2"/><circle cx="10" cy="8" r="4" fill="url(%23pawGrad2)" stroke="%23f5d7a8" stroke-width="1.2"/><circle cx="14" cy="8" r="4" fill="url(%23pawGrad2)" stroke="%23f5d7a8" stroke-width="1.2"/><circle cx="18" cy="16" r="4.5" fill="url(%23pawGrad2)" stroke="%23f5d7a8" stroke-width="1.2"/><ellipse cx="12" cy="14" rx="5.5" ry="4.5" fill="url(%23pawGrad2)" stroke="%23f5d7a8" stroke-width="1.5"/></g></svg>'), pointer;
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 22 22"><defs><radialGradient id="pawPadGradHover" cx="50%" cy="60%" r="70%"><stop offset="0%" stop-color="%23fff"/><stop offset="25%" stop-color="%23ffe4e1"/><stop offset="50%" stop-color="%23ffd1dc"/><stop offset="80%" stop-color="%23ffb6c1"/><stop offset="100%" stop-color="%23ff91a4"/></radialGradient><radialGradient id="toePadGradHover" cx="50%" cy="40%" r="60%"><stop offset="0%" stop-color="%23fff"/><stop offset="30%" stop-color="%23ffe4e1"/><stop offset="60%" stop-color="%23ffd1dc"/><stop offset="100%" stop-color="%23ffb6c1"/></radialGradient><filter id="fluffShadowHover"><feGaussianBlur in="SourceGraphic" stdDeviation="0.5"/><feDropShadow dx="0" dy="1" stdDeviation="1.2" flood-color="%23ff91a4" flood-opacity="0.3"/><feDropShadow dx="0" dy="0" stdDeviation="1.2" flood-color="%23fff" flood-opacity="0.6"/><feDropShadow dx="0" dy="0" stdDeviation="2" flood-color="%23ffd1dc" flood-opacity="0.3"/></filter></defs><g filter="url(%23fluffShadowHover)"><ellipse cx="11" cy="16" rx="6.5" ry="5" fill="url(%23pawPadGradHover)"/><circle cx="5" cy="8" r="3.8" fill="url(%23toePadGradHover)"/><circle cx="9" cy="6" r="3.2" fill="url(%23toePadGradHover)"/><circle cx="13" cy="6" r="3.2" fill="url(%23toePadGradHover)"/><circle cx="17" cy="8" r="3.8" fill="url(%23toePadGradHover)"/></g></svg>'), pointer;
 }
 
 input, textarea {
@@ -1250,4 +1291,658 @@ input, textarea {
 @keyframes trail-fade {
   0% { opacity: 0.6; }
   100% { opacity: 0; }
+}
+
+/* ========== 小猫风格-全局滚动条美化 ========== */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(50, 50, 50, 0.2);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #d4a574 0%, #c4956a 50%, #d4a574 100%);
+  border-radius: 4px;
+  position: relative;
+  box-shadow: 
+    0 0 4px rgba(212, 165, 116, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+  transition: width 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb::before,
+::-webkit-scrollbar-thumb::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 50% 50% 40% 40%;
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
+}
+
+::-webkit-scrollbar-thumb::before {
+  top: 2px;
+}
+
+::-webkit-scrollbar-thumb::after {
+  bottom: 2px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  width: 10px;
+  background: linear-gradient(180deg, #e5b88a 0%, #d4a574 50%, #e5b88a 100%);
+  box-shadow: 
+    0 0 6px rgba(212, 165, 116, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.15);
+}
+
+::-webkit-scrollbar-thumb:hover::before,
+::-webkit-scrollbar-thumb:hover::after {
+  background: rgba(255, 255, 255, 0.8);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #d4a574 rgba(50, 50, 50, 0.2);
+}
+
+/* ========== 小猫风格-顶部导航栏质感升级 ========== */
+#page-header {
+  backdrop-filter: blur(10px);
+  background: rgba(20, 20, 25, 0.6);
+  transition: all 0.3s ease;
+}
+
+#page-header.scroll-down {
+  backdrop-filter: blur(20px);
+  background: rgba(20, 20, 25, 0.9);
+}
+
+#nav a {
+  position: relative;
+  padding-left: 20px;
+  transition: color 0.2s ease;
+}
+
+#nav a::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%) translateX(-10px);
+  width: 10px;
+  height: 10px;
+  opacity: 0;
+  transition: all 0.2s ease;
+  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 10 10"><circle cx="2" cy="6" r="1.5" fill="%23d4a574"/><circle cx="4" cy="3" r="1.2" fill="%23d4a574"/><circle cx="6" cy="3" r="1.2" fill="%23d4a574"/><circle cx="8" cy="6" r="1.5" fill="%23d4a574"/><ellipse cx="5" cy="5" rx="2" ry="1.5" fill="%23d4a574"/></svg>') no-repeat center/contain;
+}
+
+#nav a:hover::before {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
+}
+
+#nav a::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #d4a574, #f5d7a8, #d4a574);
+  transition: all 0.2s ease;
+}
+
+#nav a:hover::after {
+  width: 80%;
+  left: 10%;
+}
+
+#nav .active {
+  color: #d4a574;
+}
+
+#nav .active::before {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
+}
+
+#toggle-menu {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7" fill="none" stroke="%23d4a574" stroke-width="2"/><circle cx="9" cy="10" r="1" fill="%23d4a574"/><circle cx="15" cy="10" r="1" fill="%23d4a574"/><path d="M10 14 Q12 16 14 14" fill="none" stroke="%23d4a574" stroke-width="1.5" stroke-linecap="round"/><path d="M6 9 L8 7" fill="none" stroke="%23d4a574" stroke-width="1.5"/><path d="M16 7 L18 9" fill="none" stroke="%23d4a574" stroke-width="1.5"/></svg>');
+  background-size: 24px 24px;
+}
+
+/* ========== 小猫风格-文章卡片悬浮与入场动画 ========== */
+.recent-post-item {
+  transition: all 0.3s ease;
+}
+
+.recent-post-item:hover {
+  transform: translateY(-8px);
+  box-shadow: 
+    0 12px 30px rgba(0, 0, 0, 0.3),
+    0 0 20px rgba(212, 165, 116, 0.15);
+}
+
+.recent-post-item:hover .cat-corner-badge {
+  opacity: 0.7;
+}
+
+.recent-post-item:hover img.post_bg {
+  transform: scale(1.05);
+}
+
+.post_bg {
+  transition: transform 0.5s ease;
+}
+
+.recent-post-item .article-title:hover {
+  color: #d4a574;
+}
+
+.recent-post-item .article-title::before {
+  content: '';
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-right: 6px;
+  opacity: 0;
+  transform: translateX(-8px);
+  transition: all 0.2s ease;
+  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12"><circle cx="2.5" cy="7" r="1.5" fill="%23d4a574"/><circle cx="5" cy="4" r="1.2" fill="%23d4a574"/><circle cx="7" cy="4" r="1.2" fill="%23d4a574"/><circle cx="9.5" cy="7" r="1.5" fill="%23d4a574"/><ellipse cx="6" cy="5.5" rx="2" ry="1.5" fill="%23d4a574"/></svg>') no-repeat center/contain;
+}
+
+.recent-post-item .article-title:hover::before {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.recent-post-item {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.recent-post-item.animate-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ========== 小猫风格-侧边栏卡片细节强化 ========== */
+.card-widget {
+  border: 1px solid rgba(212, 165, 116, 0.1);
+  transition: border-color 0.3s ease;
+}
+
+.card-widget:hover {
+  border-color: rgba(212, 165, 116, 0.4);
+}
+
+.card-widget .card-info a {
+  color: #d4a574;
+  font-weight: 600;
+}
+
+.card-widget .card-info span:first-child {
+  color: #d4a574;
+  font-weight: 600;
+}
+
+.card-widget .item-headline {
+  position: relative;
+  padding-left: 16px;
+  font-weight: 600;
+}
+
+.card-widget .item-headline::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 14px;
+  background: linear-gradient(180deg, #d4a574, #f5d7a8);
+  border-radius: 2px;
+}
+
+.card-widget .item-headline::after {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 8px;
+  height: 8px;
+  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 8 8"><circle cx="2" cy="5" r="1" fill="%23d4a574"/><circle cx="3.5" cy="2.5" r="0.8" fill="%23d4a574"/><circle cx="4.5" cy="2.5" r="0.8" fill="%23d4a574"/><circle cx="6" cy="5" r="1" fill="%23d4a574"/><ellipse cx="4" cy="4" rx="1.2" ry="1" fill="%23d4a574"/></svg>') no-repeat center/contain;
+}
+
+.flink-list-item {
+  transition: all 0.2s ease;
+}
+
+.flink-list-item:hover {
+  transform: translateX(4px);
+}
+
+.flink-list-item:hover .flink-icon {
+  position: relative;
+}
+
+.flink-list-item:hover .flink-icon::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 16px;
+  height: 12px;
+  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="12" viewBox="0 0 16 12"><path d="M4 2 L6 0 L8 2" fill="none" stroke="%23d4a574" stroke-width="1.5" stroke-linecap="round"/><path d="M10 2 L12 0 L14 2" fill="none" stroke="%23d4a574" stroke-width="1.5" stroke-linecap="round"/></svg>') no-repeat center/contain;
+}
+
+/* ========== 小猫风格-文章正文细节打磨 ========== */
+#article-container blockquote {
+  border-left: 3px solid transparent;
+  background: linear-gradient(90deg, rgba(212, 165, 116, 0.1), transparent);
+  position: relative;
+}
+
+#article-container blockquote::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: linear-gradient(180deg, #d4a574, #f5d7a8);
+  border-radius: 2px;
+}
+
+#article-container blockquote::after {
+  content: '';
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  width: 14px;
+  height: 14px;
+  opacity: 0.3;
+  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14"><circle cx="7" cy="7" r="5" fill="none" stroke="%23d4a574" stroke-width="1.5"/><circle cx="5" cy="6" r="0.8" fill="%23d4a574"/><circle cx="9" cy="6" r="0.8" fill="%23d4a574"/><path d="M6 9 Q7 10 8 9" fill="none" stroke="%23d4a574" stroke-width="1" stroke-linecap="round"/></svg>') no-repeat center/contain;
+}
+
+#article-container pre {
+  position: relative;
+}
+
+#article-container pre::after {
+  content: '';
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  width: 16px;
+  height: 16px;
+  opacity: 0.4;
+  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"><path d="M2 8 Q4 6 6 8 Q8 6 10 8 Q12 6 14 8" fill="none" stroke="%23d4a574" stroke-width="1.5" stroke-linecap="round"/><circle cx="3" cy="8" r="1" fill="%23d4a574"/><circle cx="6" cy="8" r="1" fill="%23d4a574"/><circle cx="10" cy="8" r="1" fill="%23d4a574"/><circle cx="13" cy="8" r="1" fill="%23d4a574"/></svg>') no-repeat center/contain;
+}
+
+#article-container table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+#article-container table th {
+  background: rgba(212, 165, 116, 0.1);
+  color: #d4a574;
+  font-weight: 600;
+}
+
+#article-container table td,
+#article-container table th {
+  border: 1px solid rgba(212, 165, 116, 0.2);
+  padding: 8px 12px;
+}
+
+#article-container table tr:hover {
+  background: rgba(212, 165, 116, 0.05);
+}
+
+#article-container a {
+  position: relative;
+  padding-left: 14px;
+}
+
+#article-container a::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%) translateX(-6px);
+  width: 8px;
+  height: 8px;
+  opacity: 0;
+  transition: all 0.2s ease;
+  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 8 8"><circle cx="2" cy="5" r="1" fill="%23d4a574"/><circle cx="3.5" cy="2.5" r="0.8" fill="%23d4a574"/><circle cx="4.5" cy="2.5" r="0.8" fill="%23d4a574"/><circle cx="6" cy="5" r="1" fill="%23d4a574"/><ellipse cx="4" cy="4" rx="1.2" ry="1" fill="%23d4a574"/></svg>') no-repeat center/contain;
+}
+
+#article-container a:hover::before {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
+}
+
+#article-container a::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 14px;
+  width: 0;
+  height: 1px;
+  background: #d4a574;
+  transition: width 0.2s ease;
+}
+
+#article-container a:hover::after {
+  width: calc(100% - 14px);
+}
+
+#article-container h2 .header-anchor,
+#article-container h3 .header-anchor {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+#article-container h2:hover .header-anchor,
+#article-container h3:hover .header-anchor {
+  opacity: 1;
+}
+
+/* ========== 小猫风格-目录模块交互优化 ========== */
+#sidebar #toc {
+  backdrop-filter: blur(10px);
+  background: rgba(20, 20, 25, 0.6);
+}
+
+#toc .toc-active {
+  color: #d4a574;
+  position: relative;
+}
+
+#toc .toc-active::before {
+  content: '';
+  position: absolute;
+  left: -12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 8px;
+  height: 8px;
+  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 8 8"><circle cx="2" cy="5" r="1" fill="%23d4a574"/><circle cx="3.5" cy="2.5" r="0.8" fill="%23d4a574"/><circle cx="4.5" cy="2.5" r="0.8" fill="%23d4a574"/><circle cx="6" cy="5" r="1" fill="%23d4a574"/><ellipse cx="4" cy="4" rx="1.2" ry="1" fill="%23d4a574"/></svg>') no-repeat center/contain;
+}
+
+#toc a:hover {
+  color: #d4a574;
+  transform: translateX(-4px);
+  transition: all 0.2s ease;
+}
+
+#toc .toc-child {
+  padding-left: 16px;
+}
+
+/* ========== 小猫风格-标签云与归档页优化 ========== */
+.tag-cloud a {
+  position: relative;
+  padding-left: 18px;
+  transition: all 0.2s ease;
+}
+
+.tag-cloud a::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%) translateX(-6px);
+  width: 8px;
+  height: 8px;
+  opacity: 0;
+  transition: all 0.2s ease;
+  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 8 8"><circle cx="2" cy="5" r="1" fill="%23d4a574"/><circle cx="3.5" cy="2.5" r="0.8" fill="%23d4a574"/><circle cx="4.5" cy="2.5" r="0.8" fill="%23d4a574"/><circle cx="6" cy="5" r="1" fill="%23d4a574"/><ellipse cx="4" cy="4" rx="1.2" ry="1" fill="%23d4a574"/></svg>') no-repeat center/contain;
+}
+
+.tag-cloud a:hover {
+  background: linear-gradient(135deg, rgba(212, 165, 116, 0.2), rgba(245, 215, 168, 0.1));
+  transform: scale(1.05);
+}
+
+.tag-cloud a:hover::before {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
+}
+
+.archive-page .timeline-line {
+  background: #d4a574;
+}
+
+.archive-page .timeline-item::before {
+  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12"><circle cx="3" cy="7" r="1.5" fill="%23d4a574"/><circle cx="5" cy="4" r="1.2" fill="%23d4a574"/><circle cx="7" cy="4" r="1.2" fill="%23d4a574"/><circle cx="9" cy="7" r="1.5" fill="%23d4a574"/><ellipse cx="6" cy="5.5" rx="1.5" ry="1.2" fill="%23d4a574"/></svg>') no-repeat center/contain;
+  border: none;
+}
+
+.archive-page .archive-list-item:hover {
+  transform: translateX(-4px);
+  transition: transform 0.2s ease;
+}
+
+/* ========== 小猫风格-返回顶部按钮与阅读进度 ========== */
+#go-up {
+  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><circle cx="20" cy="20" r="15" fill="none" stroke="%23d4a574" stroke-width="2" opacity="0.6"/><circle cx="16" cy="17" r="2" fill="%23d4a574" opacity="0.6"/><circle cx="24" cy="17" r="2" fill="%23d4a574" opacity="0.6"/><path d="M18 22 Q20 24 22 22" fill="none" stroke="%23d4a574" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/><path d="M12 16 L14 12" fill="none" stroke="%23d4a574" stroke-width="1.5" opacity="0.6"/><path d="M26 12 L28 16" fill="none" stroke="%23d4a574" stroke-width="1.5" opacity="0.6"/><path d="M20 8 L20 4" stroke="%23d4a574" stroke-width="2" stroke-linecap="round" opacity="0.6"/></svg>') no-repeat center/contain;
+  transition: all 0.3s ease;
+}
+
+#go-up:hover {
+  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><circle cx="20" cy="20" r="15" fill="%23d4a574"/><circle cx="16" cy="17" r="2" fill="%23333"/><circle cx="24" cy="17" r="2" fill="%23333"/><path d="M18 22 Q20 24 22 22" fill="none" stroke="%23333" stroke-width="1.5" stroke-linecap="round"/><path d="M12 16 L14 12" fill="none" stroke="%23333" stroke-width="1.5"/><path d="M26 12 L28 16" fill="none" stroke="%23333" stroke-width="1.5"/><path d="M20 8 L20 4" stroke="%23333" stroke-width="2" stroke-linecap="round"/></svg>') no-repeat center/contain;
+  animation: cat-jump 0.5s ease;
+}
+
+@keyframes cat-jump {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+#go-up::before {
+  content: '';
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  right: -3px;
+  bottom: -3px;
+  border-radius: 50%;
+  border: 3px solid rgba(212, 165, 116, 0.2);
+}
+
+#go-up::after {
+  content: '';
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  right: -3px;
+  bottom: -3px;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  border-top-color: #d4a574;
+  transform: rotate(calc(var(--progress-percent, 0%) * 3.6deg));
+  transition: transform 0.3s ease;
+}
+
+/* ========== 小猫风格-搜索弹窗美化 ========== */
+#search-mask {
+  backdrop-filter: blur(10px);
+  background: rgba(20, 20, 25, 0.8);
+}
+
+#search-dialog {
+  border: 1px solid rgba(212, 165, 116, 0.2);
+}
+
+#search-input {
+  border: 2px solid rgba(212, 165, 116, 0.3);
+  transition: border-color 0.2s ease;
+}
+
+#search-input:focus {
+  border-color: #d4a574;
+}
+
+#search-input::placeholder {
+  color: rgba(212, 165, 116, 0.5);
+}
+
+#search-dialog .search-icon {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><circle cx="11" cy="11" r="6" fill="none" stroke="%23d4a574" stroke-width="1.5"/><line x1="14" y1="14" x2="18" y2="18" stroke="%23d4a574" stroke-width="1.5"/><circle cx="4" cy="8" r="1.5" fill="%23d4a574"/><circle cx="2" cy="10" r="1.5" fill="%23d4a574"/></svg>') !important;
+}
+
+.search-result-list li:hover {
+  background: rgba(212, 165, 116, 0.1);
+}
+
+.search-result-list li::before {
+  content: '';
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 8px;
+  opacity: 0;
+  transform: translateX(-6px);
+  transition: all 0.2s ease;
+  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 10 10"><circle cx="2" cy="6" r="1.5" fill="%23d4a574"/><circle cx="4" cy="3" r="1.2" fill="%23d4a574"/><circle cx="6" cy="3" r="1.2" fill="%23d4a574"/><circle cx="8" cy="6" r="1.5" fill="%23d4a574"/><ellipse cx="5" cy="5" rx="2" ry="1.5" fill="%23d4a574"/></svg>') no-repeat center/contain;
+}
+
+.search-result-list li:hover::before {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* ========== 小猫风格-评论区细节适配 ========== */
+.vsubmit, .tk-submit {
+  background: linear-gradient(135deg, #d4a574, #f5d7a8) !important;
+  border: none !important;
+  border-radius: 20px !important;
+  color: #333 !important;
+  font-weight: 600 !important;
+  padding: 8px 20px !important;
+  transition: all 0.2s ease !important;
+}
+
+.vsubmit:hover, .tk-submit:hover {
+  transform: scale(0.95);
+  box-shadow: 0 4px 12px rgba(212, 165, 116, 0.4);
+}
+
+.comment-content::before {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 4px;
+  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 8 8"><circle cx="2" cy="5" r="1" fill="%23d4a574"/><circle cx="3.5" cy="2.5" r="0.8" fill="%23d4a574"/><circle cx="4.5" cy="2.5" r="0.8" fill="%23d4a574"/><circle cx="6" cy="5" r="1" fill="%23d4a574"/><ellipse cx="4" cy="4" rx="1.2" ry="1" fill="%23d4a574"/></svg>') no-repeat center/contain;
+}
+
+.vuser, .tk-nick {
+  position: relative;
+}
+
+.vuser:hover::before, .tk-nick:hover::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 14px;
+  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="14" viewBox="0 0 20 14"><path d="M5 2 L7 0 L9 2" fill="none" stroke="%23d4a574" stroke-width="1.5" stroke-linecap="round"/><path d="M11 2 L13 0 L15 2" fill="none" stroke="%23d4a574" stroke-width="1.5" stroke-linecap="round"/></svg>') no-repeat center/contain;
+}
+
+/* ========== 小猫风格-页脚氛围点缀 ========== */
+footer {
+  position: relative;
+}
+
+footer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(212, 165, 116, 0.3), rgba(212, 165, 116, 0.5), rgba(212, 165, 116, 0.3), transparent);
+}
+
+footer .copyright {
+  position: relative;
+  padding: 0 20px;
+}
+
+footer .copyright::before,
+footer .copyright::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 12px;
+  height: 12px;
+  opacity: 0.3;
+  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12"><circle cx="3" cy="7" r="1.5" fill="%23d4a574"/><circle cx="5" cy="4" r="1.2" fill="%23d4a574"/><circle cx="7" cy="4" r="1.2" fill="%23d4a574"/><circle cx="9" cy="7" r="1.5" fill="%23d4a574"/><ellipse cx="6" cy="5.5" rx="1.5" ry="1.2" fill="%23d4a574"/></svg>') no-repeat center/contain;
+}
+
+footer .copyright::before {
+  left: 0;
+}
+
+footer .copyright::after {
+  right: 0;
+}
+
+footer::after {
+  content: '';
+  position: absolute;
+  bottom: 10px;
+  left: 0;
+  right: 0;
+  height: 20px;
+  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="20" viewBox="0 0 200 20"><circle cx="10" cy="14" r="2" fill="%23d4a574" opacity="0.15"/><circle cx="30" cy="16" r="1.5" fill="%23d4a574" opacity="0.12"/><circle cx="55" cy="13" r="2" fill="%23d4a574" opacity="0.15"/><circle cx="80" cy="17" r="1.5" fill="%23d4a574" opacity="0.12"/><circle cx="105" cy="14" r="2" fill="%23d4a574" opacity="0.15"/><circle cx="130" cy="16" r="1.5" fill="%23d4a574" opacity="0.12"/><circle cx="155" cy="13" r="2" fill="%23d4a574" opacity="0.15"/><circle cx="180" cy="17" r="1.5" fill="%23d4a574" opacity="0.12"/><circle cx="195" cy="14" r="2" fill="%23d4a574" opacity="0.15"/></svg>') repeat-x center/contain;
+}
+
+/* ========== 小猫风格-全局文本选中样式 ========== */
+::selection {
+  background: rgba(255, 182, 193, 0.3);
+  color: #3d3d3d;
+}
+
+#article-container pre ::selection {
+  background: rgba(212, 165, 116, 0.3);
+  color: #f5d7a8;
+}
+
+/* ========== 小猫风格-图片加载与占位优化 ========== */
+#article-container img {
+  transition: all 0.3s ease;
+}
+
+#article-container img:hover {
+  transform: scale(1.03);
+  box-shadow: 0 0 20px rgba(212, 165, 116, 0.2);
+}
+
+#article-container img::after {
+  content: '';
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: rgba(20, 20, 25, 0.8) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 60 60"><circle cx="30" cy="30" r="20" fill="none" stroke="%23d4a574" stroke-width="2"/><circle cx="24" cy="26" r="3" fill="%23d4a574"/><circle cx="36" cy="26" r="3" fill="%23d4a574"/><path d="M26 34 Q30 38 34 34" fill="none" stroke="%23d4a574" stroke-width="2" stroke-linecap="round"/><path d="M30 10 L30 5" stroke="%23d4a574" stroke-width="2"/><circle cx="30" cy="3" r="2" fill="%23d4a574"/><path d="M18 22 L20 18" fill="none" stroke="%23d4a574" stroke-width="1.5"/><path d="M40 18 L42 22" fill="none" stroke="%23d4a574" stroke-width="1.5"/></svg>') no-repeat center;
 }

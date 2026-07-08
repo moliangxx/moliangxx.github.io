@@ -156,7 +156,74 @@ window.loadMeting = window.loadMeting || function () {};
     document.addEventListener('touchstart', handleClick, { passive: true });
   }
 
-  /* ========== 小猫风格-头像猫耳猫尾装饰注入 ========== */
+  /* ========== 小猫风格-文章卡片交错入场动画 ========== */
+  function initCardAnimation() {
+    const cards = document.querySelectorAll('.recent-post-item');
+    if (!cards.length) return;
+
+    const observer = new IntersectionObserver((entries) => {
+      let delay = 0;
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => {
+            entry.target.classList.add('animate-in');
+          }, delay);
+          delay += 60;
+          observer.unobserve(entry.target);
+        }
+      });
+    }, {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    });
+
+    cards.forEach((card) => {
+      observer.observe(card);
+    });
+  }
+
+  /* ========== 小猫风格-阅读进度条 ========== */
+  function initReadingProgress() {
+    const goUpBtn = document.getElementById('go-up');
+    if (!goUpBtn) return;
+
+    let rafId = null;
+
+    function updateProgress() {
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+
+      const circumference = 2 * Math.PI * 14;
+      const offset = circumference - (progress / 100) * circumference;
+
+      goUpBtn.style.setProperty('--progress-offset', `${offset}px`);
+      goUpBtn.style.setProperty('--progress-percent', `${progress}%`);
+
+      rafId = requestAnimationFrame(updateProgress);
+    }
+
+    updateProgress();
+
+    window.addEventListener('scroll', () => {
+      if (!rafId) {
+        rafId = requestAnimationFrame(updateProgress);
+      }
+    }, { passive: true });
+  }
+
+  /* ========== 小猫风格-图片加载失败占位 ========== */
+  function initImageErrorHandling() {
+    const images = document.querySelectorAll('#article-container img');
+
+    images.forEach((img) => {
+      img.addEventListener('error', () => {
+        img.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120"><rect width="120" height="120" fill="rgba(20,20,25,0.8)" rx="8"/><circle cx="60" cy="55" r="30" fill="none" stroke="%23d4a574" stroke-width="2"/><circle cx="52" cy="50" r="4" fill="%23d4a574"/><circle cx="68" cy="50" r="4" fill="%23d4a574"/><path d="M54 62 Q60 70 66 62" fill="none" stroke="%23d4a574" stroke-width="2" stroke-linecap="round"/><path d="M60 25 L60 15" stroke="%23d4a574" stroke-width="2"/><circle cx="60" cy="12" r="3" fill="%23d4a574"/><path d="M38 42 L42 36" fill="none" stroke="%23d4a574" stroke-width="1.5"/><path d="M78 36 L82 42" fill="none" stroke="%23d4a574" stroke-width="1.5"/><text x="60" y="95" text-anchor="middle" fill="%23d4a574" font-size="12" font-family="sans-serif">图片加载失败啦</text></svg>';
+      });
+    });
+  }
+
+  /* ========== 小猫风格-头像猫耳猫尾装饰注入（毛茸茸版） ========== */
   function initCatAvatarDecorations() {
     const avatarImg = document.querySelector('.card-widget .avatar-img');
     if (!avatarImg) return;
@@ -165,17 +232,25 @@ window.loadMeting = window.loadMeting || function () {};
       <div class="cat-ears">
         <div class="cat-ear cat-ear-left">
           <div class="cat-ear-inner"></div>
+          <div class="cat-ear-fur"></div>
         </div>
         <div class="cat-ear cat-ear-right">
           <div class="cat-ear-inner"></div>
+          <div class="cat-ear-fur"></div>
         </div>
       </div>
     `;
 
     const tailHtml = `
       <div class="cat-tail">
-        <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-          <path class="cat-tail-path" d="M5 35 Q15 20 25 25 Q30 28 35 15" />
+        <svg viewBox="0 0 50 50" xmlns="http://www.w3.org/2000/svg">
+          <g class="cat-tail-group">
+            <path class="cat-tail-path" d="M8 42 Q18 28 28 32 Q35 36 42 22" />
+            <path class="cat-tail-inner" d="M10 40 Q20 28 30 32 Q36 35 40 24" />
+            <circle class="cat-tail-fluff" cx="10" cy="40" r="3" />
+            <circle class="cat-tail-fluff" cx="42" cy="22" r="4" />
+            <circle class="cat-tail-fluff" cx="28" cy="32" r="2" />
+          </g>
         </svg>
       </div>
     `;
@@ -457,10 +532,11 @@ window.loadMeting = window.loadMeting || function () {};
 
   /* ========== 开关配置：点击特效切换 ========== */
   /* 
-     使用方案A（小老鼠逃跑）：设置 USE_HEART_EFFECT = false，取消 initMouseClickEffect 注释
-     使用方案C（心形特效）：设置 USE_HEART_EFFECT = true（当前启用）
+     使用方案A（小老鼠逃跑）：设置 USE_STAR_EFFECT = false，取消 initMouseClickEffect 注释
+     使用方案C（心形特效）：设置 USE_STAR_EFFECT = false，取消 initHeartClickEffect 注释
+     使用方案B（星星碎裂）：设置 USE_STAR_EFFECT = true（当前启用）
   */
-  const USE_HEART_EFFECT = true;
+  const USE_STAR_EFFECT = true;
 
   function initPageAnimation() {
     if (prefersReduced) return;
@@ -589,10 +665,10 @@ window.loadMeting = window.loadMeting || function () {};
   }, { passive: true });
 
   document.addEventListener('DOMContentLoaded', () => {
-    if (USE_HEART_EFFECT) {
-      initHeartClickEffect();
+    if (USE_STAR_EFFECT) {
+      initStarClickEffect();
     } else {
-      initMouseClickEffect();
+      initHeartClickEffect();
     }
     initCatAvatarDecorations();
     initPageAnimation();
@@ -601,6 +677,19 @@ window.loadMeting = window.loadMeting || function () {};
     updateProgress();
     setupPJAXAnimation();
     setupLive2DPJAX();
+    initCardAnimation();
+    initReadingProgress();
+    initImageErrorHandling();
+
+    document.addEventListener('mousedown', () => {
+      document.body.classList.add('cat-cursor-clicking');
+    });
+    document.addEventListener('mouseup', () => {
+      document.body.classList.remove('cat-cursor-clicking');
+    });
+    document.addEventListener('mouseleave', () => {
+      document.body.classList.remove('cat-cursor-clicking');
+    });
   });
 
   document.addEventListener('pjax:complete', () => {
@@ -608,6 +697,9 @@ window.loadMeting = window.loadMeting || function () {};
     updateHeader();
     updateProgress();
     initCatAvatarDecorations();
+    initCardAnimation();
+    initReadingProgress();
+    initImageErrorHandling();
   });
 
   if (prefersReduced) {
