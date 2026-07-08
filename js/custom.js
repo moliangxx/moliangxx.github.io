@@ -183,7 +183,7 @@ window.loadMeting = window.loadMeting || function () {};
     avatarImg.innerHTML = avatarImg.innerHTML + earsHtml + tailHtml;
   }
 
-  /* ========== 小猫风格-小老鼠逃跑点击特效（方案A） ========== */
+  /* ========== 小猫风格-小老鼠逃跑点击特效（方案A - 保留备用） ========== */
   function initMouseClickEffect() {
     if (prefersReduced) return;
 
@@ -313,12 +313,154 @@ window.loadMeting = window.loadMeting || function () {};
     document.addEventListener('touchstart', handleClick, { passive: true });
   }
 
+  /* ========== 心形点击特效（方案C - 当前启用） ========== */
+  function initHeartClickEffect() {
+    if (prefersReduced) return;
+
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.style.position = 'fixed';
+    canvas.style.top = '0';
+    canvas.style.left = '0';
+    canvas.style.width = '100%';
+    canvas.style.height = '100%';
+    canvas.style.pointerEvents = 'none';
+    canvas.style.zIndex = '9999';
+    document.body.appendChild(canvas);
+
+    let hearts = [];
+    let particles = [];
+    let animationId = null;
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    function drawHeart(ctx, x, y, size, opacity) {
+      ctx.save();
+      ctx.translate(x, y);
+      
+      const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, size);
+      gradient.addColorStop(0, `rgba(255, 255, 255, ${opacity})`);
+      gradient.addColorStop(0.4, `rgba(255, 182, 193, ${opacity})`);
+      gradient.addColorStop(1, `rgba(212, 165, 116, ${opacity})`);
+      
+      ctx.fillStyle = gradient;
+      ctx.beginPath();
+      ctx.moveTo(0, size * 0.3);
+      ctx.bezierCurveTo(size * 0.8, -size * 0.5, size * 1.2, size * 0.1, 0, size * 1.2);
+      ctx.bezierCurveTo(-size * 1.2, size * 0.1, -size * 0.8, -size * 0.5, 0, size * 0.3);
+      ctx.fill();
+      
+      ctx.restore();
+    }
+
+    function drawParticle(ctx, x, y, size, opacity, color) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.fillStyle = color;
+      ctx.globalAlpha = opacity;
+      ctx.beginPath();
+      ctx.arc(0, 0, size, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function createHeart(x, y) {
+      hearts.push({
+        x: x,
+        y: y,
+        size: 15 + Math.random() * 10,
+        startTime: performance.now(),
+        duration: 800 + Math.random() * 400,
+        velocityY: -2 - Math.random() * 3,
+        velocityX: (Math.random() - 0.5) * 2,
+        rotation: (Math.random() - 0.5) * 0.5
+      });
+
+      for (let i = 0; i < 6; i++) {
+        const angle = (Math.PI * 2 / 6) * i + Math.random() * 0.3;
+        const speed = 2 + Math.random() * 3;
+        particles.push({
+          x: x,
+          y: y,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          size: 2 + Math.random() * 3,
+          startTime: performance.now(),
+          duration: 600 + Math.random() * 200,
+          color: Math.random() > 0.5 ? '#ffb6c1' : '#f5d7a8'
+        });
+      }
+    }
+
+    function animate() {
+      const now = performance.now();
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      hearts = hearts.filter(heart => {
+        const elapsed = now - heart.startTime;
+        const progress = Math.min(elapsed / heart.duration, 1);
+        
+        heart.x += heart.velocityX;
+        heart.y += heart.velocityY;
+        heart.velocityY += 0.05;
+
+        const opacity = 1 - progress;
+        const scale = 0.8 + progress * 0.4;
+
+        drawHeart(ctx, heart.x, heart.y, heart.size * scale, opacity);
+
+        return progress < 1;
+      });
+
+      particles = particles.filter(particle => {
+        const elapsed = now - particle.startTime;
+        const progress = Math.min(elapsed / particle.duration, 1);
+        
+        particle.x += particle.vx;
+        particle.y += particle.vy;
+        particle.vy += 0.03;
+
+        const opacity = 1 - progress;
+
+        drawParticle(ctx, particle.x, particle.y, particle.size * (1 - progress * 0.5), opacity, particle.color);
+
+        return progress < 1;
+      });
+
+      if (hearts.length > 0 || particles.length > 0) {
+        animationId = requestAnimationFrame(animate);
+      } else {
+        animationId = null;
+      }
+    }
+
+    function handleClick(e) {
+      const x = e.clientX || e.touches?.[0]?.clientX || 0;
+      const y = e.clientY || e.touches?.[0]?.clientY || 0;
+
+      if (e.target.closest('input') || e.target.closest('textarea')) return;
+
+      createHeart(x, y);
+      if (!animationId) {
+        animate();
+      }
+    }
+
+    document.addEventListener('click', handleClick);
+    document.addEventListener('touchstart', handleClick, { passive: true });
+  }
+
   /* ========== 开关配置：点击特效切换 ========== */
   /* 
-     使用方案A（小老鼠逃跑）：取消下方注释，注释 initStarClickEffect 调用
-     使用方案B（星星碎裂）：保持现有 initStarClickEffect 调用
+     使用方案A（小老鼠逃跑）：设置 USE_HEART_EFFECT = false，取消 initMouseClickEffect 注释
+     使用方案C（心形特效）：设置 USE_HEART_EFFECT = true（当前启用）
   */
-  const USE_MOUSE_CLICK_EFFECT = true;
+  const USE_HEART_EFFECT = true;
 
   function initPageAnimation() {
     if (prefersReduced) return;
@@ -447,10 +589,10 @@ window.loadMeting = window.loadMeting || function () {};
   }, { passive: true });
 
   document.addEventListener('DOMContentLoaded', () => {
-    if (USE_MOUSE_CLICK_EFFECT) {
-      initMouseClickEffect();
+    if (USE_HEART_EFFECT) {
+      initHeartClickEffect();
     } else {
-      initStarClickEffect();
+      initMouseClickEffect();
     }
     initCatAvatarDecorations();
     initPageAnimation();
@@ -562,7 +704,7 @@ window.loadMeting = window.loadMeting || function () {};
 
     const CURTAIN_DURATION = 350;
     const LOADER_FADE_DURATION = 200;
-    const STAY_DURATION = 200;
+    const STAY_DURATION = 400;
     const TIMEOUT_MAX = 8000;
     let isTransitioning = false;
     let timeoutIds = [];
@@ -596,34 +738,41 @@ window.loadMeting = window.loadMeting || function () {};
       loader.id = 'stage-loader';
       loader.innerHTML = `
         <div class="stage-loader-icon">
-          <svg viewBox="0 0 100 50" xmlns="http://www.w3.org/2000/svg">
-            <g class="cat-chase-mouse" transform="translate(25, 20)">
-              <circle cx="0" cy="0" r="6" fill="none" stroke="#d4a574" stroke-width="1.5"/>
-              <line x1="-3" y1="-5" x2="-2" y2="-7" stroke="#d4a574" stroke-width="1.5"/>
-              <line x1="3" y1="-5" x2="2" y2="-7" stroke="#d4a574" stroke-width="1.5"/>
-              <circle cx="-2" cy="-1" r="1.5" fill="#d4a574"/>
-              <circle cx="2" cy="-1" r="1.5" fill="#d4a574"/>
-              <line x1="-5" y1="1" x2="-8" y2="1.5" stroke="#d4a574" stroke-width="1"/>
-              <line x1="5" y1="1" x2="8" y2="1.5" stroke="#d4a574" stroke-width="1"/>
-              <path d="M0 5 Q3 7 4 4" fill="none" stroke="#d4a574" stroke-width="1.5" stroke-linecap="round"/>
-            </g>
-            <g class="cat-chase-cat" transform="translate(60, 20)">
-              <ellipse cx="0" cy="0" rx="8" ry="7" fill="none" stroke="#d4a574" stroke-width="1.5"/>
-              <line x1="-5" y1="-6" x2="-3" y2="-10" stroke="#d4a574" stroke-width="1.5"/>
-              <line x1="5" y1="-6" x2="3" y2="-10" stroke="#d4a574" stroke-width="1.5"/>
-              <circle cx="-3" cy="-1" r="2" fill="#d4a574"/>
-              <circle cx="3" cy="-1" r="2" fill="#d4a574"/>
+          <svg viewBox="0 0 120 55" xmlns="http://www.w3.org/2000/svg">
+            <g class="cat-chase-mouse" transform="translate(30, 25)">
+              <ellipse cx="0" cy="0" rx="8" ry="7" fill="#f5d7a8" stroke="#d4a574" stroke-width="1.5"/>
+              <ellipse cx="-4" cy="-5" rx="3" ry="4" fill="#ffb6c1" stroke="#d4a574" stroke-width="1"/>
+              <ellipse cx="4" cy="-5" rx="3" ry="4" fill="#ffb6c1" stroke="#d4a574" stroke-width="1"/>
+              <circle cx="-3" cy="-1" r="2" fill="#333"/>
+              <circle cx="3" cy="-1" r="2" fill="#333"/>
               <circle cx="-2.5" cy="-1.5" r="0.8" fill="#fff"/>
               <circle cx="3.5" cy="-1.5" r="0.8" fill="#fff"/>
-              <path d="M-2 3 Q0 5 2 3" fill="none" stroke="#d4a574" stroke-width="1.5" stroke-linecap="round"/>
-              <line x1="-6" y1="3" x2="-9" y2="4" stroke="#d4a574" stroke-width="1"/>
-              <line x1="6" y1="3" x2="9" y2="4" stroke="#d4a574" stroke-width="1"/>
-              <path d="M-5 6 Q-8 8 -6 10" fill="none" stroke="#d4a574" stroke-width="1.5" stroke-linecap="round"/>
-              <path d="M5 6 Q8 8 6 10" fill="none" stroke="#d4a574" stroke-width="1.5" stroke-linecap="round"/>
+              <circle cx="0" cy="2" r="1.5" fill="#ffb6c1"/>
+              <line x1="-6" y1="2" x2="-10" y2="1" stroke="#d4a574" stroke-width="1"/>
+              <line x1="6" y1="2" x2="10" y2="1" stroke="#d4a574" stroke-width="1"/>
+              <path class="mouse-tail" d="M0 6 Q5 12 8 18 Q5 14 0 10" fill="none" stroke="#d4a574" stroke-width="1.5" stroke-linecap="round"/>
             </g>
-            <circle class="cat-chase-trail" cx="42" cy="20" r="2" fill="rgba(212,165,116,0.4)"/>
-            <circle class="cat-chase-trail" cx="45" cy="22" r="1.5" fill="rgba(212,165,116,0.3)"/>
-            <circle class="cat-chase-trail" cx="48" cy="18" r="1" fill="rgba(212,165,116,0.2)"/>
+            <g class="cat-chase-cat" transform="translate(75, 25)">
+              <ellipse cx="0" cy="0" rx="10" ry="9" fill="#f5d7a8" stroke="#d4a574" stroke-width="1.5"/>
+              <ellipse cx="-5" cy="-7" rx="4" ry="5" fill="#ffb6c1" stroke="#d4a574" stroke-width="1"/>
+              <ellipse cx="5" cy="-7" rx="4" ry="5" fill="#ffb6c1" stroke="#d4a574" stroke-width="1"/>
+              <circle cx="-4" cy="-1" r="3" fill="#333"/>
+              <circle cx="4" cy="-1" r="3" fill="#333"/>
+              <circle cx="-3.5" cy="-1.8" r="1" fill="#fff"/>
+              <circle cx="4.5" cy="-1.8" r="1" fill="#fff"/>
+              <circle cx="0" cy="2" r="2" fill="#ffb6c1"/>
+              <path d="M-2 4 Q0 6 2 4" fill="none" stroke="#333" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="-7" y1="1" x2="-12" y2="0" stroke="#d4a574" stroke-width="1"/>
+              <line x1="-7" y1="3" x2="-12" y2="3" stroke="#d4a574" stroke-width="1"/>
+              <line x1="7" y1="1" x2="12" y2="0" stroke="#d4a574" stroke-width="1"/>
+              <line x1="7" y1="3" x2="12" y2="3" stroke="#d4a574" stroke-width="1"/>
+              <path class="cat-paw-left" d="M-7 6 Q-9 8 -8 10" fill="none" stroke="#d4a574" stroke-width="1.5" stroke-linecap="round"/>
+              <path class="cat-paw-right" d="M7 6 Q9 8 8 10" fill="none" stroke="#d4a574" stroke-width="1.5" stroke-linecap="round"/>
+              <path class="cat-tail" d="M3 6 Q10 10 8 18 Q6 14 3 12" fill="none" stroke="#d4a574" stroke-width="1.5" stroke-linecap="round"/>
+            </g>
+            <circle class="cat-chase-trail trail-1" cx="50" cy="28" r="2" fill="rgba(212,165,116,0.5)"/>
+            <circle class="cat-chase-trail trail-2" cx="55" cy="24" r="1.5" fill="rgba(212,165,116,0.35)"/>
+            <circle class="cat-chase-trail trail-3" cx="60" cy="27" r="1" fill="rgba(212,165,116,0.2)"/>
           </svg>
         </div>
         <div class="stage-loader-text" id="stage-loading-text">

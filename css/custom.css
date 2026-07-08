@@ -252,7 +252,13 @@ i:hover {
 .card-widget .avatar-img {
   position: relative;
   border-radius: 50%;
+  overflow: visible;
+}
+
+.card-widget .avatar-img img {
+  border-radius: 50%;
   overflow: hidden;
+  display: block;
 }
 
 .card-widget .avatar-img::before {
@@ -407,7 +413,7 @@ body.reimu-transitioning #aside_content {
   left: 0;
   width: 50%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.35);
+  background: #000;
   opacity: 0;
   visibility: hidden;
   transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.35s ease;
@@ -485,13 +491,122 @@ body.reimu-transitioning #aside_content {
 }
 
 .stage-loader-icon {
-  width: 72px;
-  height: 72px;
+  width: 80px;
+  height: 45px;
 }
 
 .stage-loader-icon svg {
   width: 100%;
   height: 100%;
+}
+
+.cat-chase-mouse {
+  animation: mouse-run 1.2s linear infinite;
+}
+
+.cat-chase-cat {
+  animation: cat-chase-move 1.2s linear infinite;
+}
+
+.cat-chase-trail {
+  animation: trail-fade 1.2s ease-in-out infinite;
+}
+
+.trail-1 { animation-delay: 0s; }
+.trail-2 { animation-delay: 0.3s; }
+.trail-3 { animation-delay: 0.6s; }
+
+.mouse-tail {
+  animation: mouse-tail-wag 0.3s ease-in-out infinite;
+}
+
+.cat-paw-left {
+  animation: cat-paw-left-move 0.3s ease-in-out infinite;
+}
+
+.cat-paw-right {
+  animation: cat-paw-right-move 0.3s ease-in-out infinite;
+}
+
+.cat-tail {
+  animation: cat-tail-swing 0.4s ease-in-out infinite;
+}
+
+@keyframes mouse-run {
+  0%, 100% {
+    transform: translateX(0) translateY(0) rotate(0deg);
+  }
+  25% {
+    transform: translateX(3px) translateY(-2px) rotate(5deg);
+  }
+  50% {
+    transform: translateX(5px) translateY(1px) rotate(0deg);
+  }
+  75% {
+    transform: translateX(3px) translateY(-1px) rotate(-5deg);
+  }
+}
+
+@keyframes cat-chase-move {
+  0%, 100% {
+    transform: translateX(0) translateY(0) rotate(0deg);
+  }
+  25% {
+    transform: translateX(2px) translateY(1px) rotate(-3deg);
+  }
+  50% {
+    transform: translateX(4px) translateY(-1px) rotate(0deg);
+  }
+  75% {
+    transform: translateX(2px) translateY(0px) rotate(3deg);
+  }
+}
+
+@keyframes trail-fade {
+  0%, 100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.2;
+    transform: scale(0.8);
+  }
+}
+
+@keyframes mouse-tail-wag {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(15deg);
+  }
+}
+
+@keyframes cat-paw-left-move {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
+@keyframes cat-paw-right-move {
+  0%, 100% {
+    transform: translateY(-2px);
+  }
+  50% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes cat-tail-swing {
+  0%, 100% {
+    transform: rotate(-10deg);
+  }
+  50% {
+    transform: rotate(10deg);
+  }
 }
 
 .stage-loader-text {
@@ -986,11 +1101,11 @@ body.reimu-transitioning #aside_content {
 
 /* ========== 小猫风格-自定义猫爪光标 ========== */
 body {
-  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><path fill="none" stroke="%23d4a574" stroke-width="1.5" d="M6 16c-1.5 0-3-1-3-2.5S4.5 10 6 10s3 1 3 2.5S7.5 16 6 16zm4-6c-1.5 0-3-1-3-2.5S8.5 5 10 5s3 1 3 2.5S11.5 10 10 10zm4 0c-1.5 0-3-1-3-2.5S12.5 5 14 5s3 1 3 2.5S15.5 10 14 10zm4 6c-1.5 0-3-1-3-2.5S16.5 10 18 10s3 1 3 2.5S19.5 16 18 16z"/></svg>'), auto;
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><defs><radialGradient id="pawGrad" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="%23fff"/><stop offset="40%" stop-color="%23ffb6c1"/><stop offset="100%" stop-color="%23d4a574"/></radialGradient><filter id="fluff"><feGaussianBlur in="SourceGraphic" stdDeviation="0.5"/><feDropShadow dx="0" dy="0" stdDeviation="1.5" flood-color="%23d4a574" flood-opacity="0.4"/></filter></defs><g filter="url(%23fluff)"><circle cx="6" cy="16" r="4" fill="url(%23pawGrad)" stroke="%23d4a574" stroke-width="1"/><circle cx="10" cy="8" r="3.5" fill="url(%23pawGrad)" stroke="%23d4a574" stroke-width="1"/><circle cx="14" cy="8" r="3.5" fill="url(%23pawGrad)" stroke="%23d4a574" stroke-width="1"/><circle cx="18" cy="16" r="4" fill="url(%23pawGrad)" stroke="%23d4a574" stroke-width="1"/><ellipse cx="12" cy="14" rx="5" ry="4" fill="url(%23pawGrad)" stroke="%23d4a574" stroke-width="1.5"/></g></svg>'), auto;
 }
 
 a, button, .card-widget, .recent-post-item, .nav-links, #pagination, .article-title, .flink-icon, .tags a, .category-lists a {
-  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"><path fill="none" stroke="%23f5d7a8" stroke-width="1.5" stroke-opacity="0.9" d="M6 16c-1.5 0-3-1-3-2.5S4.5 10 6 10s3 1 3 2.5S7.5 16 6 16zm4-6c-1.5 0-3-1-3-2.5S8.5 5 10 5s3 1 3 2.5S11.5 10 10 10zm4 0c-1.5 0-3-1-3-2.5S12.5 5 14 5s3 1 3 2.5S15.5 10 14 10zm4 6c-1.5 0-3-1-3-2.5S16.5 10 18 10s3 1 3 2.5S19.5 16 18 16z"/></svg>'), pointer;
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24"><defs><radialGradient id="pawGrad2" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="%23fff"/><stop offset="30%" stop-color="%23ffcdd2"/><stop offset="70%" stop-color="%23f5d7a8"/><stop offset="100%" stop-color="%23d4a574"/></radialGradient><filter id="fluff2"><feGaussianBlur in="SourceGraphic" stdDeviation="0.5"/><feDropShadow dx="0" dy="0" stdDeviation="2" flood-color="%23d4a574" flood-opacity="0.5"/></filter></defs><g filter="url(%23fluff2)"><circle cx="6" cy="16" r="4.5" fill="url(%23pawGrad2)" stroke="%23f5d7a8" stroke-width="1.2"/><circle cx="10" cy="8" r="4" fill="url(%23pawGrad2)" stroke="%23f5d7a8" stroke-width="1.2"/><circle cx="14" cy="8" r="4" fill="url(%23pawGrad2)" stroke="%23f5d7a8" stroke-width="1.2"/><circle cx="18" cy="16" r="4.5" fill="url(%23pawGrad2)" stroke="%23f5d7a8" stroke-width="1.2"/><ellipse cx="12" cy="14" rx="5.5" ry="4.5" fill="url(%23pawGrad2)" stroke="%23f5d7a8" stroke-width="1.5"/></g></svg>'), pointer;
 }
 
 input, textarea {
