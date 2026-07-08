@@ -386,15 +386,16 @@ window.loadMeting = window.loadMeting || function () {};
 
   initReimuTransition();
 
-  /* ========== 舞台幕布转场控制逻辑 ========== */
+  /* ========== 舞台幕布转场控制逻辑（深度优化版） ========== */
   function initStageCurtainTransition() {
     if (prefersReduced) return;
 
     const CURTAIN_DURATION = 400;
     const RUNNER_FADE_DURATION = 200;
-    const CONTENT_DELAY = 100;
+    const STAY_DURATION = 250;
     let isTransitioning = false;
     let timeoutIds = [];
+    let pjaxCompleted = false;
 
     function clearAllTimeouts() {
       timeoutIds.forEach(id => clearTimeout(id));
@@ -424,20 +425,31 @@ window.loadMeting = window.loadMeting || function () {};
       runner.innerHTML = `
         <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
           <g class="stage-runner-body">
-            <circle cx="50" cy="28" r="12" fill="#d4a574"/>
-            <ellipse cx="50" cy="48" rx="10" ry="14" fill="#f5d7a8"/>
-            <line x1="50" y1="62" x2="50" y2="70" stroke="#f5d7a8" stroke-width="3" stroke-linecap="round"/>
-            <g class="stage-runner-arm-left" transform="translate(40, 50)">
-              <path d="M0 0 Q-10 8 -15 18" stroke="#d4a574" stroke-width="4" fill="none" stroke-linecap="round"/>
+            <g class="stage-runner-head">
+              <circle cx="50" cy="25" r="14" fill="#d4a574"/>
+              <circle cx="44" cy="22" r="2" fill="#3d3d3d"/>
+              <circle cx="56" cy="22" r="2" fill="#3d3d3d"/>
+              <path d="M46 28 Q50 32 54 28" stroke="#3d3d3d" stroke-width="2" fill="none" stroke-linecap="round"/>
+              <circle cx="38" cy="20" r="4" fill="#ff9f7f" opacity="0.6"/>
+              <circle cx="62" cy="20" r="4" fill="#ff9f7f" opacity="0.6"/>
             </g>
-            <g class="stage-runner-arm-right" transform="translate(60, 50)">
-              <path d="M0 0 Q10 8 15 18" stroke="#d4a574" stroke-width="4" fill="none" stroke-linecap="round"/>
+            <ellipse cx="50" cy="48" rx="12" ry="16" fill="#f5d7a8"/>
+            <ellipse cx="50" cy="52" rx="6" ry="8" fill="#ffe4c4"/>
+            <g class="stage-runner-arm-left" transform="translate(38, 48)">
+              <path d="M0 0 Q-8 6 -14 16" stroke="#d4a574" stroke-width="5" fill="none" stroke-linecap="round"/>
+              <circle cx="-14" cy="16" r="4" fill="#d4a574"/>
             </g>
-            <g class="stage-runner-leg-left" transform="translate(50, 70)">
-              <path d="M0 0 Q-5 12 -8 22" stroke="#ff9f7f" stroke-width="4" fill="none" stroke-linecap="round"/>
+            <g class="stage-runner-arm-right" transform="translate(62, 48)">
+              <path d="M0 0 Q8 6 14 16" stroke="#d4a574" stroke-width="5" fill="none" stroke-linecap="round"/>
+              <circle cx="14" cy="16" r="4" fill="#d4a574"/>
             </g>
-            <g class="stage-runner-leg-right" transform="translate(50, 70)">
-              <path d="M0 0 Q5 12 8 22" stroke="#ff9f7f" stroke-width="4" fill="none" stroke-linecap="round"/>
+            <g class="stage-runner-leg-left" transform="translate(45, 64)">
+              <path d="M0 0 Q-4 10 -8 22" stroke="#ff9f7f" stroke-width="5" fill="none" stroke-linecap="round"/>
+              <ellipse cx="-8" cy="22" rx="5" ry="3" fill="#ff9f7f"/>
+            </g>
+            <g class="stage-runner-leg-right" transform="translate(55, 64)">
+              <path d="M0 0 Q4 10 8 22" stroke="#ff9f7f" stroke-width="5" fill="none" stroke-linecap="round"/>
+              <ellipse cx="8" cy="22" rx="5" ry="3" fill="#ff9f7f"/>
             </g>
           </g>
         </svg>
@@ -446,8 +458,23 @@ window.loadMeting = window.loadMeting || function () {};
       return runner;
     }
 
+    function createLoadingTextElement() {
+      const textContainer = document.createElement('div');
+      textContainer.id = 'stage-loading-text';
+      const text = '页面加载中ฅ˙Ⱉ˙ฅ';
+      let html = '';
+      for (let i = 0; i < text.length; i++) {
+        html += `<span class="typing-char" style="animation-delay: ${i * 0.08}s">${text[i]}</span>`;
+      }
+      html += '<span class="loading-cursor"></span>';
+      textContainer.innerHTML = html;
+      document.body.appendChild(textContainer);
+      return textContainer;
+    }
+
     let curtainContainer = null;
     let runnerElement = null;
+    let loadingTextElement = null;
 
     function initElements() {
       if (!curtainContainer) {
@@ -456,57 +483,36 @@ window.loadMeting = window.loadMeting || function () {};
       if (!runnerElement) {
         runnerElement = createRunnerElement();
       }
+      if (!loadingTextElement) {
+        loadingTextElement = createLoadingTextElement();
+      }
     }
 
     function resetState() {
       clearAllTimeouts();
+      pjaxCompleted = false;
       if (curtainContainer) {
         curtainContainer.classList.remove('closing', 'opening');
       }
       if (runnerElement) {
         runnerElement.classList.remove('visible', 'hidden');
       }
+      if (loadingTextElement) {
+        loadingTextElement.classList.remove('visible', 'hidden');
+      }
       isTransitioning = false;
     }
 
-    function handlePjaxSend() {
-      if (isTransitioning) {
-        resetState();
-      }
-
-      initElements();
-      isTransitioning = true;
-
-      curtainContainer.classList.add('closing');
-
-      setTimeout(() => {
-        runnerElement.classList.add('visible');
-      }, CURTAIN_DURATION / 2);
-    }
-
-    function handlePjaxComplete() {
-      if (!isTransitioning) return;
-
-      setTimeout(() => {
-        runnerElement.classList.remove('visible');
-        runnerElement.classList.add('hidden');
-
-        setTimeout(() => {
-          curtainContainer.classList.remove('closing');
-          curtainContainer.classList.add('opening');
-
-          setTimeout(() => {
-            resetState();
-          }, CURTAIN_DURATION);
-        }, RUNNER_FADE_DURATION);
-      }, CONTENT_DELAY);
-    }
-
-    function handlePjaxError() {
+    function startOpeningSequence() {
       if (!isTransitioning) return;
 
       runnerElement.classList.remove('visible');
       runnerElement.classList.add('hidden');
+
+      if (loadingTextElement) {
+        loadingTextElement.classList.remove('visible');
+        loadingTextElement.classList.add('hidden');
+      }
 
       setTimeout(() => {
         curtainContainer.classList.remove('closing');
@@ -518,7 +524,57 @@ window.loadMeting = window.loadMeting || function () {};
       }, RUNNER_FADE_DURATION);
     }
 
-    document.addEventListener('pjax:send', handlePjaxSend);
+    function handlePjaxSend() {
+      if (isTransitioning) {
+        resetState();
+      }
+
+      initElements();
+      isTransitioning = true;
+      pjaxCompleted = false;
+
+      curtainContainer.classList.add('closing');
+
+      setTimeout(() => {
+        runnerElement.classList.add('visible');
+        if (loadingTextElement) {
+          loadingTextElement.classList.add('visible');
+        }
+      }, CURTAIN_DURATION / 2);
+
+      timeoutIds.push(setTimeout(() => {
+        if (pjaxCompleted) {
+          startOpeningSequence();
+        }
+      }, CURTAIN_DURATION + STAY_DURATION));
+    }
+
+    function handlePjaxComplete() {
+      if (!isTransitioning) return;
+
+      pjaxCompleted = true;
+
+      const elapsed = Date.now() - transitionStartTime;
+      const remaining = Math.max(0, CURTAIN_DURATION + STAY_DURATION - elapsed);
+
+      if (remaining <= 0) {
+        startOpeningSequence();
+      }
+    }
+
+    function handlePjaxError() {
+      if (!isTransitioning) return;
+
+      pjaxCompleted = true;
+      startOpeningSequence();
+    }
+
+    let transitionStartTime = 0;
+
+    document.addEventListener('pjax:send', () => {
+      transitionStartTime = Date.now();
+      handlePjaxSend();
+    });
     document.addEventListener('pjax:complete', handlePjaxComplete);
     document.addEventListener('pjax:error', handlePjaxError);
   }
