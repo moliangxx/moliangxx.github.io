@@ -389,7 +389,7 @@ body.reimu-transitioning #aside_content {
   will-change: opacity, transform;
 }
 
-/* ========== 舞台幕布转场动画整体优化 ========== */
+/* ========== 舞台幕布转场动画最终优化 ========== */
 #stage-curtain {
   position: fixed;
   top: 0;
@@ -404,43 +404,29 @@ body.reimu-transitioning #aside_content {
 .stage-curtain-right {
   position: fixed;
   top: 0;
-  bottom: 0;
-  width: 52vw;
-  height: 100vh;
-  background: rgba(18, 16, 28, 0.32);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  left: 0;
+  width: 50%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.35);
+  opacity: 0;
+  visibility: hidden;
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.35s ease;
 }
 
 .stage-curtain-left {
-  left: 0;
-  transform: translateX(-100%);
-}
-
-.stage-curtain-left::after {
-  content: '';
-  position: absolute;
-  right: 0;
-  top: 0;
-  width: 30px;
-  height: 100%;
-  background: linear-gradient(to left, rgba(18, 16, 28, 0), rgba(18, 16, 28, 0.32));
+  transform: translateX(-105%);
 }
 
 .stage-curtain-right {
+  left: auto;
   right: 0;
-  transform: translateX(100%);
+  transform: translateX(105%);
 }
 
-.stage-curtain-right::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 30px;
-  height: 100%;
-  background: linear-gradient(to right, rgba(18, 16, 28, 0), rgba(18, 16, 28, 0.32));
+#stage-curtain.closing .stage-curtain-left,
+#stage-curtain.closing .stage-curtain-right {
+  opacity: 1;
+  visibility: visible;
 }
 
 #stage-curtain.closing .stage-curtain-left {
@@ -451,58 +437,75 @@ body.reimu-transitioning #aside_content {
   transform: translateX(0);
 }
 
+#stage-curtain.opening .stage-curtain-left,
+#stage-curtain.opening .stage-curtain-right {
+  opacity: 1;
+  visibility: visible;
+}
+
 #stage-curtain.opening .stage-curtain-left {
-  transform: translateX(-100%);
+  transform: translateX(-105%);
 }
 
 #stage-curtain.opening .stage-curtain-right {
-  transform: translateX(100%);
+  transform: translateX(105%);
+}
+
+#stage-curtain.finished .stage-curtain-left,
+#stage-curtain.finished .stage-curtain-right {
+  opacity: 0;
+  visibility: hidden;
 }
 
 #stage-loader {
   position: fixed;
-  top: calc(50% - 35px);
+  top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 99999;
   opacity: 0;
-  transition: opacity 0.2s ease;
+  visibility: hidden;
+  transition: opacity 0.25s ease, visibility 0.25s ease;
   pointer-events: none;
-  width: 70px;
-  height: 70px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
 }
 
 #stage-loader.visible {
   opacity: 1;
+  visibility: visible;
 }
 
 #stage-loader.hidden {
   opacity: 0;
+  visibility: hidden;
 }
 
-#stage-loader svg {
+.stage-loader-icon {
+  width: 72px;
+  height: 72px;
+}
+
+.stage-loader-icon svg {
   width: 100%;
   height: 100%;
 }
 
-@keyframes loader-breathe {
-  0%, 100% {
-    transform: scale(1);
-    opacity: 0.9;
-  }
-  50% {
-    transform: scale(1.08);
-    opacity: 1;
-  }
-}
-
-@keyframes loader-float {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-4px);
-  }
+.stage-loader-text {
+  width: 100%;
+  max-width: 320px;
+  text-align: center;
+  font-size: 15px;
+  font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  color: rgba(255, 215, 180, 0.95);
+  text-shadow: 0 0 8px rgba(255, 215, 180, 0.6);
+  letter-spacing: 1px;
+  line-height: 1.6;
+  word-break: keep-all;
+  white-space: nowrap;
 }
 
 @keyframes loader-spin {
@@ -514,85 +517,15 @@ body.reimu-transitioning #aside_content {
   }
 }
 
-@keyframes loader-star-twinkle {
+@keyframes loader-breathe {
   0%, 100% {
-    opacity: 0.3;
-    transform: scale(0.8);
+    transform: scale(1);
+    opacity: 0.9;
   }
   50% {
+    transform: scale(1.05);
     opacity: 1;
-    transform: scale(1.2);
   }
-}
-
-.stage-loader-inner {
-  animation: loader-breathe 2s ease-in-out infinite;
-}
-
-.stage-loader-float {
-  animation: loader-float 3s ease-in-out infinite;
-}
-
-.stage-loader-ring {
-  animation: loader-spin 1.2s linear infinite;
-}
-
-.stage-loader-star {
-  animation: loader-star-twinkle 1.5s ease-in-out infinite;
-}
-
-.stage-loader-star:nth-child(2) {
-  animation-delay: 0.3s;
-}
-
-.stage-loader-star:nth-child(3) {
-  animation-delay: 0.6s;
-}
-
-#stage-loading-text {
-  position: fixed;
-  top: calc(50% + 60px);
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 99999;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-  pointer-events: none;
-  font-size: 15px;
-  font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-  color: rgba(255, 215, 180, 0.95);
-  text-shadow: 0 0 8px rgba(255, 215, 180, 0.6);
-  letter-spacing: 1px;
-  line-height: 1.6;
-  max-width: 90vw;
-  word-break: keep-all;
-  white-space: nowrap;
-}
-
-#stage-loading-text.visible {
-  opacity: 1;
-}
-
-#stage-loading-text.hidden {
-  opacity: 0;
-}
-
-#stage-loading-text .loading-cursor {
-  display: inline-block;
-  width: 6px;
-  height: 14px;
-  background: rgba(255, 215, 180, 0.9);
-  margin-left: 4px;
-  border-radius: 2px;
-}
-
-#stage-loading-text.typing .loading-cursor {
-  animation: cursor-blink 1s ease-in-out infinite;
-}
-
-#stage-loading-text:not(.typing) .loading-cursor {
-  animation: none;
-  opacity: 0;
 }
 
 @keyframes cursor-blink {
@@ -607,7 +540,7 @@ body.reimu-transitioning #aside_content {
 @keyframes typing-reveal {
   0% {
     opacity: 0;
-    transform: translateY(4px);
+    transform: translateY(3px);
   }
   100% {
     opacity: 1;
@@ -615,26 +548,51 @@ body.reimu-transitioning #aside_content {
   }
 }
 
-#stage-loading-text .typing-char {
+.stage-loader-ring {
+  animation: loader-spin 1.2s linear infinite;
+}
+
+.stage-loader-inner {
+  animation: loader-breathe 2s ease-in-out infinite;
+}
+
+.stage-loader-text .typing-char {
   display: inline-block;
   opacity: 0;
 }
 
-#stage-loading-text.typing .typing-char {
+.stage-loader-text.typing .typing-char {
   animation: typing-reveal 0.25s ease-out forwards;
 }
 
+.stage-loader-text .loading-cursor {
+  display: inline-block;
+  width: 6px;
+  height: 14px;
+  background: rgba(255, 215, 180, 0.9);
+  margin-left: 4px;
+  border-radius: 2px;
+}
+
+.stage-loader-text.typing .loading-cursor {
+  animation: cursor-blink 1s ease-in-out infinite;
+}
+
+.stage-loader-text:not(.typing) .loading-cursor {
+  animation: none;
+  opacity: 0;
+}
+
 @media (max-width: 768px) {
-  #stage-loader {
-    width: 56px;
-    height: 56px;
-    top: calc(50% - 28px);
+  .stage-loader-icon {
+    width: 58px;
+    height: 58px;
   }
   
-  #stage-loading-text {
+  .stage-loader-text {
     font-size: 13px;
-    top: calc(50% + 52px);
-    max-width: 85vw;
+    max-width: 260px;
+    letter-spacing: 0.5px;
   }
 }
 

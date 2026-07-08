@@ -386,14 +386,14 @@ window.loadMeting = window.loadMeting || function () {};
 
   initReimuTransition();
 
-  /* ========== 舞台幕布转场控制逻辑（重构优化版） ========== */
+  /* ========== 舞台幕布转场控制逻辑（最终优化版） ========== */
   function initStageCurtainTransition() {
     if (prefersReduced) return;
 
-    const CURTAIN_DURATION = 400;
+    const CURTAIN_DURATION = 350;
     const LOADER_FADE_DURATION = 200;
-    const STAY_DURATION = 250;
-    const TIMEOUT_MAX = 3000;
+    const STAY_DURATION = 200;
+    const TIMEOUT_MAX = 8000;
     let isTransitioning = false;
     let timeoutIds = [];
     let pjaxCompleted = false;
@@ -425,50 +425,29 @@ window.loadMeting = window.loadMeting || function () {};
       const loader = document.createElement('div');
       loader.id = 'stage-loader';
       loader.innerHTML = `
-        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-          <g class="stage-loader-ring">
-            <circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,215,180,0.35)" stroke-width="3" stroke-linecap="round"/>
-            <circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,215,180,0.9)" stroke-width="3" stroke-linecap="round" stroke-dasharray="60 180" transform="rotate(-90 50 50)"/>
-          </g>
-          <g class="stage-loader-float">
-            <g class="stage-loader-inner">
-              <ellipse cx="50" cy="52" rx="20" ry="22" fill="#ffb6c1"/>
-              <ellipse cx="50" cy="48" rx="18" ry="20" fill="#ffc0cb"/>
-              <ellipse cx="38" cy="38" rx="8" ry="12" fill="#ffb6c1"/>
-              <ellipse cx="62" cy="38" rx="8" ry="12" fill="#ffb6c1"/>
-              <ellipse cx="38" cy="38" rx="4" ry="7" fill="#ffc0cb"/>
-              <ellipse cx="62" cy="38" rx="4" ry="7" fill="#ffc0cb"/>
-              <circle cx="44" cy="46" r="4" fill="#3d3d3d"/>
-              <circle cx="56" cy="46" r="4" fill="#3d3d3d"/>
-              <circle cx="45" cy="45" r="1.5" fill="#fff"/>
-              <circle cx="57" cy="45" r="1.5" fill="#fff"/>
-              <path d="M46 54 Q50 58 54 54" stroke="#3d3d3d" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-              <ellipse cx="50" cy="60" rx="6" ry="4" fill="#ff9f7f" opacity="0.5"/>
-              <circle cx="38" cy="52" r="5" fill="#ff9f7f" opacity="0.4"/>
-              <circle cx="62" cy="52" r="5" fill="#ff9f7f" opacity="0.4"/>
+        <div class="stage-loader-icon">
+          <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <g class="stage-loader-ring">
+              <circle cx="50" cy="50" r="38" fill="none" stroke="rgba(255,215,180,0.3)" stroke-width="2.5"/>
+              <circle cx="50" cy="50" r="38" fill="none" stroke="rgba(255,215,180,0.85)" stroke-width="2.5" stroke-dasharray="50 170" stroke-linecap="round" transform="rotate(-90 50 50)"/>
             </g>
-          </g>
-          <g class="stage-loader-star">
-            <path d="M50 10 L53 25 L68 25 L56 35 L60 50 L50 40 L40 50 L44 35 L32 25 L47 25 Z" fill="#ffd700" opacity="0.8"/>
-          </g>
-          <g class="stage-loader-star" transform="translate(70, 30)">
-            <path d="M50 10 L53 25 L68 25 L56 35 L60 50 L50 40 L40 50 L44 35 L32 25 L47 25 Z" fill="#ffb6c1" opacity="0.7"/>
-          </g>
-          <g class="stage-loader-star" transform="translate(30, 70)">
-            <path d="M50 10 L53 25 L68 25 L56 35 L60 50 L50 40 L40 50 L44 35 L32 25 L47 25 Z" fill="#dda0dd" opacity="0.7"/>
-          </g>
-        </svg>
+            <g class="stage-loader-inner">
+              <polygon points="50,15 53,30 68,30 57,40 62,55 50,45 38,55 43,40 32,30 47,30" fill="#ffd700"/>
+              <polygon points="50,20 52,28 62,28 54,35 57,48 50,41 43,48 46,35 38,28 48,28" fill="#fffacd"/>
+              <circle cx="35" cy="25" r="3" fill="#ffb6c1" opacity="0.6"/>
+              <circle cx="65" cy="35" r="2.5" fill="#dda0dd" opacity="0.6"/>
+              <circle cx="40" cy="60" r="2" fill="#ffd700" opacity="0.5"/>
+              <circle cx="60" cy="20" r="2" fill="#ffb6c1" opacity="0.5"/>
+              <circle cx="70" cy="50" r="2" fill="#fff" opacity="0.4"/>
+            </g>
+          </svg>
+        </div>
+        <div class="stage-loader-text" id="stage-loading-text">
+          <span class="loading-cursor"></span>
+        </div>
       `;
       document.body.appendChild(loader);
       return loader;
-    }
-
-    function createLoadingTextElement() {
-      const textContainer = document.createElement('div');
-      textContainer.id = 'stage-loading-text';
-      textContainer.innerHTML = '<span class="loading-cursor"></span>';
-      document.body.appendChild(textContainer);
-      return textContainer;
     }
 
     function renderTypingText(text) {
@@ -492,7 +471,7 @@ window.loadMeting = window.loadMeting || function () {};
         loaderElement = createLoaderElement();
       }
       if (!loadingTextElement) {
-        loadingTextElement = createLoadingTextElement();
+        loadingTextElement = document.getElementById('stage-loading-text');
       }
     }
 
@@ -501,7 +480,7 @@ window.loadMeting = window.loadMeting || function () {};
         loaderElement.classList.remove('visible', 'hidden');
       }
       if (loadingTextElement) {
-        loadingTextElement.classList.remove('visible', 'hidden', 'typing');
+        loadingTextElement.classList.remove('visible', 'typing');
         loadingTextElement.innerHTML = '<span class="loading-cursor"></span>';
       }
     }
@@ -514,6 +493,10 @@ window.loadMeting = window.loadMeting || function () {};
 
       if (curtainContainer) {
         curtainContainer.classList.remove('closing', 'opening');
+        curtainContainer.classList.add('finished');
+        setTimeout(() => {
+          curtainContainer.classList.remove('finished');
+        }, 400);
       }
 
       cleanupElements();
@@ -529,7 +512,6 @@ window.loadMeting = window.loadMeting || function () {};
 
       if (loadingTextElement) {
         loadingTextElement.classList.remove('visible', 'typing');
-        loadingTextElement.classList.add('hidden');
       }
 
       setTimeout(() => {
@@ -545,6 +527,7 @@ window.loadMeting = window.loadMeting || function () {};
 
     function startClosingSequence() {
       if (!curtainContainer) return;
+      curtainContainer.classList.remove('finished');
       curtainContainer.classList.add('closing');
 
       setTimeout(() => {
@@ -558,7 +541,6 @@ window.loadMeting = window.loadMeting || function () {};
         if (loadingTextElement) {
           loadingTextElement.innerHTML = renderTypingText('正在前往下一页 ✨');
           loadingTextElement.classList.add('visible', 'typing');
-          loadingTextElement.classList.remove('hidden');
         }
       }, CURTAIN_DURATION / 2);
 
