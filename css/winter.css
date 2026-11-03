@@ -1,0 +1,2119 @@
+/* ============================================================
+   Warm Winter · 暖冬主题二次创作层
+   仅新增视觉与动效，不覆盖 source/css/custom.css 的既有规则
+   加载顺序：custom.css -> winter.css
+   ============================================================ */
+
+/* ---------- 1. 设计令牌 ---------- */
+:root {
+  --w-night: #10141b;
+  --w-ink: #171d26;
+  --w-ink-soft: #1e2530;
+  --w-snow: #f8f4ec;
+  --w-mist: #d6cec2;
+  --w-muted: #a9a294;
+  --w-amber: #f2b36d;
+  --w-amber-deep: #d68f4f;
+  --w-ember: #e07a4f;
+  --w-maple: #c75d52;
+  --w-rose: #e8a3a6;
+  --w-pine: #7fa08c;
+  --w-ice: #a8c7d9;
+
+  --w-glass: rgba(23, 29, 38, 0.56);
+  --w-glass-hover: rgba(26, 33, 43, 0.72);
+  --w-line: rgba(242, 179, 109, 0.16);
+  --w-line-strong: rgba(242, 179, 109, 0.34);
+
+  --w-radius-xl: 22px;
+  --w-radius-lg: 16px;
+  --w-radius-md: 12px;
+  --w-radius-sm: 8px;
+
+  --w-shadow: 0 18px 44px -18px rgba(0, 0, 0, 0.65),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14), inset 0 0 22px rgba(168, 199, 217, 0.06);
+  --w-shadow-hover: 0 28px 60px -20px rgba(0, 0, 0, 0.7),
+    0 0 0 1px rgba(242, 179, 109, 0.22), 0 0 42px -12px rgba(242, 179, 109, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.24), inset 0 0 26px rgba(168, 199, 217, 0.1);
+  --w-nav: rgba(16, 20, 27, 0.72);
+
+  /* 组件级令牌：所有装饰只读这层，日间在 html.winter-day 里整体替换 */
+  --w-card-line: rgba(248, 244, 236, 0.22);
+  --w-card-line-hover: rgba(255, 255, 255, 0.44);
+  --w-cap-dot: rgba(255, 255, 255, 0.78);
+  --w-cap-wash: rgba(255, 255, 255, 0.34);
+  --w-cap-opacity: 0.55;
+  --w-cap-opacity-hover: 0.9;
+  --w-nav-line: #ffffff;
+  --w-nav-line-shadow: 0 0 6px rgba(255, 255, 255, 0.75), 0 0 14px rgba(242, 179, 109, 0.45);
+  --w-nav-icon-hover: #ffffff;
+  --w-toggle-color: var(--w-amber);
+  --w-toggle-hover: var(--main-light);
+  /* 点击雪花画笔颜色（RGB 分量，供 JS 读取后拼 rgba） */
+  --w-click-flake: 255, 250, 240;
+
+  /* 卡片雪层边框：上亮下暗的冷灰雪面 + 外投影，夜间不刺眼 */
+  --w-snow-svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 24' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23eaf2f8'/%3E%3Cstop offset='.55' stop-color='%23cfdbe5'/%3E%3Cstop offset='1' stop-color='%239dadbd'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath fill='url(%23g)' d='M0 0H240V9C232 13 226 16 216 15C206 14 202 9 192 10C182 11 178 16 168 16C158 16 154 10 144 10C134 10 130 15.5 120 15.5C110 15.5 106 10 96 9.5C86 9 82 14.5 72 15C62 15.5 58 10 48 10C38 10 34 15 24 15.5C16 16 8 13 0 8Z'/%3E%3C/svg%3E");
+  --w-snow-side: rgba(178, 196, 212, 0.32);
+  --w-snow-side-hover: rgba(198, 214, 228, 0.55);
+  --w-snow-opacity: 0.62;
+  --w-snow-opacity-hover: 0.85;
+  --w-snow-shadow: rgba(8, 12, 18, 0.55);
+
+  /* 卡片外沿整圈积雪：厚度、左右薄雪、上下雪脊 SVG */
+  --w-snow-thick: 11px;
+  --w-snow-ring: rgba(238, 246, 252, 0.94);
+  --w-snow-ring-soft: rgba(184, 205, 222, 0.5);
+  --w-snow-ring-glow: rgba(168, 199, 217, 0.3);
+  --w-snow-top: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 16' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23f6fafd'/%3E%3Cstop offset='.45' stop-color='%23e3edf5'/%3E%3Cstop offset='1' stop-color='%23aabdcf'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath fill='url(%23g)' d='M0 0H240V5.2C232 8.4 226 13 216 12.4C206 11.8 202 5.8 192 6.4C182 7 178 13.2 168 12.6C158 12 154 5.6 144 6.2C134 6.8 130 13 120 12.4C110 11.8 106 5.8 96 6.4C86 7 82 13.3 72 12.8C62 12.3 58 6 48 6.6C38 7.2 34 13.4 24 12.8C16 12.3 8 10.4 0 8.2Z'/%3E%3C/svg%3E");
+  --w-snow-bottom: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 16' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23eef6fc'/%3E%3Cstop offset='.5' stop-color='%23cbd9e6'/%3E%3Cstop offset='1' stop-color='%239db1c4'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath fill='url(%23g)' d='M0 16V12C8 8.4 14 4.8 24 5.6C34 6.4 40 11.4 50 10.8C60 10.2 64 4.6 74 5.4C84 6.2 88 12 98 11.4C108 10.8 112 5 122 5.8C132 6.6 136 12.2 146 11.6C156 11 160 5.2 170 6C180 6.8 184 11.8 194 11.4C204 11 210 7.4 220 6.8C228 6.3 234 7.6 240 9.4V16Z'/%3E%3C/svg%3E");
+
+  /* 头像：只保留极细描边 + 轻微光晕 */
+  --w-avatar-ring: rgba(255, 255, 255, 0.36);
+  --w-avatar-halo: rgba(242, 179, 109, 0.2);
+
+  --w-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --w-ease-soft: cubic-bezier(0.4, 0, 0.2, 1);
+  --w-fast: 140ms;
+  --w-base: 260ms;
+  --w-slow: 480ms;
+
+  --w-font-display: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", serif;
+  --w-font-body: "Noto Sans SC", "PingFang SC", "HarmonyOS Sans SC", "Microsoft YaHei", system-ui, sans-serif;
+
+  /* 覆盖既有暖色令牌，保持兼容 */
+  --main-color: var(--w-amber);
+  --main-light: #ffe0b8;
+  --main-warm: var(--w-ember);
+  --bg-base: var(--w-night);
+  --card-bg: var(--w-glass);
+  --nav-bg: rgba(16, 20, 27, 0.72);
+  --text-primary: var(--w-snow);
+  --text-secondary: var(--w-mist);
+  --border-color: var(--w-line);
+  --radius-lg: var(--w-radius-lg);
+  --radius-md: var(--w-radius-md);
+  --radius-sm: var(--w-radius-sm);
+}
+
+/* ---------- 2. 基础排版与背景 ---------- */
+body {
+  font-family: var(--w-font-body);
+  letter-spacing: 0.012em;
+  background-color: var(--w-night);
+  color: var(--w-snow);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, h4, h5, h6,
+#site-title,
+.article-title,
+.post-title {
+  font-family: var(--w-font-display);
+  letter-spacing: 0.02em;
+}
+
+#web_bg {
+  filter: saturate(0.92) brightness(0.78);
+  transform: scale(1.02);
+}
+
+#web_bg::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  background:
+    radial-gradient(1200px 620px at 18% -8%, rgba(242, 179, 109, 0.16), transparent 62%),
+    radial-gradient(900px 520px at 88% 12%, rgba(199, 93, 82, 0.13), transparent 60%),
+    radial-gradient(1000px 700px at 50% 108%, rgba(127, 160, 140, 0.12), transparent 65%),
+    linear-gradient(180deg, rgba(16, 20, 27, 0.62) 0%, rgba(16, 20, 27, 0.5) 45%, rgba(16, 20, 27, 0.72) 100%);
+}
+
+/* 极细雪霜噪点，增加纸张/毛毡质感 */
+#web_bg::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  opacity: 0.5;
+  mix-blend-mode: soft-light;
+  background-image:
+    radial-gradient(rgba(255, 255, 255, 0.35) 0.6px, transparent 0.7px),
+    radial-gradient(rgba(242, 179, 109, 0.3) 0.6px, transparent 0.7px);
+  background-size: 34px 34px, 58px 58px;
+  background-position: 0 0, 17px 23px;
+}
+
+::selection {
+  background: rgba(232, 163, 166, 0.28);
+  color: var(--w-snow);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* ---------- 3. 氛围粒子画布 & 指针光晕 ---------- */
+#winter-particles {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 900ms var(--w-ease-out);
+}
+
+#winter-particles.is-ready {
+  opacity: 0.9;
+}
+
+#winter-cursor-glow {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 96px;
+  height: 96px;
+  margin: -48px 0 0 -48px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 99997;
+  opacity: 0;
+  background: radial-gradient(circle, rgba(242, 179, 109, 0.32) 0%, rgba(242, 179, 109, 0.12) 38%, transparent 68%);
+  filter: blur(3px);
+  transition: opacity 300ms var(--w-ease-out), width 220ms var(--w-ease-out), height 220ms var(--w-ease-out);
+  will-change: transform;
+}
+
+#winter-cursor-glow.is-on {
+  opacity: 1;
+}
+
+#winter-cursor-glow.is-press {
+  width: 64px;
+  height: 64px;
+  margin: -32px 0 0 -32px;
+  background: radial-gradient(circle, rgba(255, 224, 184, 0.5) 0%, rgba(224, 122, 79, 0.18) 42%, transparent 70%);
+}
+
+#body-wrap {
+  position: relative;
+  z-index: 2;
+}
+
+#rightside {
+  z-index: 6;
+}
+
+/* ---------- 4. 顶部横幅与首屏 ---------- */
+#page-header {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background-position: center 30%;
+  background-size: cover;
+  filter: saturate(1.02);
+}
+
+#page-header::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(180deg, rgba(16, 20, 27, 0.42) 0%, rgba(16, 20, 27, 0.14) 38%, rgba(16, 20, 27, 0.62) 78%, var(--w-night) 100%),
+    radial-gradient(ellipse 70% 55% at 26% 78%, rgba(242, 179, 109, 0.22), transparent 72%);
+}
+
+#page-header::after {
+  content: "";
+  position: absolute;
+  inset: -20% -10% 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.55;
+  background-image:
+    radial-gradient(rgba(255, 255, 255, 0.85) 1px, transparent 1.4px),
+    radial-gradient(rgba(255, 255, 255, 0.5) 1px, transparent 1.4px);
+  background-size: 120px 120px, 220px 220px;
+  background-position: 0 0, 40px 80px;
+  animation: winter-snowdust 14s linear infinite;
+}
+
+@keyframes winter-snowdust {
+  from { transform: translate3d(0, -14%, 0); }
+  to { transform: translate3d(-24px, 14%, 0); }
+}
+
+#page-header.full_page {
+  min-height: 100vh;
+}
+
+#site-info {
+  position: relative;
+  z-index: 2;
+  padding-bottom: 8vh;
+}
+
+#site-title {
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-shadow: 0 0 32px rgba(242, 179, 109, 0.35), 0 4px 24px rgba(0, 0, 0, 0.5);
+}
+
+#site-title::after {
+  content: "";
+  display: block;
+  width: 64px;
+  height: 2px;
+  margin: 18px auto 0;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, var(--w-amber), var(--w-rose), transparent);
+  opacity: 0.8;
+}
+
+#site-subtitle {
+  color: var(--w-mist);
+  letter-spacing: 0.06em;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.5);
+}
+
+#scroll-down {
+  z-index: 3;
+}
+
+#scroll-down::before {
+  border-color: rgba(255, 224, 184, 0.5) !important;
+  animation-duration: 1.8s;
+}
+
+/* 文章页横幅标题区 */
+#page-header.post-bg #post-info {
+  position: relative;
+  z-index: 2;
+}
+
+#page-header.post-bg #post-info .post-title {
+  text-shadow: 0 4px 30px rgba(0, 0, 0, 0.6);
+}
+
+#page-header.post-bg::after {
+  animation-duration: 18s;
+}
+
+/* ---------- 5. 导航与菜单动效 ---------- */
+#nav {
+  background: linear-gradient(180deg, rgba(16, 20, 27, 0.78), rgba(16, 20, 27, 0.4));
+  backdrop-filter: blur(14px) saturate(1.2);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  border-bottom: 1px solid rgba(242, 179, 109, 0.12);
+  transition: background var(--w-base) var(--w-ease-soft), box-shadow var(--w-base) var(--w-ease-soft);
+}
+
+#nav.show {
+  box-shadow: 0 12px 36px -18px rgba(0, 0, 0, 0.8);
+}
+
+/* 站点标题在导航内垂直居中 */
+#nav #blog-info {
+  display: flex;
+  align-items: center;
+  height: 60px;
+}
+
+#nav #blog-info .nav-site-title {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding: 0;
+}
+
+#nav .menus_items {
+  display: inline-flex;
+  align-items: center;
+  height: 60px;
+}
+
+#nav .menus_item {
+  display: inline-flex;
+  align-items: center;
+}
+
+#nav .site-page {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+#nav .site-page > i {
+  margin-right: 0;
+  transition: color var(--w-base) var(--w-ease-out), transform var(--w-base) var(--w-ease-out);
+}
+
+#nav a {
+  position: relative;
+  color: var(--w-mist);
+  transition: color var(--w-base) var(--w-ease-out), transform var(--w-base) var(--w-ease-out);
+}
+
+#nav a:hover {
+  color: var(--w-snow);
+}
+
+/* 分组项是 <span class="site-page group">，不是 <a>，主题只给 a 上了色，
+   这里补齐分组文字与展开子项的颜色，避免白天浅底上发白看不清 */
+#nav span.site-page.group {
+  color: var(--w-mist) !important;
+}
+
+#nav span.site-page.group:hover,
+#nav span.site-page.group.active {
+  color: var(--w-snow) !important;
+}
+
+/* 主题对子菜单 a 用了 #nav .menus_items .menus_item .menus_item_child li a
+   的 color:var(--font-color) !important，必须用同等或更高权重覆盖 */
+#nav .menus_items .menus_item .menus_item_child li a {
+  color: var(--w-mist) !important;
+}
+
+#nav .menus_items .menus_item .menus_item_child li a:hover {
+  color: var(--w-snow) !important;
+}
+
+/* 悬停：一条雪白横线，与文字基线严格对齐 */
+#nav .menus_item > a.site-page::after,
+#nav .menus_item > span.site-page.group::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -4px;
+  height: 1px;
+  border-radius: 1px;
+  background: var(--w-nav-line);
+  box-shadow: var(--w-nav-line-shadow);
+  opacity: 0;
+  transform: scaleX(0.2);
+  transform-origin: center;
+  transition: transform 320ms var(--w-ease-out), opacity 180ms var(--w-ease-soft);
+  pointer-events: none;
+}
+
+#nav .menus_item > a.site-page:hover::after,
+#nav .menus_item > a.site-page.active::after,
+#nav .menus_item > span.site-page.group:hover::after {
+  opacity: 1;
+  transform: scaleX(1);
+}
+
+#nav .menus_item > a.site-page:hover > i {
+  color: var(--w-nav-icon-hover);
+  transform: translateY(-1px) rotate(-6deg);
+}
+
+#nav .site-page.group::after {
+  content: "";
+}
+
+#nav .active {
+  color: var(--w-amber);
+}
+
+#nav .site-name {
+  color: var(--w-snow);
+  font-family: var(--w-font-display);
+  letter-spacing: 0.08em;
+}
+
+#nav .nav-site-title::after,
+#nav .site-name::after {
+  display: none;
+}
+
+#nav .menus_item > .menus_item_child {
+  background: rgba(20, 26, 34, 0.9) !important;
+  border: 1px solid var(--w-line);
+  border-radius: var(--w-radius-md);
+  box-shadow: var(--w-shadow);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  overflow: hidden;
+}
+
+#nav .menus_item_child li a {
+  transition: background var(--w-fast) var(--w-ease-soft), padding-left var(--w-fast) var(--w-ease-soft);
+}
+
+#nav .menus_item_child li a:hover {
+  background: rgba(242, 179, 109, 0.12);
+  padding-left: 6px;
+}
+
+#toggle-menu .site-page {
+  color: var(--w-snow);
+}
+
+/* ---------- 6. 卡片系统 ---------- */
+.recent-post-item,
+.card-widget,
+#pagination,
+#comments,
+.nav-links,
+#aside_content .card-widget,
+#aside_content .card-toc {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--w-line) !important;
+  border-radius: var(--w-radius-xl) !important;
+  background-color: var(--w-glass) !important;
+  box-shadow: var(--w-shadow) !important;
+  backdrop-filter: blur(18px) saturate(1.15) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(1.15) !important;
+  transition: transform var(--w-slow) var(--w-ease-out), box-shadow var(--w-slow) var(--w-ease-out),
+    border-color var(--w-base) var(--w-ease-soft), background-color var(--w-base) var(--w-ease-soft) !important;
+}
+
+/* 鼠标跟随的琥珀光斑（由 winter.js 写入 --mx / --my） */
+.recent-post-item::after,
+.card-widget::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(320px circle at var(--mx, 50%) var(--my, 50%),
+    rgba(242, 179, 109, 0.16), rgba(242, 179, 109, 0.05) 38%, transparent 62%);
+  transition: opacity var(--w-base) var(--w-ease-soft);
+}
+
+.recent-post-item:hover::after,
+.card-widget:hover::after {
+  opacity: 1;
+}
+
+.recent-post-item:hover,
+.card-widget:hover,
+#pagination:hover,
+#comments:hover,
+#aside_content .card-toc:hover {
+  transform: translateY(-6px) !important;
+  background-color: var(--w-glass-hover) !important;
+  border-color: var(--w-line-strong) !important;
+  box-shadow: var(--w-shadow-hover) !important;
+}
+
+#aside_content .card-widget:hover {
+  transform: translateY(-4px) !important;
+}
+
+/* 卡片顶部细光边 */
+.recent-post-item::before,
+.card-widget::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 14%;
+  right: 14%;
+  height: 1px;
+  z-index: 3;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(255, 224, 184, 0.45), transparent);
+  opacity: 0.5;
+  transition: opacity var(--w-base) var(--w-ease-soft);
+}
+
+.recent-post-item:hover::before,
+.card-widget:hover::before {
+  opacity: 1;
+}
+
+.post_cover,
+.recent-post-item .post_cover {
+  border-radius: var(--w-radius-lg) !important;
+}
+
+.post_cover img,
+.recent-post-item img.post_bg {
+  transition: transform 900ms var(--w-ease-out), filter 600ms var(--w-ease-out) !important;
+  will-change: transform;
+}
+
+.recent-post-item:hover .post_cover img,
+.recent-post-item:hover img.post_bg {
+  transform: scale(1.06) !important;
+  filter: saturate(1.08) brightness(1.04);
+}
+
+.recent-post-item .article-title,
+.card .card-title,
+#post .post-title {
+  color: var(--w-snow) !important;
+  transition: color var(--w-base) var(--w-ease-out), letter-spacing var(--w-base) var(--w-ease-out) !important;
+}
+
+.recent-post-item:hover .article-title,
+.card .card-title a:hover {
+  color: #ffe0b8 !important;
+  letter-spacing: 0.03em;
+}
+
+.layout_post > .post,
+.layout_post.layout_post > .post {
+  border-radius: var(--w-radius-xl) !important;
+  background: rgba(23, 29, 38, 0.52) !important;
+  border: 1px solid var(--w-line) !important;
+  box-shadow: var(--w-shadow) !important;
+  backdrop-filter: blur(14px) saturate(1.1) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(1.1) !important;
+}
+
+.layout_post > .post:hover,
+.layout_post.layout_post > .post:hover {
+  transform: none !important;
+  box-shadow: var(--w-shadow) !important;
+  background: rgba(23, 29, 38, 0.56) !important;
+}
+
+/* ---------- 7. 控件：按钮 / 链接 / 分页 / 标签 ---------- */
+button,
+.btn,
+.vsubmit,
+.tk-submit,
+#pagination a,
+.pagination a {
+  border-radius: 999px !important;
+  transition: transform var(--w-fast) var(--w-ease-soft), box-shadow var(--w-base) var(--w-ease-out),
+    background var(--w-base) var(--w-ease-soft), color var(--w-fast) var(--w-ease-soft) !important;
+}
+
+button:active,
+.btn:active,
+.vsubmit:active,
+.tk-submit:active,
+#pagination a:active,
+.pagination a:active {
+  transform: scale(0.96) !important;
+}
+
+.vsubmit,
+.tk-submit {
+  background: linear-gradient(135deg, var(--w-amber), #ffd9a8 55%, var(--w-rose)) !important;
+  color: #3b2716 !important;
+  box-shadow: 0 10px 24px -10px rgba(242, 179, 109, 0.6) !important;
+}
+
+.vsubmit:hover,
+.tk-submit:hover {
+  box-shadow: 0 14px 30px -10px rgba(242, 179, 109, 0.8) !important;
+  transform: translateY(-2px) !important;
+}
+
+#pagination .page-number,
+#pagination .extend {
+  border-radius: 999px !important;
+  border: 1px solid transparent !important;
+  transition: all var(--w-base) var(--w-ease-out) !important;
+}
+
+#pagination .page-number:hover,
+#pagination .extend:hover {
+  background: rgba(242, 179, 109, 0.14) !important;
+  border-color: var(--w-line-strong) !important;
+  color: #ffe0b8 !important;
+}
+
+#pagination .page-number.current {
+  background: linear-gradient(135deg, var(--w-amber), var(--w-ember)) !important;
+  color: #2a1a10 !important;
+  font-weight: 700;
+  box-shadow: 0 8px 20px -8px rgba(242, 179, 109, 0.8);
+}
+
+/* 链接下划线扫动 */
+#article-container a:not(.headerlink):not(.post-copyright a),
+.card-info a,
+.friends-link-item a {
+  position: relative;
+  text-decoration: none;
+  background-image: linear-gradient(90deg, var(--w-amber), var(--w-rose));
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 0% 1px;
+  transition: background-size var(--w-base) var(--w-ease-out), color var(--w-base) var(--w-ease-out);
+}
+
+#article-container a:not(.headerlink):not(.post-copyright a):hover,
+.card-info a:hover,
+.friends-link-item a:hover {
+  background-size: 100% 1px;
+  color: #ffe0b8;
+}
+
+#article-container a.headerlink {
+  color: var(--w-amber);
+  opacity: 0;
+  transition: opacity var(--w-fast) var(--w-ease-soft), transform var(--w-fast) var(--w-ease-soft);
+}
+
+#article-container h2:hover .headerlink,
+#article-container h3:hover .headerlink {
+  opacity: 1;
+  transform: translateX(3px);
+}
+
+/* 标签 */
+.tag-cloud a,
+.category-list a,
+.article-tag-list a,
+.tags a {
+  border-radius: 999px !important;
+  border: 1px solid transparent !important;
+  transition: transform var(--w-base) var(--w-ease-out), background var(--w-base) var(--w-ease-soft),
+    color var(--w-fast) var(--w-ease-soft), border-color var(--w-base) var(--w-ease-soft) !important;
+}
+
+.tag-cloud a:hover,
+.category-list a:hover,
+.article-tag-list a:hover,
+.tags a:hover {
+  background: linear-gradient(135deg, rgba(242, 179, 109, 0.2), rgba(232, 163, 166, 0.12)) !important;
+  border-color: var(--w-line-strong) !important;
+  color: #ffe0b8 !important;
+  transform: translateY(-3px) scale(1.03) !important;
+}
+
+/* 社交图标 */
+#site_social_icons a,
+#aside_content .card-info-social-icons a {
+  transition: transform var(--w-base) var(--w-ease-out), color var(--w-fast) var(--w-ease-soft);
+}
+
+#site_social_icons a:hover,
+#aside_content .card-info-social-icons a:hover {
+  color: #ffe0b8 !important;
+  transform: translateY(-4px) rotate(-6deg) scale(1.12);
+}
+
+/* 点击水波纹（由 winter.js 注入 .winter-ripple） */
+.winter-ripple {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  transform: translate(-50%, -50%) scale(0);
+  background: radial-gradient(circle, rgba(255, 224, 184, 0.5), rgba(242, 179, 109, 0.18) 45%, transparent 70%);
+  animation: winter-ripple 620ms var(--w-ease-out) forwards;
+  z-index: 20;
+}
+
+@keyframes winter-ripple {
+  0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+  70% { opacity: 0.5; }
+  100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+}
+
+/* ---------- 8. 文章正文 ---------- */
+#article-container {
+  color: #f2eee6;
+}
+
+#article-container p {
+  color: #efe9df;
+  line-height: 1.9;
+}
+
+#article-container h1,
+#article-container h2,
+#article-container h3,
+#article-container h4 {
+  color: var(--w-snow);
+  scroll-margin-top: 90px;
+}
+
+#article-container h2 {
+  position: relative;
+  padding-bottom: 10px;
+  margin-top: 2.2em;
+  font-size: 1.5rem;
+}
+
+#article-container h2::after {
+  content: "";
+  display: block;
+  width: 100%;
+  height: 1px;
+  margin-top: 10px;
+  background: linear-gradient(90deg, rgba(242, 179, 109, 0.5), rgba(232, 163, 166, 0.22) 38%, transparent 78%);
+}
+
+#article-container h3::before {
+  content: "";
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 10px;
+  border-radius: 3px 3px 3px 1px;
+  background: linear-gradient(135deg, var(--w-amber), var(--w-ember));
+  box-shadow: 0 0 12px rgba(242, 179, 109, 0.5);
+  transform: translateY(-1px) rotate(-6deg);
+}
+
+#article-container blockquote {
+  position: relative;
+  padding: 16px 20px 16px 24px;
+  border-left: 2px solid transparent !important;
+  border-radius: 0 var(--w-radius-md) var(--w-radius-md) 0;
+  background: linear-gradient(90deg, rgba(242, 179, 109, 0.1), rgba(242, 179, 109, 0.02) 60%, transparent) !important;
+  color: #e6ded1 !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+#article-container blockquote::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 10px;
+  bottom: 10px;
+  width: 2px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, var(--w-amber), var(--w-rose));
+  box-shadow: 0 0 14px rgba(242, 179, 109, 0.45);
+}
+
+#article-container blockquote::after {
+  display: none;
+}
+
+#article-container code:not([class*="hljs"]):not([class*="language-"]) {
+  padding: 2px 7px;
+  border-radius: 6px;
+  background: rgba(242, 179, 109, 0.14) !important;
+  color: #ffdcaa !important;
+  font-size: 0.88em;
+  border: 1px solid rgba(242, 179, 109, 0.16);
+}
+
+#article-container .highlight,
+#article-container .code-wrap {
+  border-radius: var(--w-radius-md) !important;
+  border: 1px solid rgba(242, 179, 109, 0.14) !important;
+  background: rgba(14, 18, 24, 0.86) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 12px 30px -18px rgba(0, 0, 0, 0.8);
+}
+
+#article-container pre {
+  border-radius: var(--w-radius-md);
+}
+
+#article-container pre::after {
+  opacity: 0.35;
+}
+
+#article-container table {
+  border-radius: var(--w-radius-md);
+  overflow: hidden;
+  border: 1px solid rgba(242, 179, 109, 0.16) !important;
+  background: rgba(23, 29, 38, 0.55);
+  box-shadow: 0 10px 28px -20px rgba(0, 0, 0, 0.8);
+}
+
+#article-container table th {
+  background: linear-gradient(180deg, rgba(242, 179, 109, 0.16), rgba(242, 179, 109, 0.08)) !important;
+  color: #ffe0b8 !important;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+#article-container table th,
+#article-container table td {
+  border-color: rgba(242, 179, 109, 0.14) !important;
+  padding: 10px 14px;
+}
+
+#article-container table tr:hover {
+  background: rgba(242, 179, 109, 0.06) !important;
+}
+
+#article-container hr {
+  border: none;
+  height: 28px;
+  position: relative;
+  margin: 34px auto;
+  width: 72%;
+  background: linear-gradient(90deg, transparent, rgba(242, 179, 109, 0.22), transparent) center / 100% 1px no-repeat;
+}
+
+#article-container hr::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  margin: -4px 0 0 -4px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff, var(--w-amber));
+  box-shadow: 0 0 14px rgba(242, 179, 109, 0.8);
+}
+
+#article-container img {
+  border-radius: var(--w-radius-md);
+  box-shadow: 0 16px 40px -22px rgba(0, 0, 0, 0.9);
+  transition: transform var(--w-slow) var(--w-ease-out), box-shadow var(--w-slow) var(--w-ease-out) !important;
+}
+
+#article-container img:hover {
+  transform: translateY(-3px) scale(1.01) !important;
+  box-shadow: 0 24px 52px -22px rgba(0, 0, 0, 0.95), 0 0 30px -12px rgba(242, 179, 109, 0.3) !important;
+}
+
+/* note 模块 */
+#article-container .note {
+  border-radius: var(--w-radius-md) !important;
+  border: 1px solid rgba(242, 179, 109, 0.16) !important;
+  background: rgba(23, 29, 38, 0.62) !important;
+  backdrop-filter: blur(10px);
+}
+
+/* 文章元信息 */
+.layout_post > .post .article-meta-wrap {
+  color: #b3aa9c !important;
+}
+
+.layout_post > .post .article-meta-wrap a {
+  color: var(--w-amber) !important;
+}
+
+#post .post-title {
+  font-size: 2rem;
+  line-height: 1.35;
+}
+
+/* 目录 */
+#aside_content .card-toc {
+  border-radius: var(--w-radius-lg) !important;
+}
+
+#toc a {
+  position: relative;
+  transition: color var(--w-fast) var(--w-ease-soft), transform var(--w-base) var(--w-ease-out);
+}
+
+#toc a:hover {
+  color: #ffe0b8 !important;
+  transform: translateX(4px);
+}
+
+#toc .toc-active,
+#toc .active {
+  color: var(--w-amber) !important;
+  font-weight: 600;
+}
+
+#toc .toc-active::before {
+  background: radial-gradient(circle at 35% 30%, #fff, var(--w-amber)) !important;
+  box-shadow: 0 0 10px rgba(242, 179, 109, 0.8);
+  width: 6px !important;
+  height: 6px !important;
+}
+
+/* 右侧悬浮按钮 */
+#rightside > div > button,
+#rightside div.rightside-group > button,
+#rightside .rightside-item {
+  border-radius: 50% !important;
+  background: rgba(23, 29, 38, 0.72) !important;
+  border: 1px solid var(--w-line) !important;
+  color: var(--w-mist) !important;
+  box-shadow: 0 10px 24px -14px rgba(0, 0, 0, 0.7);
+  transition: transform var(--w-base) var(--w-ease-out), color var(--w-fast) var(--w-ease-soft),
+    background var(--w-fast) var(--w-ease-soft), border-color var(--w-base) var(--w-ease-soft) !important;
+}
+
+#rightside > div > button:hover,
+#rightside div.rightside-group > button:hover,
+#rightside .rightside-item:hover {
+  transform: translateY(-3px) rotate(-8deg) !important;
+  color: #ffe0b8 !important;
+  background: rgba(242, 179, 109, 0.16) !important;
+  border-color: var(--w-line-strong) !important;
+}
+
+/* 头像与作者卡 */
+#aside_content .card-widget .card-info-data {
+  border-top-color: rgba(242, 179, 109, 0.12);
+}
+
+/* 页脚 */
+#footer {
+  position: relative;
+  background: linear-gradient(180deg, rgba(16, 20, 27, 0.2), rgba(12, 15, 20, 0.72)) !important;
+  border-top: 1px solid rgba(242, 179, 109, 0.1);
+}
+
+#footer::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: 10%;
+  right: 10%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(242, 179, 109, 0.4), rgba(232, 163, 166, 0.3), transparent);
+}
+
+#footer .copyright {
+  color: var(--w-muted);
+}
+
+.footer-wrap {
+  border-radius: 0 !important;
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* 搜索 */
+#search-mask {
+  background: rgba(10, 13, 18, 0.78) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+#search-dialog {
+  border-radius: var(--w-radius-xl) !important;
+  border: 1px solid rgba(242, 179, 109, 0.22) !important;
+  background: rgba(20, 26, 34, 0.92) !important;
+  box-shadow: 0 30px 80px -30px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.03) !important;
+}
+
+#search-input {
+  border-radius: var(--w-radius-md) !important;
+  border: 1px solid rgba(242, 179, 109, 0.24) !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+  color: var(--w-snow) !important;
+  transition: border-color var(--w-base) var(--w-ease-soft), box-shadow var(--w-base) var(--w-ease-soft) !important;
+}
+
+#search-input:focus {
+  border-color: var(--w-amber) !important;
+  box-shadow: 0 0 0 4px rgba(242, 179, 109, 0.14) !important;
+  outline: none;
+}
+
+/* 滚动条 */
+::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(16, 20, 27, 0.6);
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 6px;
+  background: linear-gradient(180deg, var(--w-amber), var(--w-ember) 60%, var(--w-maple));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #ffd9a8, var(--w-amber));
+}
+
+/* ---------- 9. 自定义光标（暖冬猫爪） ---------- */
+html.winter-cursor, html.winter-cursor body {
+  cursor: url("/img/winter/cursor-paw.svg") 6 6, auto;
+}
+
+html.winter-cursor a,
+html.winter-cursor button,
+html.winter-cursor .btn,
+html.winter-cursor .recent-post-item,
+html.winter-cursor .card-widget,
+html.winter-cursor .nav-links,
+html.winter-cursor #pagination a,
+html.winter-cursor .tag-cloud a,
+html.winter-cursor .category-list a,
+html.winter-cursor .article-title,
+html.winter-cursor .menus_item_child li,
+html.winter-cursor #rightside button,
+html.winter-cursor input[type="submit"] {
+  cursor: url("/img/winter/cursor-paw-hover.svg") 8 8, pointer;
+}
+
+html.winter-cursor.winter-pressing,
+html.winter-cursor.winter-pressing body,
+html.winter-cursor.winter-pressing a,
+html.winter-cursor.winter-pressing button {
+  cursor: url("/img/winter/cursor-paw-press.svg") 5 5, pointer;
+}
+
+html.winter-cursor input,
+html.winter-cursor textarea,
+html.winter-cursor select {
+  cursor: text;
+}
+
+/* ---------- 10. 页面转场（风雪幕布） ---------- */
+#winter-transition {
+  position: fixed;
+  inset: 0;
+  z-index: 99998;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  background:
+    radial-gradient(ellipse 60% 45% at 30% 20%, rgba(242, 179, 109, 0.18), transparent 70%),
+    radial-gradient(ellipse 55% 45% at 78% 78%, rgba(199, 93, 82, 0.16), transparent 70%),
+    linear-gradient(145deg, #0d1118 0%, #151b24 48%, #10151d 100%);
+  /* 入场不再从屏幕外滑入：点击瞬间就铺满，避免本地快速跳转时看不到幕布 */
+  transform: translateY(0);
+  transition: transform 560ms var(--w-ease-out), opacity 300ms linear, visibility 0s linear;
+  will-change: transform;
+  overflow: hidden;
+}
+
+#winter-transition::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.6;
+  background-image:
+    radial-gradient(rgba(255, 255, 255, 0.7) 1px, transparent 1.5px),
+    radial-gradient(rgba(255, 224, 184, 0.5) 1px, transparent 1.5px);
+  background-size: 140px 140px, 210px 210px;
+  background-position: 0 0, 60px 90px;
+  animation: transition-drift 6s linear infinite;
+}
+
+#winter-transition::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 18vh;
+  background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.06));
+  filter: blur(6px);
+}
+
+@keyframes transition-drift {
+  from { background-position: 0 -140px, 60px -50px; }
+  to { background-position: 0 140px, 60px 250px; }
+}
+
+#winter-transition.is-in {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  /* 点击后尽快入场，避免本地快速跳转时“还没看见就结束” */
+  transition: transform 300ms var(--w-ease-out), opacity 120ms linear, visibility 0s linear;
+}
+
+#winter-transition.is-out {
+  opacity: 0;
+  visibility: visible;
+  transform: translateY(100%);
+  transition: transform 560ms var(--w-ease-out), opacity 300ms linear 200ms;
+}
+
+.wt-inner {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  transform: translateY(14px);
+  opacity: 0;
+  transition: transform 520ms var(--w-ease-out) 120ms, opacity 420ms var(--w-ease-soft) 120ms;
+}
+
+#winter-transition.is-in .wt-inner {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.wt-flake {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  animation: wt-spin 6s linear infinite;
+  filter: drop-shadow(0 0 14px rgba(242, 179, 109, 0.55));
+}
+
+.wt-flake svg {
+  width: 100%;
+  height: 100%;
+}
+
+@keyframes wt-spin {
+  to { transform: rotate(360deg); }
+}
+
+.wt-text {
+  font-family: var(--w-font-display);
+  font-size: 0.98rem;
+  letter-spacing: 0.12em;
+  color: #ffe6c4;
+  text-indent: 0.12em;
+  text-align: center;
+  max-width: 80vw;
+}
+
+.wt-line {
+  width: 160px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(242, 179, 109, 0.8), transparent);
+  position: relative;
+  overflow: hidden;
+  border-radius: 1px;
+}
+
+.wt-line::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: 40%;
+  background: linear-gradient(90deg, transparent, #fff, transparent);
+  animation: wt-line-sweep 1.4s var(--w-ease-soft) infinite;
+}
+
+@keyframes wt-line-sweep {
+  0% { transform: translateX(-120%); }
+  100% { transform: translateX(320%); }
+}
+
+/* 切换页时不再锁定滚动，避免滚动条消失造成的跳动 */
+html.winter-leaving {
+  overflow-anchor: none;
+}
+
+/* ---------- 11. 内容进场 ---------- */
+html.winter-reveal-ready #article-container > * {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 620ms var(--w-ease-out), transform 620ms var(--w-ease-out);
+}
+
+html.winter-reveal-ready #article-container > *.is-revealed {
+  opacity: 1;
+  transform: none;
+}
+
+/* 首页卡片：在既有 animate-in 基础上增强 */
+html.winter-reveal-ready .recent-post-item {
+  opacity: 0;
+  transform: translateY(20px) scale(0.995);
+  transition: opacity 700ms var(--w-ease-out), transform 700ms var(--w-ease-out),
+    box-shadow var(--w-slow) var(--w-ease-out), border-color var(--w-base) var(--w-ease-soft),
+    background var(--w-base) var(--w-ease-soft);
+}
+
+html.winter-reveal-ready .recent-post-item.animate-in {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* 阅读进度条 */
+#reading-progress {
+  height: 2px !important;
+  background: linear-gradient(90deg, var(--w-amber), var(--w-rose), var(--w-maple)) !important;
+  box-shadow: 0 0 14px rgba(242, 179, 109, 0.7);
+  border-radius: 0 2px 2px 0;
+}
+
+/* 顶部固定导航滚动态 */
+#page-header.fixed {
+  box-shadow: 0 10px 40px -20px rgba(0, 0, 0, 0.85);
+}
+
+/* 归档时间线 */
+.timeline-item::before {
+  background: radial-gradient(circle at 35% 30%, #fff, var(--w-amber)) !important;
+  box-shadow: 0 0 12px rgba(242, 179, 109, 0.7);
+}
+
+.timeline-item:hover {
+  transform: translateX(4px);
+}
+
+/* 评论区 */
+.comment-list > li {
+  background: rgba(23, 29, 38, 0.5);
+  border: 1px solid var(--w-line);
+  border-radius: var(--w-radius-md);
+  transition: border-color var(--w-base) var(--w-ease-soft), background var(--w-base) var(--w-ease-soft);
+}
+
+.comment-list > li:hover {
+  border-color: var(--w-line-strong);
+  background: rgba(23, 29, 38, 0.64);
+}
+
+/* 键盘可访问性 */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--w-amber);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+/* ---------- 12. 响应式 ---------- */
+@media (max-width: 900px) {
+  #site-info {
+    padding-bottom: 6vh;
+  }
+
+  .layout_post > .post,
+  .layout_post.layout_post > .post {
+    border-radius: var(--w-radius-lg) !important;
+  }
+
+  .recent-post-item,
+  .card-widget,
+  #pagination,
+  #comments {
+    border-radius: var(--w-radius-lg) !important;
+  }
+
+  #winter-cursor-glow {
+    display: none;
+  }
+
+  #page-header::after {
+    opacity: 0.35;
+  }
+}
+
+@media (max-width: 600px) {
+  #post .post-title {
+    font-size: 1.5rem;
+  }
+
+  #article-container h2 {
+    font-size: 1.28rem;
+  }
+
+  .wt-text {
+    letter-spacing: 0.18em;
+    font-size: 0.82rem;
+  }
+}
+
+/* 触摸设备不启用自定义光标，恢复系统光标 */
+@media (hover: none), (pointer: coarse) {
+  html.winter-cursor,
+  html.winter-cursor body,
+  html.winter-cursor a,
+  html.winter-cursor button,
+  html.winter-cursor .recent-post-item,
+  html.winter-cursor .card-widget {
+    cursor: auto;
+  }
+
+  #winter-cursor-glow {
+    display: none;
+  }
+}
+
+/* ---------- 13. 减少动效 ---------- */
+@media (prefers-reduced-motion: reduce) {
+  html.winter-reveal-ready #article-container > *,
+  html.winter-reveal-ready .recent-post-item {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  #winter-transition {
+    display: none;
+  }
+
+  #page-header::after,
+  .wt-flake,
+  .wt-line::after {
+    animation: none !important;
+  }
+
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* ============================================================
+   14. 卡片雪层：一整圈“压在外沿”的积雪厚度
+   做法：伪元素向外扩 9px，用 padding + mask 只保留外圈；
+   上沿是不规则雪脊 SVG，下沿是雪堆 SVG，左右是渐变薄雪。
+   旧实现失效原因：custom.css 的 ::before 写死 width:8px，
+   而旧规则只设 left/right，宽度被 8px 压死；且 overflow:hidden
+   把外扩部分裁掉，所以只剩左上角一小块。
+   ============================================================ */
+
+.recent-post-item,
+.card-widget,
+.layout_post > .post,
+.layout_post.layout_post > .post {
+  overflow: visible !important;
+}
+
+/* 封面图仍按卡片圆角裁剪，避免取消 overflow:hidden 后露出直角 */
+.recent-post-item .post_cover {
+  border-radius: var(--w-radius-xl) 0 0 var(--w-radius-xl);
+}
+
+.recent-post-item .post_cover.right {
+  border-radius: 0 var(--w-radius-xl) var(--w-radius-xl) 0;
+}
+
+@media (max-width: 768px) {
+  .recent-post-item .post_cover,
+  .recent-post-item .post_cover.right {
+    border-radius: var(--w-radius-xl) var(--w-radius-xl) 0 0;
+  }
+}
+
+.recent-post-item::before,
+.card-widget::before,
+.layout_post > .post::before {
+  content: "" !important;
+  position: absolute !important;
+  z-index: 4;
+  inset: calc(var(--w-snow-thick) * -1) !important;
+  width: auto !important;
+  height: auto !important;
+  padding: var(--w-snow-thick) !important;
+  border: 0 !important;
+  border-radius: calc(var(--w-radius-xl) + var(--w-snow-thick)) !important;
+  opacity: 1 !important;
+  pointer-events: none;
+  background:
+    var(--w-snow-top) top center / 100% var(--w-snow-thick) no-repeat,
+    var(--w-snow-bottom) bottom center / 100% var(--w-snow-thick) no-repeat,
+    linear-gradient(90deg,
+      transparent 0,
+      var(--w-snow-ring-soft) calc(var(--w-snow-thick) * 0.28),
+      var(--w-snow-ring) calc(var(--w-snow-thick) * 0.92),
+      transparent calc(var(--w-snow-thick) * 1.08),
+      transparent calc(100% - var(--w-snow-thick) * 1.08),
+      var(--w-snow-ring) calc(100% - var(--w-snow-thick) * 0.92),
+      var(--w-snow-ring-soft) calc(100% - var(--w-snow-thick) * 0.28),
+      transparent 100%) !important;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  filter: drop-shadow(0 1px 2px var(--w-snow-shadow)) drop-shadow(0 0 6px var(--w-snow-ring-glow));
+  transition: filter var(--w-base) var(--w-ease-soft);
+}
+
+.recent-post-item:hover::before,
+.card-widget:hover::before,
+.layout_post > .post:hover::before {
+  filter: drop-shadow(0 1px 3px var(--w-snow-shadow)) drop-shadow(0 0 10px var(--w-snow-ring-glow));
+}
+
+/* ============================================================
+   15. 头像：清掉旋转渐变环 / 白边 / 猫耳猫尾，只留细描边 + 轻光晕
+   ============================================================ */
+.card-widget .avatar-img .cat-ears,
+.card-widget .avatar-img .cat-tail {
+  display: none !important;
+}
+
+.card-widget .avatar-img,
+#aside-content .card-widget .avatar-img,
+#aside_content .card-widget .avatar-img {
+  position: relative;
+  overflow: visible;
+  box-shadow: none !important;
+}
+
+/* custom.css 的 ::before 是旋转渐变环，这里换成静态暖色柔光 */
+.card-widget .avatar-img::before {
+  content: "" !important;
+  inset: -6px !important;
+  border-radius: 50% !important;
+  background: radial-gradient(circle, var(--w-avatar-halo) 0%, transparent 68%) !important;
+  background-size: auto !important;
+  animation: none !important;
+  opacity: 0.9;
+  z-index: 0;
+}
+
+/* custom.css 的 ::after 是白色内描边，这里改成 1px 细描边 */
+.card-widget .avatar-img::after {
+  content: "" !important;
+  inset: 0 !important;
+  border: 1px solid var(--w-avatar-ring) !important;
+  border-radius: 50% !important;
+  background: none !important;
+  box-shadow: 0 6px 18px -10px var(--w-avatar-halo);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.card-widget .avatar-img img {
+  position: relative;
+  z-index: 1;
+  border: 0 !important;
+  border-radius: 50% !important;
+  box-shadow: none !important;
+}
+
+.card-widget .avatar-img:hover {
+  transform: none !important;
+}
+
+/* ============================================================
+   16. 日间 / 夜间主题切换按钮
+   ============================================================ */
+#winter-theme-toggle {
+  position: fixed;
+  top: 78px;
+  right: 20px;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border: 1px solid var(--w-line-strong);
+  border-radius: 50%;
+  color: var(--w-toggle-color);
+  background: var(--w-glass);
+  box-shadow: var(--w-shadow);
+  backdrop-filter: blur(14px) saturate(1.15);
+  -webkit-backdrop-filter: blur(14px) saturate(1.15);
+  cursor: pointer;
+  transition: transform var(--w-base) var(--w-ease-out), border-color var(--w-base) var(--w-ease-soft),
+    color var(--w-base) var(--w-ease-soft), background-color var(--w-base) var(--w-ease-soft),
+    box-shadow var(--w-base) var(--w-ease-out);
+}
+
+#winter-theme-toggle:hover {
+  transform: translateY(-2px) rotate(-10deg);
+  border-color: var(--w-amber);
+  color: var(--w-toggle-hover);
+  box-shadow: 0 12px 28px -12px rgba(0, 0, 0, 0.75), 0 0 24px -6px rgba(242, 179, 109, 0.55);
+}
+
+#winter-theme-toggle:active {
+  transform: scale(0.92) rotate(0deg);
+}
+
+#winter-theme-toggle .wt-sun,
+#winter-theme-toggle .wt-moon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#winter-theme-toggle svg {
+  width: 19px;
+  height: 19px;
+}
+
+#winter-theme-toggle .wt-moon {
+  display: none;
+}
+
+html.winter-day #winter-theme-toggle {
+  --w-toggle-color: #4a443c;
+  --w-toggle-hover: #a8602a;
+}
+
+html.winter-day #winter-theme-toggle .wt-sun {
+  display: none;
+}
+
+html.winter-day #winter-theme-toggle .wt-moon {
+  display: flex;
+}
+
+/* 隐藏 custom.js 注入的旧星星点击 canvas（无 id），避免与雪花叠加 */
+body > canvas:not([id]) {
+  display: none !important;
+}
+
+/* ============================================================
+   17. 日间皮肤（html.winter-day）
+   ============================================================ */
+html.winter-day {
+  --w-snow: #2b2822;
+  --w-mist: #5f5950;
+  --w-muted: #837b6f;
+  --w-amber: #c67b3c;
+  --w-amber-deep: #a8602a;
+  --w-ember: #c95f3b;
+  --w-maple: #a84b47;
+  --w-rose: #d48e92;
+  --w-pine: #5f8271;
+  --w-ice: #6f95ad;
+
+  --w-glass: rgba(253, 248, 240, 0.72);
+  --w-glass-hover: rgba(255, 251, 244, 0.84);
+  --w-line: rgba(150, 111, 70, 0.2);
+  --w-line-strong: rgba(150, 111, 70, 0.42);
+  --w-nav: rgba(252, 248, 240, 0.86);
+
+  /* 组件令牌整体换装：浅底上改用暖棕细描边，避免全白墙 */
+  --w-card-line: rgba(176, 142, 102, 0.3);
+  --w-card-line-hover: rgba(176, 142, 102, 0.48);
+  --w-cap-dot: rgba(255, 255, 255, 1);
+  --w-cap-wash: rgba(255, 255, 255, 0.9);
+  --w-cap-opacity: 0.85;
+  --w-cap-opacity-hover: 0.95;
+  --w-nav-line: #8b6a45;
+  --w-nav-line-shadow: 0 1px 0 rgba(255, 255, 255, 0.95), 0 0 10px rgba(255, 255, 255, 0.8),
+    0 0 16px rgba(198, 123, 60, 0.35);
+  --w-nav-icon-hover: #1f1d19;
+  --w-click-flake: 158, 106, 58;
+
+  /* 日间雪层：暖白雪面，靠暖棕描边和投影与浅底拉开层次 */
+  --w-snow-svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 24' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23ffffff'/%3E%3Cstop offset='.55' stop-color='%23f7f1e7'/%3E%3Cstop offset='1' stop-color='%23e4d8c7'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath fill='url(%23g)' d='M0 0H240V9C232 13 226 16 216 15C206 14 202 9 192 10C182 11 178 16 168 16C158 16 154 10 144 10C134 10 130 15.5 120 15.5C110 15.5 106 10 96 9.5C86 9 82 14.5 72 15C62 15.5 58 10 48 10C38 10 34 15 24 15.5C16 16 8 13 0 8Z'/%3E%3C/svg%3E");
+  --w-snow-side: rgba(150, 111, 70, 0.24);
+  --w-snow-side-hover: rgba(150, 111, 70, 0.38);
+  --w-snow-opacity: 0.9;
+  --w-snow-opacity-hover: 1;
+  --w-snow-shadow: rgba(150, 111, 70, 0.22);
+
+  /* 日间积雪环：雪面纯白，靠暖棕投影和描边在浅底上压出厚度 */
+  --w-snow-ring: rgba(255, 255, 255, 0.98);
+  --w-snow-ring-soft: rgba(206, 186, 160, 0.6);
+  --w-snow-ring-glow: rgba(150, 111, 70, 0.32);
+  --w-snow-top: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 16' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23ffffff'/%3E%3Cstop offset='.45' stop-color='%23f5ecdc'/%3E%3Cstop offset='1' stop-color='%23d8c6ab'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath fill='url(%23g)' d='M0 0H240V5.2C232 8.4 226 13 216 12.4C206 11.8 202 5.8 192 6.4C182 7 178 13.2 168 12.6C158 12 154 5.6 144 6.2C134 6.8 130 13 120 12.4C110 11.8 106 5.8 96 6.4C86 7 82 13.3 72 12.8C62 12.3 58 6 48 6.6C38 7.2 34 13.4 24 12.8C16 12.3 8 10.4 0 8.2Z'/%3E%3C/svg%3E");
+  --w-snow-bottom: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 16' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23fffdf8'/%3E%3Cstop offset='.5' stop-color='%23f2e6d4'/%3E%3Cstop offset='1' stop-color='%23cdb99c'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath fill='url(%23g)' d='M0 16V12C8 8.4 14 4.8 24 5.6C34 6.4 40 11.4 50 10.8C60 10.2 64 4.6 74 5.4C84 6.2 88 12 98 11.4C108 10.8 112 5 122 5.8C132 6.6 136 12.2 146 11.6C156 11 160 5.2 170 6C180 6.8 184 11.8 194 11.4C204 11 210 7.4 220 6.8C228 6.3 234 7.6 240 9.4V16Z'/%3E%3C/svg%3E");
+  --w-avatar-ring: rgba(150, 111, 70, 0.3);
+  --w-avatar-halo: rgba(198, 123, 60, 0.16);
+
+  --w-shadow: 0 16px 38px -20px rgba(92, 73, 52, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  --w-shadow-hover: 0 24px 52px -22px rgba(92, 73, 52, 0.48),
+    0 0 0 1px rgba(198, 123, 60, 0.22), 0 0 36px -14px rgba(198, 123, 60, 0.32),
+    inset 0 1px 0 #ffffff;
+
+  --main-color: #b5703a;
+  --main-light: #8f5427;
+  --main-warm: #c95f3b;
+  --bg-base: #f1e9dc;
+  --card-bg: rgba(255, 252, 246, 0.76);
+  --nav-bg: rgba(252, 248, 240, 0.86);
+  --text-primary: #2b2822;
+  --text-secondary: #5f5950;
+  --border-color: rgba(150, 111, 70, 0.2);
+}
+
+html.winter-day body {
+  background-color: #f1e9dc;
+  color: var(--w-snow);
+}
+
+html.winter-day #web_bg {
+  filter: saturate(0.94) brightness(1.12);
+}
+
+html.winter-day #web_bg::before {
+  background-color: rgba(238, 227, 211, 0.42);
+  background-image:
+    radial-gradient(1200px 620px at 16% -6%, rgba(252, 226, 186, 0.28), transparent 62%),
+    radial-gradient(900px 520px at 90% 10%, rgba(240, 214, 211, 0.22), transparent 60%),
+    radial-gradient(1000px 700px at 50% 108%, rgba(206, 222, 210, 0.18), transparent 65%),
+    linear-gradient(180deg, rgba(250, 244, 234, 0.5) 0%, rgba(246, 238, 226, 0.4) 45%, rgba(240, 230, 214, 0.58) 100%);
+}
+
+html.winter-day ::selection {
+  background: rgba(198, 123, 60, 0.22);
+  color: #2b2822;
+}
+
+/* 日间雪花粒子：白点加一层淡影，浅底上依然可见 */
+html.winter-day #winter-particles {
+  opacity: 0.5;
+  filter: drop-shadow(0 1px 2px rgba(110, 92, 72, 0.5)) saturate(1.05);
+}
+
+html.winter-day #winter-particles.is-ready {
+  opacity: 0.5;
+}
+
+html.winter-day #winter-cursor-glow {
+  background: radial-gradient(circle, rgba(198, 123, 60, 0.26) 0%, rgba(198, 123, 60, 0.1) 40%, transparent 68%);
+}
+
+/* 横幅：保留浅色文字，只把底部压暗换成米白，衔接日间背景 */
+html.winter-day #page-header::before {
+  background:
+    linear-gradient(180deg, rgba(30, 26, 22, 0.34) 0%, rgba(30, 26, 22, 0.1) 40%, rgba(42, 35, 27, 0.52) 80%, #f1e9dc 100%),
+    radial-gradient(ellipse 70% 55% at 26% 78%, rgba(246, 208, 158, 0.28), transparent 72%);
+}
+
+html.winter-day #site-title,
+html.winter-day #site-subtitle {
+  color: #fffaf2;
+}
+
+/* 导航 */
+html.winter-day #nav {
+  background: linear-gradient(180deg, rgba(252, 248, 240, 0.94), rgba(252, 248, 240, 0.68));
+  border-bottom-color: rgba(150, 111, 70, 0.18);
+}
+
+html.winter-day #nav.show {
+  box-shadow: 0 12px 34px -20px rgba(92, 73, 52, 0.55);
+}
+
+html.winter-day #nav a {
+  color: #4a443c;
+}
+
+html.winter-day #nav a:hover {
+  color: #1f1d19;
+}
+
+html.winter-day #nav .active {
+  color: #a8602a;
+}
+
+html.winter-day #nav span.site-page.group {
+  color: #2b2822 !important;
+}
+
+html.winter-day #nav span.site-page.group:hover,
+html.winter-day #nav span.site-page.group.active {
+  color: #a8602a !important;
+}
+
+html.winter-day #nav .menus_items .menus_item .menus_item_child li a {
+  color: #2b2822 !important;
+}
+
+html.winter-day #nav .menus_items .menus_item .menus_item_child li a:hover {
+  color: #a8602a !important;
+}
+
+html.winter-day #nav .site-name {
+  color: #1f1d19;
+}
+
+html.winter-day #nav .menus_item_child {
+  background: rgba(252, 248, 240, 0.96) !important;
+  border-color: rgba(150, 111, 70, 0.22);
+}
+
+html.winter-day #nav .menus_item_child li a:hover {
+  background: rgba(198, 123, 60, 0.12);
+}
+
+/* 卡片与正文容器 */
+html.winter-day .card-widget,
+html.winter-day #pagination,
+html.winter-day #comments,
+html.winter-day .nav-links,
+html.winter-day #aside_content .card-widget,
+html.winter-day #aside_content .card-toc {
+  border-color: var(--w-card-line) !important;
+  background-color: var(--w-glass) !important;
+  box-shadow: var(--w-shadow) !important;
+}
+
+/* 首页文章卡片保留雪层边框：不跟随卡片描边令牌，下沿无雪 */
+html.winter-day .recent-post-item {
+  border-color: var(--w-snow-side) !important;
+  border-bottom-color: transparent !important;
+  background-color: var(--w-glass) !important;
+  box-shadow: var(--w-shadow) !important;
+}
+
+html.winter-day .recent-post-item:hover {
+  border-color: var(--w-snow-side-hover) !important;
+  border-bottom-color: transparent !important;
+  background-color: var(--w-glass-hover) !important;
+}
+
+html.winter-day .card-widget:hover,
+html.winter-day #pagination:hover,
+html.winter-day #comments:hover,
+html.winter-day #aside_content .card-toc:hover {
+  border-color: var(--w-card-line-hover) !important;
+  background-color: var(--w-glass-hover) !important;
+}
+
+html.winter-day .layout_post > .post,
+html.winter-day .layout_post.layout_post > .post {
+  background: rgba(253, 248, 240, 0.72) !important;
+  border-color: var(--w-card-line) !important;
+  box-shadow: var(--w-shadow) !important;
+}
+
+html.winter-day .layout_post > .post:hover,
+html.winter-day .layout_post.layout_post > .post:hover {
+  background: rgba(255, 251, 244, 0.84) !important;
+}
+
+html.winter-day .recent-post-item::after,
+html.winter-day .card-widget::after {
+  background: radial-gradient(320px circle at var(--mx, 50%) var(--my, 50%),
+    rgba(198, 123, 60, 0.12), rgba(198, 123, 60, 0.04) 38%, transparent 62%);
+}
+
+html.winter-day .recent-post-item::before,
+html.winter-day .card-widget::before {
+  border-radius: inherit;
+}
+
+/* 标题与正文文字（custom.css 里写死了白色，这里按日间覆盖） */
+html.winter-day .article-title,
+html.winter-day .recent-post-item .article-title,
+html.winter-day .layout_page > .post .article-title,
+html.winter-day .card .card-title,
+html.winter-day .card .card-title a,
+html.winter-day #post .post-title,
+html.winter-day #aside_content .card-widget .card-info-title,
+html.winter-day #aside_content .card-widget .card-title,
+html.winter-day .tag-cloud-title,
+html.winter-day .category-lists-title,
+html.winter-day .friends-title {
+  color: #2b2822 !important;
+}
+
+html.winter-day .recent-post-item:hover .article-title,
+html.winter-day .card .card-title a:hover {
+  color: #a8602a !important;
+}
+
+html.winter-day #article-container,
+html.winter-day #article-container p {
+  color: #3a3733;
+}
+
+html.winter-day #article-container h1,
+html.winter-day #article-container h2,
+html.winter-day #article-container h3,
+html.winter-day #article-container h4,
+html.winter-day #article-container h5,
+html.winter-day #article-container h6 {
+  color: #262420;
+}
+
+html.winter-day #article-container blockquote {
+  color: #5f5950;
+}
+
+html.winter-day #article-container code {
+  color: #9a5a20;
+  background: rgba(198, 123, 60, 0.1);
+}
+
+html.winter-day #article-container table {
+  background: rgba(253, 248, 240, 0.62);
+}
+
+html.winter-day #article-container table th {
+  color: #7a4a20;
+}
+
+html.winter-day #article-container .highlight,
+html.winter-day #article-container .code-wrap {
+  background: rgba(253, 248, 240, 0.86);
+}
+
+html.winter-day #article-container hr {
+  border-color: rgba(150, 111, 70, 0.22);
+}
+
+html.winter-day .layout_post > .post .article-meta-wrap {
+  color: #6f685e;
+}
+
+html.winter-day #aside_content .card-widget .card-info-description,
+html.winter-day #aside_content .card-widget .headline,
+html.winter-day #aside_content .card-widget .length-num {
+  color: #4a443c;
+}
+
+/* 页脚、搜索、滚动条 */
+html.winter-day #footer {
+  background: linear-gradient(180deg, rgba(241, 233, 220, 0.2), rgba(232, 221, 204, 0.85)) !important;
+  border-top-color: rgba(150, 111, 70, 0.18);
+}
+
+html.winter-day #footer .copyright {
+  color: #837b6f;
+}
+
+html.winter-day #search-mask {
+  background: rgba(240, 233, 221, 0.72) !important;
+}
+
+html.winter-day #search-dialog {
+  background: rgba(253, 248, 240, 0.94) !important;
+  border-color: rgba(198, 123, 60, 0.26) !important;
+  box-shadow: 0 30px 70px -34px rgba(92, 73, 52, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.6) !important;
+}
+
+html.winter-day #search-input {
+  background: rgba(255, 252, 246, 0.66) !important;
+  border-color: rgba(198, 123, 60, 0.26) !important;
+  color: #2b2822 !important;
+}
+
+html.winter-day ::-webkit-scrollbar-track {
+  background: rgba(240, 233, 221, 0.8);
+}
+
+/* 转场幕布在日间也可读 */
+html.winter-day #winter-transition {
+  background: radial-gradient(ellipse at center, rgba(252, 248, 240, 0.94) 0%, rgba(241, 233, 220, 0.98) 62%);
+}
+
+html.winter-day #winter-transition .wt-text {
+  color: #7a4a20;
+}
+
+html.winter-day #winter-transition .wt-flake svg g {
+  stroke: #c67b3c;
+}
+
+/* ============================================================
+   18. 新组件响应式与减少动效
+   ============================================================ */
+@media (max-width: 600px) {
+  #winter-theme-toggle {
+    top: 70px;
+    right: 12px;
+    width: 36px;
+    height: 36px;
+  }
+
+  #winter-theme-toggle svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+/* ============================================================
+   19. 清理 custom.css 旧导航装饰（猫爪 + 琥珀下划线）
+   旧规则残留 width:0 / hover 时 left:10% width:80%，会和新雪线错位
+   ============================================================ */
+#nav a::before,
+#nav .menus_item > span.site-page.group::before {
+  content: none !important;
+  display: none !important;
+}
+
+/* 旧的 padding-left 会把图标和文字整体推右，导致雪线不居中 */
+#nav a {
+  padding-left: 0;
+}
+
+/* 明确覆盖旧规则的 width / left / right，雪线始终与菜单项等宽 */
+#nav .menus_item > a.site-page::after,
+#nav .menus_item > span.site-page.group::after {
+  top: auto;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: 1px;
+  margin: 0;
+}
+
+#nav .menus_item > a.site-page:hover::after,
+#nav .menus_item > a.site-page.active::after,
+#nav .menus_item > span.site-page.group:hover::after {
+  left: 0;
+  width: 100%;
+}
+
+/* ============================================================
+   20. 侧栏卡片标题统一：全站一律“无图标”，只保留竖线锚点
+   理由：标题图标混用 Font Awesome / Remix 两套字体，部分卡片加载失败
+   会留下空槽，导致“有的有、有的没有”；统一按纯文字处理最稳。
+   ============================================================ */
+.card-widget .item-headline::after {
+  content: none !important;
+  display: none !important;
+}
+
+#aside-content .card-widget .item-headline,
+#aside_content .card-widget .item-headline {
+  display: flex;
+  align-items: center;
+  min-height: 26px;
+  padding-left: 16px;
+  line-height: 1.5;
+}
+
+#aside-content .card-widget .item-headline > i,
+#aside_content .card-widget .item-headline > i {
+  display: none !important;
+}
+
+#aside-content .card-widget .item-headline > span,
+#aside_content .card-widget .item-headline > span {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 0;
+  line-height: 1.5;
+}
+
+#aside-content .card-widget .item-headline > a.card-more-btn,
+#aside_content .card-widget .item-headline > a.card-more-btn {
+  display: inline-flex;
+  align-items: center;
+  margin-left: auto;
+}
+
+/* ============================================================
+   21. 正文盒子：克制的雪层边框（引用/提示/代码/表格）
+   只加 1px 边框 + 顶部内高光，不改背景，不抢正文
+   ============================================================ */
+:root {
+  --w-doc-line: rgba(248, 244, 236, 0.14);
+  --w-doc-edge: rgba(255, 255, 255, 0.2);
+}
+
+html.winter-day {
+  --w-doc-line: rgba(150, 111, 70, 0.22);
+  --w-doc-edge: rgba(255, 255, 255, 0.9);
+}
+
+#article-container blockquote,
+#article-container .note,
+#article-container .tip,
+#article-container .warning,
+#article-container .danger,
+#article-container .highlight,
+#article-container .code-wrap,
+#article-container table {
+  border: 1px solid var(--w-doc-line) !important;
+  border-radius: var(--w-radius-md);
+  box-shadow: inset 0 1px 0 var(--w-doc-edge);
+}
+
+/* ============================================================
+   22. 分页条：整条垂直居中，页码 / 省略号 / 箭头同轴
+   ============================================================ */
+#pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 16px;
+}
+
+#pagination .pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 0;
+  line-height: 1;
+}
+
+#pagination .pagination > * {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  height: 2.5em;
+  margin: 0 !important;
+  line-height: 1 !important;
+  vertical-align: middle;
+}
+
+#pagination .pagination .extend > i,
+#pagination .pagination .page-number > i {
+  display: block;
+  line-height: 1;
+}
+
+/* ============================================================
+   23. 页脚与主体同轴：最大宽度对齐主内容容器
+   ============================================================ */
+#footer .footer-other {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px 20px;
+}
+
+/* ============================================================
+   24. 顶部导航图标槽位：宽度/高度固定，图标缺失时也不塌陷
+   根因是菜单 icon 类名写错导致 ::before 无字形；
+   这里兜底保证未来再有缺字形，也不会让文字左右或上下偏移。
+   ============================================================ */
+#nav .site-page > i.fa-fw {
+  flex: 0 0 1.25em;
+  width: 1.25em;
+  min-height: 1em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: inherit;
+  vertical-align: middle;
+}
+
+/* ============================================================
+   25. 右侧控件区：只要四个圆形按钮，外层不要卡片底/边框/阴影
+   custom.css 给 #rightside 加了背景、描边和投影，这里整体去掉。
+   按钮本身的 50% 圆角、#go-up 进度环保持不变。
+   ============================================================ */
+#rightside,
+#rightside.rightside-show,
+html.winter-day #rightside,
+html.winter-day #rightside.rightside-show {
+  background: transparent !important;
+  background-image: none !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* ============================================================
+   26. 看板娘置顶：autoload.js 默认 #waifu z-index:1，
+   被 #body-wrap（z-index:2）和卡片层盖住；这里提到最上层，
+   但 pointer-events:none，避免挡住导航、分页和右侧按钮；
+   只放开工具栏按钮的点击。
+   ============================================================ */
+#waifu,
+#live2d-widget,
+.live2d-widget {
+  z-index: 99990 !important;
+  pointer-events: none !important;
+}
+
+/* 整个看板娘不接收鼠标，避免盖住正文链接与分页；
+   想看板娘工具栏可点左下角的 #waifu-toggle 开合 */
+#waifu-tool,
+#waifu-tips {
+  pointer-events: none !important;
+}
+
+#waifu-toggle {
+  pointer-events: auto !important;
+  z-index: 99989 !important;
+}
+
+/* ============================================================
+   27. 转场遮罩出现时拦截重复点击，保证每次跳转只播一次
+   （幕布本身 pointer-events:none，只有 is-in 期间接管）
+   ============================================================ */
+#winter-transition.is-in {
+  pointer-events: auto;
+}

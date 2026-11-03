@@ -1,0 +1,398 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="dark"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>ESP32-S3 联网实战：Wi-Fi、MQTT 与 OTA | 莫良的小窝</title><meta name="author" content="Liang_Mo"><meta name="copyright" content="Liang_Mo"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#0d0d0d"><meta name="description" content="让 ESP32-S3 稳定连上 Wi-Fi、通过 MQTT 收发指令，并支持空中升级 OTA 的工程化写法。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ESP32-S3 联网实战：Wi-Fi、MQTT 与 OTA">
+<meta property="og:url" content="https://moliangxx.github.io/2026/11/02/ESP32/ESP32-S3%20%E8%81%94%E7%BD%91%E5%AE%9E%E6%88%98%EF%BC%9AWiFi%E3%80%81MQTT%20%E4%B8%8E%20OTA/index.html">
+<meta property="og:site_name" content="莫良的小窝">
+<meta property="og:description" content="让 ESP32-S3 稳定连上 Wi-Fi、通过 MQTT 收发指令，并支持空中升级 OTA 的工程化写法。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://moliangxx.github.io/img/winter/banner-post.jpg">
+<meta property="article:published_time" content="2026-11-02T08:10:00.000Z">
+<meta property="article:modified_time" content="2026-11-02T12:34:15.495Z">
+<meta property="article:author" content="Liang_Mo">
+<meta property="article:tag" content="ESP32-S3">
+<meta property="article:tag" content="MQTT">
+<meta property="article:tag" content="OTA">
+<meta property="article:tag" content="WiFi">
+<meta property="article:tag" content="物联网">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://moliangxx.github.io/img/winter/banner-post.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "ESP32-S3 联网实战：Wi-Fi、MQTT 与 OTA",
+  "url": "https://moliangxx.github.io/2026/11/02/ESP32/ESP32-S3%20%E8%81%94%E7%BD%91%E5%AE%9E%E6%88%98%EF%BC%9AWiFi%E3%80%81MQTT%20%E4%B8%8E%20OTA/",
+  "image": "https://moliangxx.github.io/img/winter/banner-post.jpg",
+  "datePublished": "2026-11-02T08:10:00.000Z",
+  "dateModified": "2026-11-02T12:34:15.495Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "Liang_Mo",
+      "url": "https://moliangxx.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.webp"><link rel="canonical" href="https://moliangxx.github.io/2026/11/02/ESP32/ESP32-S3%20%E8%81%94%E7%BD%91%E5%AE%9E%E6%88%98%EF%BC%9AWiFi%E3%80%81MQTT%20%E4%B8%8E%20OTA/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.5.3"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!true && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"簡"},
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":500,"highlightFullpage":true,"highlightMacStyle":true},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":50,"languages":{"author":"作者: Liang_Mo","link":"链接: ","source":"来源: 莫良的小窝","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'medium_zoom',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.12.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'ESP32-S3 联网实战：Wi-Fi、MQTT 与 OTA',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="/css/remixicon/remixicon.css"><link rel="stylesheet" href="/css/custom.css"><link rel="stylesheet" href="/css/winter.css"><meta name="generator" content="Hexo 8.1.1"></head><body><div class="bg-animation" id="web_bg" style="background-image: url(/img/winter/bg-winter.jpg);"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.jpg" onerror="this.onerror=null;this.src='/img/error2.gif'" alt="avatar"/ loading='lazy'></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">77</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">101</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">26</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw ri-home-4-line"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw ri-archive-line"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw ri-price-tag-3-line"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw ri-folder-open-line"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/study/"><i class="fa-fw ri-book-open-line"></i><span> 学习</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw ri-list-unordered"></i><span> 列表</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw ri-music-2-line"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw ri-video-line"></i><span> 电影</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw ri-links-line"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/lidong/"><i class="fa-fw ri-user-line"></i><span> 礼物</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/winter/banner-post.jpg);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">莫良的小窝</span></a><a class="nav-page-title" href="/"><span class="site-name">ESP32-S3 联网实战：Wi-Fi、MQTT 与 OTA</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw ri-home-4-line"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw ri-archive-line"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw ri-price-tag-3-line"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw ri-folder-open-line"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/study/"><i class="fa-fw ri-book-open-line"></i><span> 学习</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw ri-list-unordered"></i><span> 列表</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw ri-music-2-line"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw ri-video-line"></i><span> 电影</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw ri-links-line"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/lidong/"><i class="fa-fw ri-user-line"></i><span> 礼物</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">ESP32-S3 联网实战：Wi-Fi、MQTT 与 OTA<a class="post-edit-link" href="https://github.com/moliangxx/moliangxx.github.io/edit/main/source/_posts_posts/ESP32/ESP32-S3 联网实战：WiFi、MQTT 与 OTA.md" title="编辑" target="_blank"><i class="fas fa-pencil-alt"></i></a></h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-11-02T08:10:00.000Z" title="发表于 2026-11-02 16:10:00">2026-11-02</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-11-02T12:34:15.495Z" title="更新于 2026-11-02 20:34:15">2026-11-02</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/ESP32-S3/">ESP32-S3</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/ESP32-S3/%E8%81%94%E7%BD%91/">联网</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="ESP32-S3-联网实战：Wi-Fi、MQTT-与-OTA"><a href="#ESP32-S3-联网实战：Wi-Fi、MQTT-与-OTA" class="headerlink" title="ESP32-S3 联网实战：Wi-Fi、MQTT 与 OTA"></a>ESP32-S3 联网实战：Wi-Fi、MQTT 与 OTA</h1><p>点灯只是开始。真正做项目时，设备要能<strong>联网、上报、远程升级</strong>，还要在断网时自己恢复。这篇整理一套能直接用的骨架。</p>
+<h2 id="一、Wi-Fi：自动重连比连上更重要"><a href="#一、Wi-Fi：自动重连比连上更重要" class="headerlink" title="一、Wi-Fi：自动重连比连上更重要"></a>一、Wi-Fi：自动重连比连上更重要</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;WiFi.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">const</span> <span class="type">char</span> *SSID = <span class="string">&quot;your-ssid&quot;</span>;</span><br><span class="line"><span class="type">const</span> <span class="type">char</span> *PASS = <span class="string">&quot;your-password&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">connectWiFi</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  WiFi.<span class="built_in">mode</span>(WIFI_STA);</span><br><span class="line">  WiFi.<span class="built_in">setAutoReconnect</span>(<span class="literal">true</span>);</span><br><span class="line">  WiFi.<span class="built_in">persistent</span>(<span class="literal">true</span>);</span><br><span class="line">  WiFi.<span class="built_in">begin</span>(SSID, PASS);</span><br><span class="line"></span><br><span class="line">  <span class="type">int</span> retry = <span class="number">0</span>;</span><br><span class="line">  <span class="keyword">while</span> (WiFi.<span class="built_in">status</span>() != WL_CONNECTED &amp;&amp; retry &lt; <span class="number">40</span>) &#123;</span><br><span class="line">    <span class="built_in">delay</span>(<span class="number">500</span>);</span><br><span class="line">    Serial.<span class="built_in">printf</span>(<span class="string">&quot;connecting... %d\n&quot;</span>, retry++);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (WiFi.<span class="built_in">status</span>() == WL_CONNECTED) &#123;</span><br><span class="line">    Serial.<span class="built_in">printf</span>(<span class="string">&quot;IP: %s\n&quot;</span>, WiFi.<span class="built_in">localIP</span>().<span class="built_in">toString</span>().<span class="built_in">c_str</span>());</span><br><span class="line">    Serial.<span class="built_in">printf</span>(<span class="string">&quot;RSSI: %d dBm\n&quot;</span>, WiFi.<span class="built_in">RSSI</span>());</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    Serial.<span class="built_in">println</span>(<span class="string">&quot;wifi failed, restart in 10s&quot;</span>);</span><br><span class="line">    <span class="built_in">delay</span>(<span class="number">10000</span>);</span><br><span class="line">    ESP.<span class="built_in">restart</span>();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>工程建议：</p>
+<ul>
+<li>用 <code>WiFi.setAutoReconnect(true)</code> + <code>WiFi.persistent(true)</code>。</li>
+<li>Wi-Fi 事件回调里做状态机，不要只靠 <code>delay</code> 轮询。</li>
+<li>密码不要硬编码，量产时放 NVS 或配网流程。</li>
+<li>信号弱时把发射功率调到 <code>WIFI_POWER_8_5dBm</code>，省电且稳定。</li>
+</ul>
+<p>事件回调写法：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">WiFi.<span class="built_in">onEvent</span>([](WiFiEvent_t event) &#123;</span><br><span class="line">  <span class="keyword">switch</span> (event) &#123;</span><br><span class="line">    <span class="keyword">case</span> ARDUINO_EVENT_WIFI_STA_GOT_IP:</span><br><span class="line">      Serial.<span class="built_in">println</span>(<span class="string">&quot;got ip&quot;</span>);</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> ARDUINO_EVENT_WIFI_STA_DISCONNECTED:</span><br><span class="line">      Serial.<span class="built_in">println</span>(<span class="string">&quot;disconnected, reconnecting&quot;</span>);</span><br><span class="line">      WiFi.<span class="built_in">reconnect</span>();</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">default</span>:</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<h2 id="二、时间同步：证书校验的前提"><a href="#二、时间同步：证书校验的前提" class="headerlink" title="二、时间同步：证书校验的前提"></a>二、时间同步：证书校验的前提</h2><p>MQTT over TLS 与 OTA 都需要正确时间。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;time.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">syncTime</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="built_in">configTime</span>(<span class="number">8</span> * <span class="number">3600</span>, <span class="number">0</span>, <span class="string">&quot;ntp.aliyun.com&quot;</span>, <span class="string">&quot;pool.ntp.org&quot;</span>);</span><br><span class="line">  <span class="keyword">struct</span> <span class="title class_">tm</span> timeinfo;</span><br><span class="line">  <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; <span class="number">20</span>; i++) &#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">getLocalTime</span>(&amp;timeinfo, <span class="number">1000</span>)) &#123;</span><br><span class="line">      Serial.<span class="built_in">printf</span>(<span class="string">&quot;time: %04d-%02d-%02d %02d:%02d\n&quot;</span>,</span><br><span class="line">        timeinfo.tm_year + <span class="number">1900</span>, timeinfo.tm_mon + <span class="number">1</span>, timeinfo.tm_mday,</span><br><span class="line">        timeinfo.tm_hour, timeinfo.tm_min);</span><br><span class="line">      <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  Serial.<span class="built_in">println</span>(<span class="string">&quot;ntp failed&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="三、MQTT：用-PubSubClient-收发"><a href="#三、MQTT：用-PubSubClient-收发" class="headerlink" title="三、MQTT：用 PubSubClient 收发"></a>三、MQTT：用 PubSubClient 收发</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;PubSubClient.h&gt;</span></span></span><br><span class="line"></span><br><span class="line">WiFiClient net;</span><br><span class="line"><span class="function">PubSubClient <span class="title">mqtt</span><span class="params">(net)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="type">const</span> <span class="type">char</span> *MQTT_HOST = <span class="string">&quot;broker.emqx.io&quot;</span>;</span><br><span class="line"><span class="type">const</span> <span class="type">int</span> MQTT_PORT = <span class="number">1883</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">onMessage</span><span class="params">(<span class="type">char</span> *topic, byte *payload, <span class="type">unsigned</span> <span class="type">int</span> len)</span> </span>&#123;</span><br><span class="line">  String msg;</span><br><span class="line">  msg.<span class="built_in">reserve</span>(len);</span><br><span class="line">  <span class="keyword">for</span> (<span class="type">unsigned</span> <span class="type">int</span> i = <span class="number">0</span>; i &lt; len; i++) msg += (<span class="type">char</span>)payload[i];</span><br><span class="line">  Serial.<span class="built_in">printf</span>(<span class="string">&quot;topic=%s msg=%s\n&quot;</span>, topic, msg.<span class="built_in">c_str</span>());</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (<span class="built_in">String</span>(topic) == <span class="string">&quot;home/led/set&quot;</span>) &#123;</span><br><span class="line">    <span class="built_in">digitalWrite</span>(<span class="number">48</span>, msg == <span class="string">&quot;on&quot;</span> ? HIGH : LOW);</span><br><span class="line">    mqtt.<span class="built_in">publish</span>(<span class="string">&quot;home/led/state&quot;</span>, msg == <span class="string">&quot;on&quot;</span> ? <span class="string">&quot;on&quot;</span> : <span class="string">&quot;off&quot;</span>, <span class="literal">true</span>);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">connectMqtt</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  mqtt.<span class="built_in">setServer</span>(MQTT_HOST, MQTT_PORT);</span><br><span class="line">  mqtt.<span class="built_in">setCallback</span>(onMessage);</span><br><span class="line">  mqtt.<span class="built_in">setKeepAlive</span>(<span class="number">30</span>);</span><br><span class="line">  mqtt.<span class="built_in">setBufferSize</span>(<span class="number">512</span>);</span><br><span class="line"></span><br><span class="line">  String clientId = <span class="string">&quot;s3-&quot;</span> + <span class="built_in">String</span>((<span class="type">uint32_t</span>)ESP.<span class="built_in">getEfuseMac</span>(), HEX);</span><br><span class="line">  <span class="keyword">while</span> (!mqtt.<span class="built_in">connected</span>()) &#123;</span><br><span class="line">    Serial.<span class="built_in">println</span>(<span class="string">&quot;mqtt connecting...&quot;</span>);</span><br><span class="line">    <span class="keyword">if</span> (mqtt.<span class="built_in">connect</span>(clientId.<span class="built_in">c_str</span>())) &#123;</span><br><span class="line">      mqtt.<span class="built_in">subscribe</span>(<span class="string">&quot;home/led/set&quot;</span>, <span class="number">1</span>);</span><br><span class="line">      mqtt.<span class="built_in">publish</span>(<span class="string">&quot;home/led/state&quot;</span>, <span class="string">&quot;offline&quot;</span>, <span class="literal">true</span>); <span class="comment">// retained 上线状态</span></span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="built_in">delay</span>(<span class="number">2000</span>);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="Topic-设计建议"><a href="#Topic-设计建议" class="headerlink" title="Topic 设计建议"></a>Topic 设计建议</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">home/&#123;room&#125;/&#123;device&#125;/set      下发指令</span><br><span class="line">home/&#123;room&#125;/&#123;device&#125;/state    设备状态</span><br><span class="line">home/&#123;room&#125;/&#123;device&#125;/telemetry 传感器数据</span><br></pre></td></tr></table></figure>
+
+<p>要点：</p>
+<ol>
+<li><strong>retained 状态</strong>：让新订阅者立刻知道当前状态。</li>
+<li><strong>QoS 1</strong>：至少一次，适合控制指令；QoS 2 在资源有限的设备上代价偏高。</li>
+<li><strong>payload 用 JSON</strong>，方便扩展：</li>
+</ol>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span> <span class="attr">&quot;power&quot;</span><span class="punctuation">:</span> <span class="string">&quot;on&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;brightness&quot;</span><span class="punctuation">:</span> <span class="number">80</span><span class="punctuation">,</span> <span class="attr">&quot;ts&quot;</span><span class="punctuation">:</span> <span class="number">1762000000</span> <span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>解析用 ArduinoJson：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;ArduinoJson.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">handleJson</span><span class="params">(<span class="type">const</span> <span class="type">char</span> *raw)</span> </span>&#123;</span><br><span class="line">  StaticJsonDocument&lt;<span class="number">256</span>&gt; doc;</span><br><span class="line">  <span class="keyword">if</span> (<span class="built_in">deserializeJson</span>(doc, raw)) <span class="keyword">return</span>;</span><br><span class="line">  <span class="type">bool</span> power = <span class="built_in">String</span>(doc[<span class="string">&quot;power&quot;</span>] | <span class="string">&quot;&quot;</span>) == <span class="string">&quot;on&quot;</span>;</span><br><span class="line">  <span class="type">int</span> brightness = doc[<span class="string">&quot;brightness&quot;</span>] | <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="四、OTA：不拆机也能升级"><a href="#四、OTA：不拆机也能升级" class="headerlink" title="四、OTA：不拆机也能升级"></a>四、OTA：不拆机也能升级</h2><h3 id="4-1-Arduino-OTA（局域网）"><a href="#4-1-Arduino-OTA（局域网）" class="headerlink" title="4.1 Arduino OTA（局域网）"></a>4.1 Arduino OTA（局域网）</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;ArduinoOTA.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">setupOta</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  ArduinoOTA.<span class="built_in">setHostname</span>(<span class="string">&quot;esp32s3-node&quot;</span>);</span><br><span class="line">  ArduinoOTA.<span class="built_in">setPassword</span>(<span class="string">&quot;ota-password&quot;</span>);</span><br><span class="line"></span><br><span class="line">  ArduinoOTA.<span class="built_in">onStart</span>([]() &#123; Serial.<span class="built_in">println</span>(<span class="string">&quot;ota start&quot;</span>); &#125;);</span><br><span class="line">  ArduinoOTA.<span class="built_in">onProgress</span>([](<span class="type">unsigned</span> <span class="type">int</span> progress, <span class="type">unsigned</span> <span class="type">int</span> total) &#123;</span><br><span class="line">    Serial.<span class="built_in">printf</span>(<span class="string">&quot;ota %u%%\n&quot;</span>, (progress * <span class="number">100</span>) / total);</span><br><span class="line">  &#125;);</span><br><span class="line">  ArduinoOTA.<span class="built_in">onEnd</span>([]() &#123; Serial.<span class="built_in">println</span>(<span class="string">&quot;ota done&quot;</span>); &#125;);</span><br><span class="line">  ArduinoOTA.<span class="built_in">onError</span>([](<span class="type">ota_error_t</span> error) &#123; Serial.<span class="built_in">printf</span>(<span class="string">&quot;ota error %u\n&quot;</span>, error); &#125;);</span><br><span class="line"></span><br><span class="line">  ArduinoOTA.<span class="built_in">begin</span>();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">loop</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  ArduinoOTA.<span class="built_in">handle</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-2-HTTPS-OTA（远程）"><a href="#4-2-HTTPS-OTA（远程）" class="headerlink" title="4.2 HTTPS OTA（远程）"></a>4.2 HTTPS OTA（远程）</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;HTTPUpdate.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;WiFiClientSecure.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">remoteUpdate</span><span class="params">(<span class="type">const</span> <span class="type">char</span> *url)</span> </span>&#123;</span><br><span class="line">  WiFiClientSecure client;</span><br><span class="line">  client.<span class="built_in">setCACert</span>(ROOT_CA);         <span class="comment">// 必须校验证书</span></span><br><span class="line">  client.<span class="built_in">setTimeout</span>(<span class="number">30000</span>);</span><br><span class="line"></span><br><span class="line">  httpUpdate.<span class="built_in">onStart</span>([]() &#123; Serial.<span class="built_in">println</span>(<span class="string">&quot;update start&quot;</span>); &#125;);</span><br><span class="line">  httpUpdate.<span class="built_in">onError</span>([](<span class="type">int</span> err) &#123; Serial.<span class="built_in">printf</span>(<span class="string">&quot;update error %d\n&quot;</span>, err); &#125;);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">auto</span> result = httpUpdate.<span class="built_in">update</span>(client, url);</span><br><span class="line">  Serial.<span class="built_in">printf</span>(<span class="string">&quot;update result=%d\n&quot;</span>, result);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>注意事项：</p>
+<ol>
+<li>分区表必须包含<strong>两个 APP 分区</strong>（<code>app0</code> &#x2F; <code>app1</code>），否则无法回滚。</li>
+<li>升级过程中断电可能变砖，建议加看门狗与“升级成功标记”。</li>
+<li>远程 OTA 必须用 HTTPS 并校验 CA，不要用 <code>setInsecure()</code> 上生产。</li>
+<li>先用小固件验证，再替换整机固件。</li>
+</ol>
+<h2 id="五、断网自恢复：状态机"><a href="#五、断网自恢复：状态机" class="headerlink" title="五、断网自恢复：状态机"></a>五、断网自恢复：状态机</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">enum</span> <span class="title class_">NetState</span> &#123; IDLE, WIFI_CONNECTING, MQTT_CONNECTING, ONLINE &#125;;</span><br><span class="line"></span><br><span class="line">NetState state = IDLE;</span><br><span class="line"><span class="type">unsigned</span> <span class="type">long</span> lastCheck = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">loop</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (<span class="built_in">millis</span>() - lastCheck &lt; <span class="number">1000</span>) <span class="keyword">return</span>;</span><br><span class="line">  lastCheck = <span class="built_in">millis</span>();</span><br><span class="line"></span><br><span class="line">  <span class="keyword">switch</span> (state) &#123;</span><br><span class="line">    <span class="keyword">case</span> IDLE:</span><br><span class="line">      <span class="built_in">connectWiFi</span>();</span><br><span class="line">      state = WiFi.<span class="built_in">status</span>() == WL_CONNECTED ? MQTT_CONNECTING : WIFI_CONNECTING;</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> WIFI_CONNECTING:</span><br><span class="line">      <span class="keyword">if</span> (WiFi.<span class="built_in">status</span>() == WL_CONNECTED) state = MQTT_CONNECTING;</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> MQTT_CONNECTING:</span><br><span class="line">      <span class="built_in">connectMqtt</span>();</span><br><span class="line">      <span class="keyword">if</span> (mqtt.<span class="built_in">connected</span>()) state = ONLINE;</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> ONLINE:</span><br><span class="line">      <span class="keyword">if</span> (!mqtt.<span class="built_in">connected</span>()) state = MQTT_CONNECTING;</span><br><span class="line">      <span class="keyword">if</span> (WiFi.<span class="built_in">status</span>() != WL_CONNECTED) state = WIFI_CONNECTING;</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (!mqtt.<span class="built_in">connected</span>()) &#123;</span><br><span class="line">    <span class="comment">// 避免 loop 阻塞</span></span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  mqtt.<span class="built_in">loop</span>();</span><br><span class="line">  ArduinoOTA.<span class="built_in">handle</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="六、功耗与稳定性建议"><a href="#六、功耗与稳定性建议" class="headerlink" title="六、功耗与稳定性建议"></a>六、功耗与稳定性建议</h2><table>
+<thead>
+<tr>
+<th>场景</th>
+<th>建议</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>电池供电</td>
+<td>用 light sleep，Wi-Fi 保持连接</td>
+</tr>
+<tr>
+<td>长期在线</td>
+<td>关闭 debug 日志，降低 CPU 频率至 160 MHz</td>
+</tr>
+<tr>
+<td>室内传感器</td>
+<td>每 5 分钟上报一次，其余时间休眠</td>
+</tr>
+<tr>
+<td>摄像头</td>
+<td>按需启动，采完即关</td>
+</tr>
+<tr>
+<td>看门狗</td>
+<td>启用 <code>esp_task_wdt</code>，避免任务卡死</td>
+</tr>
+</tbody></table>
+<h2 id="七、常见问题"><a href="#七、常见问题" class="headerlink" title="七、常见问题"></a>七、常见问题</h2><ol>
+<li><strong>MQTT 频繁掉线</strong>：检查 keepAlive 与 <code>mqtt.loop()</code> 是否被长任务阻塞。</li>
+<li><strong>OTA 卡在 0%</strong>：先确认 URL 可访问、证书时间正确、分区表够大。</li>
+<li><strong>Wi-Fi 连上但无网</strong>：检查 DNS 与路由器是否隔离了设备。</li>
+<li><strong>内存不足重启</strong>：TLS + JSON + 大 buffer 很吃 RAM，必要时用 PSRAM。</li>
+</ol>
+<h2 id="八、小结"><a href="#八、小结" class="headerlink" title="八、小结"></a>八、小结</h2><p>联网部分的核心不是“连上”，而是<strong>断了能自己回来</strong>：</p>
+<ul>
+<li>Wi-Fi 用事件 + 自动重连；</li>
+<li>MQTT 用 retained 状态 + QoS 1；</li>
+<li>OTA 用双分区 + HTTPS；</li>
+<li>主循环不要被阻塞。</li>
+</ul>
+<p>做到这四点，设备才具备上线的基本条件。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://moliangxx.github.io">Liang_Mo</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://moliangxx.github.io/2026/11/02/ESP32/ESP32-S3%20%E8%81%94%E7%BD%91%E5%AE%9E%E6%88%98%EF%BC%9AWiFi%E3%80%81MQTT%20%E4%B8%8E%20OTA/">https://moliangxx.github.io/2026/11/02/ESP32/ESP32-S3%20%E8%81%94%E7%BD%91%E5%AE%9E%E6%88%98%EF%BC%9AWiFi%E3%80%81MQTT%20%E4%B8%8E%20OTA/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://moliangxx.github.io" target="_blank">莫良的小窝</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/ESP32-S3/">ESP32-S3</a><a class="post-meta__tags" href="/tags/WiFi/">WiFi</a><a class="post-meta__tags" href="/tags/MQTT/">MQTT</a><a class="post-meta__tags" href="/tags/OTA/">OTA</a><a class="post-meta__tags" href="/tags/%E7%89%A9%E8%81%94%E7%BD%91/">物联网</a></div><div class="post-share"><div class="social-share" data-image="/img/winter/banner-post.jpg" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><div class="post-reward"><div class="reward-button"><i class="fas fa-qrcode"></i>“请我喝杯奶茶~”</div><div class="reward-main"><ul class="reward-all"><li class="reward-item"><a href="/img/wechat.jpg" target="_blank"><img class="post-qr-code-img" src="/img/wechat.jpg"/ loading='lazy'></a><div class="post-qr-code-desc"></div></li></ul></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width" href="/2026/11/02/ESP32/ESP32-S3%20%E5%85%A5%E9%97%A8%EF%BC%9A%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83%E3%80%81GPIO%20%E4%B8%8E%20FreeRTOS/" title="ESP32-S3 入门：开发环境、GPIO 与 FreeRTOS"><img class="cover" src="/img/winter/banner-post.jpg" onerror="onerror=null;src='/img/error2.jpg'" alt="cover of next post" loading='lazy'><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">ESP32-S3 入门：开发环境、GPIO 与 FreeRTOS</div></div><div class="info-2"><div class="info-item-1">ESP32-S3 入门：开发环境、GPIO 与 FreeRTOSESP32-S3 是乐鑫面向“带屏幕 + 带摄像头 + 轻量 AI”场景的芯片：双核 LX7、Wi-Fi + BLE 5、USB OTG、足够的 PSRAM，价格还不高。这篇记录从点灯到多任务的第一条路径。 一、芯片要点   项目 ESP32-S3    内核 双核 Xtensa LX7，最高 240 MHz   内存 512 KB SRAM + 外部 PSRAM（模组常见 2&#x2F;8 MB）   无线 2.4 GHz Wi-Fi 4 + BLE 5   GPIO 最多 45 个可用引脚（具体看模组）   总线 USB OTG、SPI、I2C、I2S、UART、TWAI(CAN)   特色 向量指令，适合轻量神经网络推理   常见模组：ESP32-S3-WROOM-1（无屏方案）、ESP32-S3-WROOM-1-N16R8（16MB Flash + 8MB PSRAM）、ESP32-S3-DevKitC-1 开发板。 二、开发环境2.1 Arduino IDE &#x2F; arduino-cli 安装 ES...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2026/11/02/ESP32/ESP32-S3%20%E5%85%A5%E9%97%A8%EF%BC%9A%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83%E3%80%81GPIO%20%E4%B8%8E%20FreeRTOS/" title="ESP32-S3 入门：开发环境、GPIO 与 FreeRTOS"><img class="cover" src="/img/winter/banner-post.jpg" alt="cover" loading='lazy'><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-11-02</div><div class="info-item-2">ESP32-S3 入门：开发环境、GPIO 与 FreeRTOS</div></div><div class="info-2"><div class="info-item-1">ESP32-S3 入门：开发环境、GPIO 与 FreeRTOSESP32-S3 是乐鑫面向“带屏幕 + 带摄像头 + 轻量 AI”场景的芯片：双核 LX7、Wi-Fi + BLE 5、USB OTG、足够的 PSRAM，价格还不高。这篇记录从点灯到多任务的第一条路径。 一、芯片要点   项目 ESP32-S3    内核 双核 Xtensa LX7，最高 240 MHz   内存 512 KB SRAM + 外部 PSRAM（模组常见 2&#x2F;8 MB）   无线 2.4 GHz Wi-Fi 4 + BLE 5   GPIO 最多 45 个可用引脚（具体看模组）   总线 USB OTG、SPI、I2C、I2S、UART、TWAI(CAN)   特色 向量指令，适合轻量神经网络推理   常见模组：ESP32-S3-WROOM-1（无屏方案）、ESP32-S3-WROOM-1-N16R8（16MB Flash + 8MB PSRAM）、ESP32-S3-DevKitC-1 开发板。 二、开发环境2.1 Arduino IDE &#x2F; arduino-cli 安装 ES...</div></div></div></a></div></div><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="giscus-wrap"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content is-expand"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#ESP32-S3-%E8%81%94%E7%BD%91%E5%AE%9E%E6%88%98%EF%BC%9AWi-Fi%E3%80%81MQTT-%E4%B8%8E-OTA"><span class="toc-number">1.</span> <span class="toc-text">ESP32-S3 联网实战：Wi-Fi、MQTT 与 OTA</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81Wi-Fi%EF%BC%9A%E8%87%AA%E5%8A%A8%E9%87%8D%E8%BF%9E%E6%AF%94%E8%BF%9E%E4%B8%8A%E6%9B%B4%E9%87%8D%E8%A6%81"><span class="toc-number">1.1.</span> <span class="toc-text">一、Wi-Fi：自动重连比连上更重要</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E6%97%B6%E9%97%B4%E5%90%8C%E6%AD%A5%EF%BC%9A%E8%AF%81%E4%B9%A6%E6%A0%A1%E9%AA%8C%E7%9A%84%E5%89%8D%E6%8F%90"><span class="toc-number">1.2.</span> <span class="toc-text">二、时间同步：证书校验的前提</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81MQTT%EF%BC%9A%E7%94%A8-PubSubClient-%E6%94%B6%E5%8F%91"><span class="toc-number">1.3.</span> <span class="toc-text">三、MQTT：用 PubSubClient 收发</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Topic-%E8%AE%BE%E8%AE%A1%E5%BB%BA%E8%AE%AE"><span class="toc-number">1.3.1.</span> <span class="toc-text">Topic 设计建议</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81OTA%EF%BC%9A%E4%B8%8D%E6%8B%86%E6%9C%BA%E4%B9%9F%E8%83%BD%E5%8D%87%E7%BA%A7"><span class="toc-number">1.4.</span> <span class="toc-text">四、OTA：不拆机也能升级</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-1-Arduino-OTA%EF%BC%88%E5%B1%80%E5%9F%9F%E7%BD%91%EF%BC%89"><span class="toc-number">1.4.1.</span> <span class="toc-text">4.1 Arduino OTA（局域网）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-HTTPS-OTA%EF%BC%88%E8%BF%9C%E7%A8%8B%EF%BC%89"><span class="toc-number">1.4.2.</span> <span class="toc-text">4.2 HTTPS OTA（远程）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E6%96%AD%E7%BD%91%E8%87%AA%E6%81%A2%E5%A4%8D%EF%BC%9A%E7%8A%B6%E6%80%81%E6%9C%BA"><span class="toc-number">1.5.</span> <span class="toc-text">五、断网自恢复：状态机</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AD%E3%80%81%E5%8A%9F%E8%80%97%E4%B8%8E%E7%A8%B3%E5%AE%9A%E6%80%A7%E5%BB%BA%E8%AE%AE"><span class="toc-number">1.6.</span> <span class="toc-text">六、功耗与稳定性建议</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%83%E3%80%81%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98"><span class="toc-number">1.7.</span> <span class="toc-text">七、常见问题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AB%E3%80%81%E5%B0%8F%E7%BB%93"><span class="toc-number">1.8.</span> <span class="toc-text">八、小结</span></a></li></ol></li></ol></div></div></div></div></main><footer id="footer" style="background-image: url(/img/winter/bg-winter.jpg);"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By Liang_Mo</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.1</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.3</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.3"></script><script src="/js/main.js?v=5.5.3"></script><script src="/js/tw_cn.js?v=5.5.3"></script><script src="https://cdn.jsdelivr.net/npm/medium-zoom@1.1.0/dist/medium-zoom.min.js"></script><div class="js-pjax"><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = {"mapping":"pathname","crossorigin":"anonymous"}
+
+  const getGiscusTheme = theme => theme === 'dark' ? 'dark' : 'light'
+
+  const createScriptElement = config => {
+    const ele = document.createElement('script')
+    Object.entries(config).forEach(([key, value]) => {
+      ele.setAttribute(key, value)
+    })
+    return ele
+  }
+
+  const loadGiscus = (el = document, key) => {
+    const mappingConfig = isShuoshuo
+      ? { 'data-mapping': 'specific', 'data-term': key }
+      : { 'data-mapping': (option && option['data-mapping']) || 'pathname' }
+
+    const giscusConfig = {
+      src: 'https://giscus.app/client.js',
+      'data-repo': 'moliangxx/moliangxx.github.io',
+      'data-repo-id': 'R_kgDOQkNdpQ',
+      'data-category-id': 'DIC_kwDOQkNdpc4C0z4Q',
+      'data-theme': getGiscusTheme(document.documentElement.getAttribute('data-theme')),
+      'data-reactions-enabled': '1',
+      crossorigin: 'anonymous',
+      async: true,
+      ...option,
+      ...mappingConfig
+    }
+
+    const scriptElement = createScriptElement(giscusConfig)
+
+    el.querySelector('#giscus-wrap').appendChild(scriptElement)
+
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyGiscus = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+  }
+
+  const changeGiscusTheme = theme => {
+    const iframe = document.querySelector('#giscus-wrap iframe')
+    if (iframe) {
+      const message = {
+        giscus: {
+          setConfig: {
+            theme: getGiscusTheme(theme)
+          }
+        }
+      }
+      iframe.contentWindow.postMessage(message, 'https://giscus.app')
+    }
+  }
+
+  btf.addGlobalFn('themeChange', changeGiscusTheme, 'giscus')
+
+  if (isShuoshuo) {
+    'Giscus' === 'Giscus'
+      ? window.shuoshuoComment = { loadComment: loadGiscus }
+      : window.loadOtherComment = loadGiscus
+    return
+  }
+
+  if ('Giscus' === 'Giscus' || !false) {
+    if (false) btf.loadComment(document.getElementById('giscus-wrap'), loadGiscus)
+    else loadGiscus()
+  } else {
+    window.loadOtherComment = loadGiscus
+  }
+})()</script></div><script src="/js/custom.js"></script><script src="/js/winter.js"></script><script src="https://fastly.jsdelivr.net/npm/live2d-widgets@1.0.1/dist/autoload.js"></script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js"></script><script src="https://cdn.jsdelivr.net/npm/meting@2/dist/Meting.min.js"></script><script>(() => {
+  const destroyAplayer = () => {
+    if (window.aplayers) {
+      for (let i = 0; i < window.aplayers.length; i++) {
+        if (!window.aplayers[i].options.fixed) {
+          window.aplayers[i].destroy()
+        }
+      }
+    }
+  }
+
+  const runMetingJS = () => {
+    typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+  }
+
+  btf.addGlobalFn('pjaxSend', destroyAplayer, 'destroyAplayer')
+  btf.addGlobalFn('pjaxComplete', loadMeting, 'runMetingJS')
+})()</script><script src="https://cdn.jsdelivr.net/npm/pjax@0.2.8/pjax.min.js" defer="defer"></script><script>document.addEventListener('DOMContentLoaded', () => {
+  const pjaxSelectors = ["meta[property=\"og:image\"]","meta[property=\"og:title\"]","meta[property=\"og:url\"]","meta[property=\"og:description\"]","link[rel=\"canonical\"]","head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+
+  window.pjax = new Pjax({
+    elements: 'a:not([target="_blank"])',
+    selectors: pjaxSelectors,
+    cacheBust: false,
+    analytics: false,
+    scrollRestoration: false
+  })
+
+  const triggerPjaxFn = (val) => {
+    if (!val) return
+    Object.values(val).forEach(fn => {
+      try {
+        fn()
+      } catch (err) {
+        console.debug('Pjax callback failed:', err)
+      }
+    })
+  }
+
+  document.addEventListener('pjax:send', () => {
+    // removeEventListener
+    btf.removeGlobalFnEvent('pjaxSendOnce')
+    btf.removeGlobalFnEvent('themeChange')
+
+    // reset readmode
+    const $bodyClassList = document.body.classList
+    if ($bodyClassList.contains('read-mode')) $bodyClassList.remove('read-mode')
+
+    triggerPjaxFn(window.globalFn.pjaxSend)
+  })
+
+  document.addEventListener('pjax:complete', () => {
+    btf.removeGlobalFnEvent('pjaxCompleteOnce')
+    document.querySelectorAll('script[data-pjax]').forEach(item => {
+      const newScript = document.createElement('script')
+      const content = item.text || item.textContent || item.innerHTML || ""
+      Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+      newScript.appendChild(document.createTextNode(content))
+      item.parentNode.replaceChild(newScript, item)
+    })
+
+    triggerPjaxFn(window.globalFn.pjaxComplete)
+  })
+
+  document.addEventListener('pjax:error', e => {
+    if (e.request.status === 404) {
+      true
+        ? pjax.loadUrl('/404.html')
+        : window.location.href = e.request.responseURL
+    }
+  })
+})</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
