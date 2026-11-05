@@ -1,0 +1,667 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="dark"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>枚举、Const Val、普通 Val 与 @IntDef：灵江项目的四种&quot;常量&quot;取舍 | 莫良的小窝</title><meta name="author" content="Liang_Mo"><meta name="copyright" content="Liang_Mo"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#0d0d0d"><meta name="description" content="灵江项目里既有 M.kt 的大量 const Int、GrowthEvent 的 const String，也有 WeatherAlertLevel 这类带属性和方法的枚举。本文对照真实代码，讲清四种常量方案的编译产物、类型安全、when 穷尽、ordinal 持久化陷阱、values() 与 entries 的差异，以及哪些常量必须留在 Int&#x2F;String。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="枚举、Const Val、普通 Val 与 @IntDef：灵江项目的四种&quot;常量&quot;取舍">
+<meta property="og:url" content="https://moliangxx.github.io/2026/11/04/android-kotlin-enum-constants/index.html">
+<meta property="og:site_name" content="莫良的小窝">
+<meta property="og:description" content="灵江项目里既有 M.kt 的大量 const Int、GrowthEvent 的 const String，也有 WeatherAlertLevel 这类带属性和方法的枚举。本文对照真实代码，讲清四种常量方案的编译产物、类型安全、when 穷尽、ordinal 持久化陷阱、values() 与 entries 的差异，以及哪些常量必须留在 Int&#x2F;String。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://moliangxx.github.io/img/winter/banner-post.jpg">
+<meta property="article:published_time" content="2026-11-04T03:00:00.000Z">
+<meta property="article:modified_time" content="2026-11-04T08:09:11.765Z">
+<meta property="article:author" content="Liang_Mo">
+<meta property="article:tag" content="Android 面试">
+<meta property="article:tag" content="IntDef">
+<meta property="article:tag" content="Kotlin">
+<meta property="article:tag" content="const">
+<meta property="article:tag" content="枚举">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://moliangxx.github.io/img/winter/banner-post.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "枚举、Const Val、普通 Val 与 @IntDef：灵江项目的四种\"常量\"取舍",
+  "url": "https://moliangxx.github.io/2026/11/04/android-kotlin-enum-constants/",
+  "image": "https://moliangxx.github.io/img/winter/banner-post.jpg",
+  "datePublished": "2026-11-04T03:00:00.000Z",
+  "dateModified": "2026-11-04T08:09:11.765Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "Liang_Mo",
+      "url": "https://moliangxx.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.webp"><link rel="canonical" href="https://moliangxx.github.io/2026/11/04/android-kotlin-enum-constants/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.5.3"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!true && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"簡"},
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":500,"highlightFullpage":true,"highlightMacStyle":true},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":50,"languages":{"author":"作者: Liang_Mo","link":"链接: ","source":"来源: 莫良的小窝","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'medium_zoom',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.12.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '枚举、Const Val、普通 Val 与 @IntDef：灵江项目的四种"常量"取舍',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="/css/remixicon/remixicon.css"><link rel="stylesheet" href="/css/custom.css"><link rel="stylesheet" href="/css/winter.css"><meta name="generator" content="Hexo 8.1.1"></head><body><div class="bg-animation" id="web_bg" style="background-image: url(/img/winter/bg-winter.jpg);"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.jpg" onerror="this.onerror=null;this.src='/img/error2.gif'" alt="avatar"/ loading='lazy'></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">86</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">119</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">27</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw ri-home-4-line"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw ri-archive-line"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw ri-price-tag-3-line"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw ri-folder-open-line"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/study/"><i class="fa-fw ri-book-open-line"></i><span> 学习</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw ri-list-unordered"></i><span> 列表</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw ri-music-2-line"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw ri-video-line"></i><span> 电影</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw ri-links-line"></i><span> 友链</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/winter/banner-post.jpg);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">莫良的小窝</span></a><a class="nav-page-title" href="/"><span class="site-name">枚举、Const Val、普通 Val 与 @IntDef：灵江项目的四种&quot;常量&quot;取舍</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw ri-home-4-line"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw ri-archive-line"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw ri-price-tag-3-line"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw ri-folder-open-line"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/study/"><i class="fa-fw ri-book-open-line"></i><span> 学习</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw ri-list-unordered"></i><span> 列表</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw ri-music-2-line"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw ri-video-line"></i><span> 电影</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw ri-links-line"></i><span> 友链</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">枚举、Const Val、普通 Val 与 @IntDef：灵江项目的四种&quot;常量&quot;取舍<a class="post-edit-link" href="https://github.com/moliangxx/moliangxx.github.io/edit/main/source/_posts_posts/android-kotlin-enum-constants.md" title="编辑" target="_blank"><i class="fas fa-pencil-alt"></i></a></h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-11-04T03:00:00.000Z" title="发表于 2026-11-04 11:00:00">2026-11-04</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-11-04T08:09:11.765Z" title="更新于 2026-11-04 16:09:11">2026-11-04</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Android-%E9%9D%A2%E8%AF%95/">Android 面试</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="枚举、const-val、普通-val-与-IntDef：灵江项目的四种”常量”取舍"><a href="#枚举、const-val、普通-val-与-IntDef：灵江项目的四种”常量”取舍" class="headerlink" title="枚举、const val、普通 val 与 @IntDef：灵江项目的四种”常量”取舍"></a>枚举、const val、普通 val 与 @IntDef：灵江项目的四种”常量”取舍</h1><p>“常量用枚举还是 <code>const val</code>？”这个问题在面试里经常被答成一句”枚举更安全”。但真实项目里，灵江同时存在四类常量：</p>
+<ul>
+<li><code>M.kt</code> 里几十个 <code>const val</code> 的 <code>Int</code>；</li>
+<li><code>GrowthEvent</code> 里八个 <code>const val</code> 的 <code>String</code>；</li>
+<li><code>WeatherAlertLevel</code> &#x2F; <code>WeatherAlertType</code> &#x2F; <code>SeedModule</code> 这种带属性和方法的枚举；</li>
+<li><code>ChatFragment</code> 里直接把选项下标映射成 <code>Int</code> 模式值。</li>
+</ul>
+<p>它们不是风格混乱，而是<strong>每种常量承担的职责不同</strong>：有的要进数据库，有的要跨进程&#x2F;跨端，有的要做 UI 展示，有的只是编译期标签。这篇按灵江真实代码逐个拆。</p>
+<h2 id="一、场景：一个-App-里为什么会有四种常量"><a href="#一、场景：一个-App-里为什么会有四种常量" class="headerlink" title="一、场景：一个 App 里为什么会有四种常量"></a>一、场景：一个 App 里为什么会有四种常量</h2><p>先看灵江的数据模型，常量大致分四类用途：</p>
+<ol>
+<li><strong>持久化值</strong>：<code>growth_event.type</code>、<code>ancient_checkin.source</code>、<code>architecture_part.childType</code> 直接写进 Room 列，甚至参与复合主键；</li>
+<li><strong>协议&#x2F;云端值</strong>：<code>GrowthEvent.TYPE_*</code> 会随 Bmob 上传下载，字符串必须稳定；</li>
+<li><strong>UI 配置</strong>：<code>WeatherAlertLevel</code> 要带 <code>@StringRes</code>、要比较严重程度，<code>SeedModule</code> 要带 SharedPreferences key 和版本号；</li>
+<li><strong>纯标签&#x2F;开关</strong>：<code>M.MODE_EDIT</code>、<code>M.TOOL_MODE_CLOSE</code> 这种只在进程内分派。</li>
+</ol>
+<p>如果全部改成枚举，持久化列就得加 <code>TypeConverter</code> 或迁移；如果全部用 <code>Int</code>，UI 分派又会失去类型安全。灵江的选择是”按边界选方案”，下面逐个看。</p>
+<h2 id="二、灵江里的真实代码"><a href="#二、灵江里的真实代码" class="headerlink" title="二、灵江里的真实代码"></a>二、灵江里的真实代码</h2><h3 id="2-1-M-kt：大量-const-val-Int"><a href="#2-1-M-kt：大量-const-val-Int" class="headerlink" title="2.1 M.kt：大量 const val Int"></a>2.1 <code>M.kt</code>：大量 <code>const val Int</code></h3><p>对应文件：<code>base/M.kt</code>。</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// base/M.kt:6</span></span><br><span class="line"><span class="keyword">object</span> M &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// :12-24  来源固定值：图鉴三表用 system/user，image 用 camera/album/avatar，checkin 用 recognize/manual/map</span></span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">val</span> SOURCE_SYSTEM = <span class="number">0</span></span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">val</span> SOURCE_USER = <span class="number">1</span></span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">val</span> SOURCE_CAMERA = <span class="number">2</span></span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">val</span> SOURCE_ALBUM = <span class="number">3</span></span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">val</span> SOURCE_AVATAR = <span class="number">4</span></span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">val</span> SOURCE_AI = <span class="number">5</span></span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">val</span> SOURCE_RECOGNIZE = <span class="number">8</span></span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">val</span> SOURCE_MANUAL = <span class="number">9</span></span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">val</span> SOURCE_MAP = <span class="number">10</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// :28-30</span></span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">val</span> STORAGE_STATE_NORMAL = <span class="number">1</span>   <span class="comment">// 正常数据（默认，已上传）</span></span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">val</span> STORAGE_STATE_PENDING = -<span class="number">1</span> <span class="comment">// 本地，待上传</span></span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">val</span> STORAGE_STATE_JUNK = <span class="number">0</span>     <span class="comment">// 垃圾数据</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// :33-35</span></span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">val</span> RARITY_NORMAL = <span class="number">2</span></span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">val</span> RARITY_RARE = <span class="number">5</span></span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">val</span> RARITY_EPIC = <span class="number">8</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// :38-41</span></span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">val</span> TYPE_CHECKIN = <span class="number">10</span></span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">val</span> TYPE_ARCH = <span class="number">11</span></span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">val</span> TYPE_STRUCTURE = <span class="number">12</span></span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">val</span> TYPE_RELIC = <span class="number">13</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// :307  数据库版本</span></span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">val</span> DB_VERSION: <span class="built_in">Int</span> = <span class="number">1</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这些值的共同点是：<strong>它们会直接进 Room 列、参与比较、参与 <code>when</code> 分派，甚至作为注解参数</strong>。</p>
+<p><code>DB_VERSION</code> 还有一个硬约束：它被用在 Room 注解里。</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// data/db/AppDatabase.kt:43</span></span><br><span class="line"><span class="meta">@Database(</span></span><br><span class="line"><span class="meta">    entities = [...],</span></span><br><span class="line"><span class="meta">    version = M.DB_VERSION,</span></span><br><span class="line"><span class="meta">    exportSchema = false</span></span><br><span class="line"><span class="meta">)</span></span><br></pre></td></tr></table></figure>
+
+<p>注解参数必须是编译期常量，所以这里只能 <code>const val</code>；换成普通 <code>val</code> 直接编译不过。这是”为什么有些常量不能改成枚举”的最直接例子。</p>
+<h3 id="2-2-GrowthEvent：const-val-String-作为持久化类型标签"><a href="#2-2-GrowthEvent：const-val-String-作为持久化类型标签" class="headerlink" title="2.2 GrowthEvent：const val String 作为持久化类型标签"></a>2.2 <code>GrowthEvent</code>：<code>const val String</code> 作为持久化类型标签</h3><p>对应文件：<code>data/arch/local/action/GrowthEvent.kt</code>。</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// :19-53</span></span><br><span class="line"><span class="meta">@Entity(</span></span><br><span class="line"><span class="meta">    tableName = <span class="string">&quot;growth_event&quot;</span>,</span></span><br><span class="line"><span class="meta">    indices = [</span></span><br><span class="line"><span class="meta">        Index(value = [<span class="string">&quot;userId&quot;</span>]),</span></span><br><span class="line"><span class="meta">        Index(value = [<span class="string">&quot;type&quot;</span>]),</span></span><br><span class="line"><span class="meta">        Index(value = [<span class="string">&quot;storageState&quot;</span>])</span></span><br><span class="line"><span class="meta">    ]</span></span><br><span class="line"><span class="meta">)</span></span><br><span class="line"><span class="keyword">data</span> <span class="keyword">class</span> <span class="title class_">GrowthEvent</span>(</span><br><span class="line">    <span class="meta">@PrimaryKey</span> <span class="keyword">var</span> id: String = <span class="string">&quot;&quot;</span>,</span><br><span class="line">    <span class="keyword">var</span> userId: String,</span><br><span class="line">    <span class="keyword">var</span> type: String,                 <span class="comment">// 这里是 String，不是枚举</span></span><br><span class="line">    <span class="keyword">var</span> refId: String? = <span class="literal">null</span>,</span><br><span class="line">    <span class="keyword">var</span> deltaExp: <span class="built_in">Int</span> = <span class="number">0</span>,</span><br><span class="line">    <span class="keyword">var</span> deltaPoints: <span class="built_in">Int</span> = <span class="number">0</span>,</span><br><span class="line">    <span class="keyword">var</span> remark: String? = <span class="literal">null</span>,</span><br><span class="line">    <span class="keyword">var</span> time: <span class="built_in">Long</span> = System.currentTimeMillis(),</span><br><span class="line">    <span class="keyword">var</span> version: <span class="built_in">Int</span> = <span class="number">1</span>,</span><br><span class="line">    <span class="keyword">var</span> storageState: <span class="built_in">Int</span> = M.STORAGE_STATE_PENDING,</span><br><span class="line">    <span class="keyword">var</span> remoteId: String? = <span class="literal">null</span>,</span><br><span class="line">) &#123;</span><br><span class="line">    <span class="keyword">companion</span> <span class="keyword">object</span> &#123;</span><br><span class="line">        <span class="comment">// :57-64</span></span><br><span class="line">        <span class="keyword">const</span> <span class="keyword">val</span> TYPE_CHECKIN = <span class="string">&quot;CHECKIN&quot;</span></span><br><span class="line">        <span class="keyword">const</span> <span class="keyword">val</span> TYPE_UNLOCK_ARCH = <span class="string">&quot;UNLOCK_ARCH&quot;</span></span><br><span class="line">        <span class="keyword">const</span> <span class="keyword">val</span> TYPE_COLLECT_STRUCTURE = <span class="string">&quot;COLLECT_STRUCTURE&quot;</span></span><br><span class="line">        <span class="keyword">const</span> <span class="keyword">val</span> TYPE_COLLECT_RELIC = <span class="string">&quot;COLLECT_RELIC&quot;</span></span><br><span class="line">        <span class="keyword">const</span> <span class="keyword">val</span> TYPE_SPEND_UNLOCK = <span class="string">&quot;SPEND_UNLOCK&quot;</span></span><br><span class="line">        <span class="keyword">const</span> <span class="keyword">val</span> TYPE_EARN_QUIZ = <span class="string">&quot;EARN_QUIZ&quot;</span></span><br><span class="line">        <span class="keyword">const</span> <span class="keyword">val</span> TYPE_EARN_ADMIN = <span class="string">&quot;EARN_ADMIN&quot;</span></span><br><span class="line">        <span class="keyword">const</span> <span class="keyword">val</span> TYPE_MANUAL_ADJUST = <span class="string">&quot;MANUAL_ADJUST&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>为什么不是枚举？因为这一列要：</p>
+<ul>
+<li>写进 Room 的 <code>TEXT</code> 列（枚举需要 <code>TypeConverter</code>，还要考虑迁移）；</li>
+<li>上传到 Bmob，云端也是字符串；</li>
+<li>在服务端&#x2F;开发者后台可能直接按字符串筛选。</li>
+</ul>
+<p>用 <code>const val String</code> 的好处是”值稳定、跨端一致、零转换”；代价是<strong>类型不安全</strong>——<code>addGrowthEventOnce(userId, type: String, ...)</code> 接受任何字符串，写错一个字母也能入库。</p>
+<h3 id="2-3-WeatherAlertLevel-WeatherAlertType：带属性的枚举"><a href="#2-3-WeatherAlertLevel-WeatherAlertType：带属性的枚举" class="headerlink" title="2.3 WeatherAlertLevel &#x2F; WeatherAlertType：带属性的枚举"></a>2.3 <code>WeatherAlertLevel</code> &#x2F; <code>WeatherAlertType</code>：带属性的枚举</h3><p>对应文件：<code>data/weather/alert/WeatherAlert.kt</code>。</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// :17-27</span></span><br><span class="line"><span class="keyword">enum</span> <span class="keyword">class</span> <span class="title class_">WeatherAlertLevel</span>(<span class="meta">@StringRes</span> <span class="keyword">val</span> titleRes: <span class="built_in">Int</span>) &#123;</span><br><span class="line">    YELLOW(R.string.weather_alert_title_yellow),</span><br><span class="line">    ORANGE(R.string.weather_alert_title_orange),</span><br><span class="line">    RED(R.string.weather_alert_title_red);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">companion</span> <span class="keyword">object</span> &#123;</span><br><span class="line">        <span class="comment">/** 取更严重的级别 */</span></span><br><span class="line">        <span class="function"><span class="keyword">fun</span> <span class="title">max</span><span class="params">(a: <span class="type">WeatherAlertLevel</span>, b: <span class="type">WeatherAlertLevel</span>)</span></span>: WeatherAlertLevel =</span><br><span class="line">            <span class="keyword">if</span> (a.ordinal &gt;= b.ordinal) a <span class="keyword">else</span> b</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// :34-45</span></span><br><span class="line"><span class="keyword">enum</span> <span class="keyword">class</span> <span class="title class_">WeatherAlertType</span>(<span class="meta">@StringRes</span> <span class="keyword">val</span> labelRes: <span class="built_in">Int</span>) &#123;</span><br><span class="line">    RAINSTORM(R.string.weather_alert_type_rainstorm),</span><br><span class="line">    TYPHOON(R.string.weather_alert_type_typhoon),</span><br><span class="line">    THUNDERSTORM(R.string.weather_alert_type_thunderstorm),</span><br><span class="line">    HAIL(R.string.weather_alert_type_hail),</span><br><span class="line">    SNOWSTORM(R.string.weather_alert_type_snowstorm),</span><br><span class="line">    GALE(R.string.weather_alert_type_gale),</span><br><span class="line">    SANDSTORM(R.string.weather_alert_type_sandstorm),</span><br><span class="line">    HEAT(R.string.weather_alert_type_heat),</span><br><span class="line">    COLD_WAVE(R.string.weather_alert_type_cold_wave),</span><br><span class="line">    FOG(R.string.weather_alert_type_fog)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这是枚举的典型正面用法：</p>
+<ul>
+<li>集合固定（黄&#x2F;橙&#x2F;红，十种天气）；</li>
+<li>每个常量带 <code>@StringRes</code>，UI 直接取文案；</li>
+<li>需要 <code>when</code> 穷尽（天气文案拼接、通知样式）；</li>
+<li>需要比较严重程度（<code>max</code>）。</li>
+</ul>
+<p>注意 <code>max</code> 用的是 <code>ordinal</code>。这在<strong>进程内比较</strong>是可以的，因为声明顺序就是严重程度顺序；但它同时埋了一个雷：<strong>一旦有人调整常量声明顺序，严重程度逻辑会静默翻转</strong>。更稳的写法是显式 <code>rank</code> 字段：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 改进示例</span></span><br><span class="line"><span class="keyword">enum</span> <span class="keyword">class</span> <span class="title class_">WeatherAlertLevel</span>(<span class="meta">@StringRes</span> <span class="keyword">val</span> titleRes: <span class="built_in">Int</span>, <span class="keyword">val</span> rank: <span class="built_in">Int</span>) &#123;</span><br><span class="line">    YELLOW(R.string.weather_alert_title_yellow, <span class="number">0</span>),</span><br><span class="line">    ORANGE(R.string.weather_alert_title_orange, <span class="number">1</span>),</span><br><span class="line">    RED(R.string.weather_alert_title_red, <span class="number">2</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">companion</span> <span class="keyword">object</span> &#123;</span><br><span class="line">        <span class="function"><span class="keyword">fun</span> <span class="title">max</span><span class="params">(a: <span class="type">WeatherAlertLevel</span>, b: <span class="type">WeatherAlertLevel</span>)</span></span> =</span><br><span class="line">            <span class="keyword">if</span> (a.rank &gt;= b.rank) a <span class="keyword">else</span> b</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-4-SeedModule：枚举当”注册表”"><a href="#2-4-SeedModule：枚举当”注册表”" class="headerlink" title="2.4 SeedModule：枚举当”注册表”"></a>2.4 <code>SeedModule</code>：枚举当”注册表”</h3><p>对应文件：<code>base/util/SeedUtil.kt</code>。</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// :37-42</span></span><br><span class="line"><span class="keyword">enum</span> <span class="keyword">class</span> <span class="title class_">SeedModule</span>(<span class="keyword">val</span> spKey: String, <span class="keyword">val</span> seedVersion: <span class="built_in">Int</span>) &#123;</span><br><span class="line">    ARCHITECTURE(<span class="string">&quot;arch&quot;</span>, <span class="number">4</span>),</span><br><span class="line">    IMAGE(<span class="string">&quot;image&quot;</span>, <span class="number">3</span>),</span><br><span class="line">    ACTION(<span class="string">&quot;action&quot;</span>, <span class="number">3</span>),</span><br><span class="line">    USER(<span class="string">&quot;user&quot;</span>, <span class="number">1</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// :54</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">val</span> shouldCache = HashMap&lt;SeedModule, <span class="built_in">Boolean</span>&gt;()</span><br></pre></td></tr></table></figure>
+
+<p>这里是枚举的另一个强项：<strong>每个模块带自己的数据，同时枚举常量还能当 Map 的 key</strong>。<code>HashMap&lt;SeedModule, Boolean&gt;</code> 的 key 是单例对象，<code>hashCode</code> 稳定，不需要字符串拼接。</p>
+<p>如果改成 <code>const val SEED_ARCH = &quot;arch&quot;</code>，<code>HashMap&lt;String, Boolean&gt;</code> 也能用，但：</p>
+<ul>
+<li>没有”模块全集”的概念，无法遍历；</li>
+<li>传错字符串不会报错；</li>
+<li>想给每个模块挂 <code>seedVersion</code>，只能再建一张 Map 或再写一堆常量。</li>
+</ul>
+<h3 id="2-5-DataShowFragment-DataType：跨-Bundle-传枚举名"><a href="#2-5-DataShowFragment-DataType：跨-Bundle-传枚举名" class="headerlink" title="2.5 DataShowFragment.DataType：跨 Bundle 传枚举名"></a>2.5 <code>DataShowFragment.DataType</code>：跨 Bundle 传枚举名</h3><p>对应文件：<code>main/mine/dataview/DataShowFragment.kt</code>。</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// :54-57</span></span><br><span class="line"><span class="keyword">enum</span> <span class="keyword">class</span> <span class="title class_">DataType</span> &#123;</span><br><span class="line">    CHECKIN,</span><br><span class="line">    CONTRIBUTE</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// :143-151</span></span><br><span class="line"><span class="keyword">companion</span> <span class="keyword">object</span> &#123;</span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">val</span> ARG_DATA_TYPE = <span class="string">&quot;arg_data_type&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">newInstance</span><span class="params">(type: <span class="type">DataType</span>)</span></span>: DataShowFragment = DataShowFragment().apply &#123;</span><br><span class="line">        <span class="comment">// apply 语法糖：等价于</span></span><br><span class="line">        <span class="comment">// val f = DataShowFragment()</span></span><br><span class="line">        <span class="comment">// f.arguments = Bundle().apply &#123; putString(ARG_DATA_TYPE, type.name) &#125;</span></span><br><span class="line">        <span class="comment">// return f</span></span><br><span class="line">        arguments = Bundle().apply &#123; putString(ARG_DATA_TYPE, type.name) &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// :79-84</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">val</span> dataType: DataType</span><br><span class="line">    <span class="keyword">get</span>() = DataType.valueOf(</span><br><span class="line">        requireNotNull(requireArguments().getString(ARG_DATA_TYPE)) &#123;</span><br><span class="line">            <span class="string">&quot;DataShowFragment 缺少参数 <span class="variable">$ARG_DATA_TYPE</span>&quot;</span></span><br><span class="line">        &#125;</span><br><span class="line">    )</span><br></pre></td></tr></table></figure>
+
+<p>这里把 <code>type.name</code> 写进 Bundle，再用 <code>valueOf</code> 还原。好处是 Bundle 里是人类可读字符串；风险是<strong>枚举名成了隐式协议</strong>：</p>
+<ul>
+<li>改枚举常量名 &#x3D; 改协议；</li>
+<li>若把同样的字符串写进 SP&#x2F;数据库&#x2F;云端，R8 混淆后跨版本可能 <code>valueOf</code> 失败；</li>
+<li><code>valueOf</code> 对大小写敏感，未知值直接抛 <code>IllegalArgumentException</code>。</li>
+</ul>
+<p>更稳的做法是给枚举一个显式 <code>key</code>：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 改进示例：持久化用显式 key，不用 name/ordinal</span></span><br><span class="line"><span class="keyword">enum</span> <span class="keyword">class</span> <span class="title class_">DataType</span>(<span class="keyword">val</span> key: String) &#123;</span><br><span class="line">    CHECKIN(<span class="string">&quot;checkin&quot;</span>),</span><br><span class="line">    CONTRIBUTE(<span class="string">&quot;contribute&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">companion</span> <span class="keyword">object</span> &#123;</span><br><span class="line">        <span class="function"><span class="keyword">fun</span> <span class="title">fromKey</span><span class="params">(key: <span class="type">String</span>?)</span></span>: DataType? = entries.firstOrNull &#123; it.key == key &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-6-ArchitecturePart-childType：常量进复合主键"><a href="#2-6-ArchitecturePart-childType：常量进复合主键" class="headerlink" title="2.6 ArchitecturePart.childType：常量进复合主键"></a>2.6 <code>ArchitecturePart.childType</code>：常量进复合主键</h3><p>对应文件：<code>data/arch/local/part/ArchitecturePart.kt</code>。</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// :31-48</span></span><br><span class="line"><span class="meta">@Entity(</span></span><br><span class="line"><span class="meta">    tableName = <span class="string">&quot;architecture_part&quot;</span>,</span></span><br><span class="line"><span class="meta">    primaryKeys = [<span class="string">&quot;architectureId&quot;</span>, <span class="string">&quot;childType&quot;</span>, <span class="string">&quot;childId&quot;</span>],</span></span><br><span class="line"><span class="meta">    indices = [Index(value = [<span class="string">&quot;childType&quot;</span>, <span class="string">&quot;childId&quot;</span>])]</span></span><br><span class="line"><span class="meta">)</span></span><br><span class="line"><span class="keyword">data</span> <span class="keyword">class</span> <span class="title class_">ArchitecturePart</span>(</span><br><span class="line">    <span class="keyword">var</span> architectureId: String,</span><br><span class="line">    <span class="keyword">var</span> childType: <span class="built_in">Int</span>,   <span class="comment">// STRUCTURE / RELIC 的常量值，参与复合主键</span></span><br><span class="line">    <span class="keyword">var</span> childId: String,</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>这一列是复合主键的一部分，已经写进了本地库、云端关系行。<strong>这种值几乎不可能改成枚举</strong>：一旦改类型，Room 要迁移、云端要改协议、历史数据要转换。能做的只有加 <code>@IntDef</code> 或包装类型，在编译期收窄取值范围。</p>
+<h3 id="2-7-ToolState-recognizeMode：Int-模式值一路泄漏"><a href="#2-7-ToolState-recognizeMode：Int-模式值一路泄漏" class="headerlink" title="2.7 ToolState.recognizeMode：Int 模式值一路泄漏"></a>2.7 <code>ToolState.recognizeMode</code>：<code>Int</code> 模式值一路泄漏</h3><p>对应文件：<code>data/ai/local/ToolState.kt</code>、<code>main/chat/ChatFragment.kt</code>、<code>agent/core/Agent.kt</code>。</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// data/ai/local/ToolState.kt:27</span></span><br><span class="line"><span class="keyword">var</span> recognizeMode: <span class="built_in">Int</span> = M.TOOL_MODE_CLOSE</span><br><span class="line"></span><br><span class="line"><span class="comment">// main/chat/ChatFragment.kt:216-222</span></span><br><span class="line"><span class="keyword">private</span> <span class="function"><span class="keyword">fun</span> <span class="title">recognizeModeAt</span><span class="params">(index: <span class="type">Int</span>)</span></span>: <span class="built_in">Int</span> = <span class="keyword">when</span> (index) &#123;</span><br><span class="line">    <span class="number">0</span> -&gt; M.TOOL_MODE_OPEN</span><br><span class="line">    <span class="number">1</span> -&gt; M.TOOL_MODE_RELIC</span><br><span class="line">    <span class="number">2</span> -&gt; M.TOOL_MODE_STRUCTURE</span><br><span class="line">    <span class="number">3</span> -&gt; M.TOOL_MODE_ARCHITECTURE</span><br><span class="line">    <span class="keyword">else</span> -&gt; M.TOOL_MODE_CLOSE</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>M.TOOL_MODE_*</code> 是五个 <code>const Int</code>（0~4），在 <code>ToolState</code>、<code>ChatFragment</code>、<code>Agent</code> 之间来回传。问题是：</p>
+<ul>
+<li>任何 <code>Int</code> 都能赋给 <code>recognizeMode</code>，编译器不拦；</li>
+<li>两层 <code>when</code> 都靠 <code>else</code> 兜底，新增模式时不会报错；</li>
+<li>“选项下标”和”模式值”是两套编号，<code>recognizeModeAt</code> &#x2F; <code>recognizeIndexForMode</code> 必须手工维护映射，容易错位。</li>
+</ul>
+<p>这类值最适合的是<strong>枚举 + 显式持久化 code</strong>，或者 <code>@IntDef</code> + 集中映射。</p>
+<h3 id="2-8-一个”常量与模型漂移”的真实例子"><a href="#2-8-一个”常量与模型漂移”的真实例子" class="headerlink" title="2.8 一个”常量与模型漂移”的真实例子"></a>2.8 一个”常量与模型漂移”的真实例子</h3><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// base/M.kt:88-90</span></span><br><span class="line"><span class="comment">// Chat 会话类型（Chat.chatType）：1 普通文本对话 / 2 拍照识图</span></span><br><span class="line"><span class="keyword">const</span> <span class="keyword">val</span> CHAT_TYPE_NORMAL = <span class="number">1</span></span><br><span class="line"><span class="keyword">const</span> <span class="keyword">val</span> CHAT_TYPE_RECOGNIZE = <span class="number">2</span></span><br></pre></td></tr></table></figure>
+
+<p>全项目搜索 <code>CHAT_TYPE_</code>，除了定义处没有任何引用；<code>Chat</code> 实体里也没有 <code>chatType</code> 字段（识图消息靠 <code>imageKeys</code> 非空判断）。<strong>常量还在，字段已经没了。</strong></p>
+<p>这不是要批判代码，而是提醒：常量类最容易变成”历史博物馆”。没有类型系统约束的 <code>const</code>，删改都没人知道。定期 grep 或改用枚举&#x2F;密封模型，能自然清理这种漂移。</p>
+<h2 id="三、原理拆解：四种方案到底差在哪"><a href="#三、原理拆解：四种方案到底差在哪" class="headerlink" title="三、原理拆解：四种方案到底差在哪"></a>三、原理拆解：四种方案到底差在哪</h2><h3 id="3-1-const-val：编译期内联的”字面量”"><a href="#3-1-const-val：编译期内联的”字面量”" class="headerlink" title="3.1 const val：编译期内联的”字面量”"></a>3.1 <code>const val</code>：编译期内联的”字面量”</h3><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="keyword">val</span> SOURCE_SYSTEM = <span class="number">0</span></span><br></pre></td></tr></table></figure>
+
+<p>编译后大致是：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 常规写法（Java 等价物）</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">int</span> <span class="variable">SOURCE_SYSTEM</span> <span class="operator">=</span> <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+
+<p>而且<strong>使用处会被内联</strong>：你在别的文件写 <code>M.SOURCE_SYSTEM</code>，编译进字节码的就是字面量 <code>0</code>，不是一次字段读取。</p>
+<p>这带来两个后果：</p>
+<ul>
+<li>运行时零开销，也不需要类初始化；</li>
+<li>但<strong>改库里的 <code>const</code> 值，调用方不重新编译就还是旧值</strong>。这是二进制兼容性坑：SDK 升级后，App 若没重新编译，可能还在用旧常量。</li>
+</ul>
+<p><code>const val</code> 的限制：</p>
+<ul>
+<li>只能是 <code>String</code> 或基本类型；</li>
+<li>只能是 top-level、<code>object</code> 或 <code>companion object</code> 的成员；</li>
+<li>不能有自定义 getter，不能是 <code>var</code>；</li>
+<li>不能用在需要运行时计算的地方。</li>
+</ul>
+<h3 id="3-2-普通-val：运行时的静态字段-getter"><a href="#3-2-普通-val：运行时的静态字段-getter" class="headerlink" title="3.2 普通 val：运行时的静态字段 + getter"></a>3.2 普通 <code>val</code>：运行时的静态字段 + getter</h3><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">object</span> Config &#123;</span><br><span class="line">    <span class="keyword">val</span> BASE_URL = <span class="string">&quot;https://example.com/&quot;</span>   <span class="comment">// 普通 val</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>大致编译成：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 常规写法（Java 等价物）</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">class</span> <span class="title class_">Config</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">String</span> <span class="variable">BASE_URL</span> <span class="operator">=</span> <span class="string">&quot;https://example.com/&quot;</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String <span class="title function_">getBASE_URL</span><span class="params">()</span> &#123; <span class="keyword">return</span> BASE_URL; &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>和 <code>const</code> 的区别：</p>
+<ul>
+<li>使用处是<strong>读字段&#x2F;调 getter</strong>，不会内联，改值后重新编译调用方不是必须的；</li>
+<li>可以保存非基本类型、可以运行时计算、可以 <code>by lazy</code>；</li>
+<li>有类初始化成本；<code>object</code> 第一次访问会触发初始化；</li>
+<li>想暴露成 Java 的公开静态字段，可以加 <code>@JvmField</code>。</li>
+</ul>
+<p>灵江的 <code>M</code> 全部用 <code>const</code>，是因为它们都是”真正常量”；<code>SeedUtil</code> 里需要运行时读 SP 的值，就只能用普通 <code>val</code>&#x2F;函数。</p>
+<h3 id="3-3-枚举：固定单例-类"><a href="#3-3-枚举：固定单例-类" class="headerlink" title="3.3 枚举：固定单例 + 类"></a>3.3 枚举：固定单例 + 类</h3><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">enum</span> <span class="keyword">class</span> <span class="title class_">WeatherAlertLevel</span>(<span class="meta">@StringRes</span> <span class="keyword">val</span> titleRes: <span class="built_in">Int</span>) &#123; YELLOW(...), ORANGE(...), RED(...) &#125;</span><br></pre></td></tr></table></figure>
+
+<p>编译后是一个类，包含：</p>
+<ul>
+<li>三个 <code>public static final</code> 的常量对象（单例）；</li>
+<li>一个私有的 <code>$VALUES</code> 数组；</li>
+<li><code>values()</code>：<strong>每次调用都克隆一份数组</strong>；</li>
+<li><code>valueOf(name)</code>：按名字查常量，找不到抛 <code>IllegalArgumentException</code>；</li>
+<li><code>ordinal</code> 字段：声明顺序，从 0 开始；</li>
+<li><code>name</code> 字段：常量名。</li>
+</ul>
+<p>枚举的初始化是<strong>类初始化</strong>，JVM 保证线程安全；但枚举常量构造里如果做耗时操作，会拖慢第一次访问。</p>
+<h3 id="3-4-IntDef：只在编译期-lint-存在的”伪枚举”"><a href="#3-4-IntDef：只在编译期-lint-存在的”伪枚举”" class="headerlink" title="3.4 @IntDef：只在编译期&#x2F;lint 存在的”伪枚举”"></a>3.4 <code>@IntDef</code>：只在编译期&#x2F;lint 存在的”伪枚举”</h3><p><code>@IntDef</code> 是 AndroidX 注解，不是 Kotlin 语言特性。它的作用是让 lint 检查”这个 <code>Int</code> 只能取这几个值”：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 项目里没有 @IntDef 实现，以下为通用示例</span></span><br><span class="line"><span class="meta">@IntDef(</span></span><br><span class="line"><span class="meta">    M.SOURCE_SYSTEM, M.SOURCE_USER, M.SOURCE_CAMERA,</span></span><br><span class="line"><span class="meta">    M.SOURCE_ALBUM, M.SOURCE_AVATAR, M.SOURCE_AI</span></span><br><span class="line"><span class="meta">)</span></span><br><span class="line"><span class="meta">@Retention(AnnotationRetention.SOURCE)</span> <span class="comment">// Kotlin 默认 RUNTIME，必须显式改 SOURCE</span></span><br><span class="line"><span class="meta">@Target(</span></span><br><span class="line"><span class="meta">    AnnotationTarget.VALUE_PARAMETER,</span></span><br><span class="line"><span class="meta">    AnnotationTarget.FIELD,</span></span><br><span class="line"><span class="meta">    AnnotationTarget.PROPERTY,</span></span><br><span class="line"><span class="meta">    AnnotationTarget.FUNCTION</span></span><br><span class="line"><span class="meta">)</span></span><br><span class="line"><span class="keyword">annotation</span> <span class="keyword">class</span> <span class="title class_">ImageSource</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">upload</span><span class="params">(<span class="meta">@ImageSource</span> source: <span class="type">Int</span>)</span></span> &#123; ... &#125;</span><br></pre></td></tr></table></figure>
+
+<p>特点：</p>
+<ul>
+<li><strong>零运行时开销</strong>（<code>SOURCE</code> 保留策略，编译后注解不保留）；</li>
+<li>仍然是 <code>Int</code>，可以继续进数据库、进云端、进复合主键；</li>
+<li>但<strong>没有 <code>when</code> 穷尽</strong>，也没有 <code>name/ordinal</code>；</li>
+<li>lint 能提示，运行时照样可以传任意 <code>Int</code>（反序列化、云端数据都可能越界）。</li>
+</ul>
+<p>它适合”值已经进了数据库&#x2F;协议，改不动，但想收窄编译期取值范围”的场景，正好对应灵江的 <code>source</code>、<code>storageState</code>、<code>childType</code>、<code>TOOL_MODE_*</code>。</p>
+<h3 id="3-5-values-、entries-与-ordinal"><a href="#3-5-values-、entries-与-ordinal" class="headerlink" title="3.5 values()、entries 与 ordinal"></a>3.5 <code>values()</code>、<code>entries</code> 与 <code>ordinal</code></h3><table>
+<thead>
+<tr>
+<th>API</th>
+<th>返回</th>
+<th>是否分配新对象</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>values()</code></td>
+<td><code>Array&lt;T&gt;</code></td>
+<td><strong>每次调用都克隆数组</strong></td>
+<td>Java 互操作保留；高频调用要自己缓存</td>
+</tr>
+<tr>
+<td><code>entries</code>（Kotlin 1.9+）</td>
+<td><code>EnumEntries&lt;T&gt;</code>（不可变 List）</td>
+<td>不克隆，常量列表缓存</td>
+<td>推荐用于遍历&#x2F;查找</td>
+</tr>
+<tr>
+<td><code>enumValues&lt;T&gt;()</code></td>
+<td><code>Array&lt;T&gt;</code></td>
+<td>是</td>
+<td>泛型版 <code>values()</code></td>
+</tr>
+<tr>
+<td><code>enumEntries&lt;T&gt;()</code></td>
+<td><code>EnumEntries&lt;T&gt;</code></td>
+<td>否</td>
+<td>泛型版 <code>entries</code></td>
+</tr>
+</tbody></table>
+<p>灵江目前没有用 <code>values()</code>&#x2F;<code>entries</code>（<code>SeedModule</code> 只当 Map key），所以没有分配开销问题。但一旦做”设置页遍历所有种子模块”，优先写：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SeedModule.entries.forEach &#123; module -&gt; ... &#125;</span><br></pre></td></tr></table></figure>
+
+<p>而不是 <code>SeedModule.values().forEach { ... }</code>。</p>
+<p><code>ordinal</code> 的危险在于<strong>它只是声明顺序</strong>：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">enum</span> <span class="keyword">class</span> <span class="title class_">Level</span> &#123; LOW, HIGH &#125;</span><br><span class="line"><span class="comment">// 有人把顺序改成 HIGH, LOW</span></span><br><span class="line"><span class="comment">// 持久化的 ordinal 0 从 LOW 变成 HIGH，历史数据语义直接翻转</span></span><br></pre></td></tr></table></figure>
+
+<p>所以：<code>ordinal</code> 只能用于进程内、且顺序本身有业务含义的场景（灵江的 <code>WeatherAlertLevel.max</code> 就属于这种），<strong>绝不能写进数据库&#x2F;SP&#x2F;云端</strong>。要持久化就存 <code>name</code> 或显式 <code>code</code>。</p>
+<h3 id="3-6-name、valueOf-与混淆"><a href="#3-6-name、valueOf-与混淆" class="headerlink" title="3.6 name、valueOf 与混淆"></a>3.6 <code>name</code>、<code>valueOf</code> 与混淆</h3><p><code>valueOf</code> 是大小写敏感的精确匹配，失败抛异常。它依赖常量名，所以：</p>
+<ul>
+<li>改名 &#x3D; 改协议；</li>
+<li>R8 可能混淆枚举常量名，基于 <code>name</code> 的持久化在跨版本时可能失效；</li>
+<li>Gson 默认按字段名&#x2F;枚举名序列化，也需要 keep 规则或显式 <code>@SerializedName</code>。</li>
+</ul>
+<p>灵江的 <code>DataShowFragment</code> 只把 <code>name</code> 放在 Bundle 里（同一次进程&#x2F;同一版本内使用），风险可控；但不要把这个模式复制到 SP&#x2F;数据库。</p>
+<h3 id="3-7-枚举能带属性、方法、接口"><a href="#3-7-枚举能带属性、方法、接口" class="headerlink" title="3.7 枚举能带属性、方法、接口"></a>3.7 枚举能带属性、方法、接口</h3><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 通用示例</span></span><br><span class="line"><span class="keyword">enum</span> <span class="keyword">class</span> <span class="title class_">SyncState</span>(<span class="keyword">val</span> code: <span class="built_in">Int</span>) : Serializable &#123;</span><br><span class="line">    IDLE(<span class="number">0</span>) &#123; <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">canRetry</span><span class="params">()</span></span> = <span class="literal">true</span> &#125;,</span><br><span class="line">    LOADING(<span class="number">1</span>) &#123; <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">canRetry</span><span class="params">()</span></span> = <span class="literal">false</span> &#125;,</span><br><span class="line">    ERROR(<span class="number">2</span>) &#123; <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">canRetry</span><span class="params">()</span></span> = <span class="literal">true</span> &#125;;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">abstract</span> <span class="function"><span class="keyword">fun</span> <span class="title">canRetry</span><span class="params">()</span></span>: <span class="built_in">Boolean</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">isFinished</span><span class="params">()</span></span>: <span class="built_in">Boolean</span> = <span class="keyword">this</span> == IDLE || <span class="keyword">this</span> == ERROR</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>枚举可以实现接口、可以有抽象方法（每个常量单独实现）、可以有伴生对象工具方法。它不能继承类，也不能被继承——这正好保证”常量集合固定”。</p>
+<h2 id="四、写法对比：四种方案怎么选"><a href="#四、写法对比：四种方案怎么选" class="headerlink" title="四、写法对比：四种方案怎么选"></a>四、写法对比：四种方案怎么选</h2><table>
+<thead>
+<tr>
+<th>维度</th>
+<th><code>const val</code></th>
+<th>普通 <code>val</code></th>
+<th><code>enum class</code></th>
+<th><code>@IntDef</code></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>编译产物</td>
+<td>内联字面量 + 静态常量</td>
+<td>静态字段 + getter</td>
+<td>类 + 单例常量 + <code>$VALUES</code></td>
+<td>注解（SOURCE 下不保留）</td>
+</tr>
+<tr>
+<td>运行时开销</td>
+<td>0</td>
+<td>一次字段&#x2F;getter 读取</td>
+<td>类初始化 + 对象</td>
+<td>0</td>
+</tr>
+<tr>
+<td>类型安全</td>
+<td>弱（<code>Int</code>&#x2F;<code>String</code> 随便传）</td>
+<td>弱</td>
+<td>强（类型就是枚举）</td>
+<td>中（仅 lint）</td>
+</tr>
+<tr>
+<td><code>when</code> 穷尽</td>
+<td>不适用</td>
+<td>不适用</td>
+<td>能</td>
+<td>不能</td>
+</tr>
+<tr>
+<td>能否持久化</td>
+<td>能（值稳定）</td>
+<td>能（值可能变）</td>
+<td>需要 <code>TypeConverter</code>&#x2F;存 name</td>
+<td>能（仍是 Int）</td>
+</tr>
+<tr>
+<td>混淆影响</td>
+<td>值内联，名字无关</td>
+<td>值内联&#x2F;字段名可能混淆</td>
+<td><code>name</code>&#x2F;<code>valueOf</code> 受影响</td>
+<td>值稳定，注解不留</td>
+</tr>
+<tr>
+<td>遍历全集</td>
+<td>不能</td>
+<td>不能</td>
+<td>能（<code>entries</code>&#x2F;<code>values()</code>）</td>
+<td>不能（除非另维护数组）</td>
+</tr>
+<tr>
+<td>适合</td>
+<td>注解参数、协议值、DB 列</td>
+<td>运行时配置、非基本类型</td>
+<td>固定集合 + 属性&#x2F;方法&#x2F;穷尽</td>
+<td>历史 Int 列收窄范围</td>
+</tr>
+</tbody></table>
+<p>再看三个”同一需求”的写法：</p>
+<table>
+<thead>
+<tr>
+<th>需求</th>
+<th>灵江选择</th>
+<th>原因</th>
+<th>如果改成枚举的代价</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>growth_event.type</code></td>
+<td><code>const String</code></td>
+<td>已进 Room TEXT 列 + Bmob 云端</td>
+<td>加 <code>TypeConverter</code>、迁移、云端协议转换</td>
+</tr>
+<tr>
+<td><code>architecture_part.childType</code></td>
+<td><code>const Int</code></td>
+<td>复合主键 + 云端关系行</td>
+<td>迁移 + 云端改类型，几乎不可行</td>
+</tr>
+<tr>
+<td><code>WeatherAlertLevel</code></td>
+<td>枚举</td>
+<td>固定集合、带 <code>titleRes</code>、要比较&#x2F;穷尽</td>
+<td>反而更啰嗦：要维护 Int→文案映射</td>
+</tr>
+</tbody></table>
+<h2 id="五、灵江的取舍逐条分析"><a href="#五、灵江的取舍逐条分析" class="headerlink" title="五、灵江的取舍逐条分析"></a>五、灵江的取舍逐条分析</h2><h3 id="5-1-哪些必须留常量"><a href="#5-1-哪些必须留常量" class="headerlink" title="5.1 哪些必须留常量"></a>5.1 哪些必须留常量</h3><ul>
+<li><strong><code>M.SOURCE_*</code> &#x2F; <code>M.STORAGE_STATE_*</code> &#x2F; <code>M.TYPE_*</code></strong>：都进了 Room 列，<code>STORAGE_STATE_*</code> 还参与同步状态机（PENDING&#x2F;NORMAL&#x2F;JUNK），改枚举要做 Converter + 迁移，收益不抵成本。可以用 <code>@IntDef</code> 在编译期收窄。</li>
+<li><strong><code>M.RARITY_*</code></strong>：稀有度对应经验值（2&#x2F;5&#x2F;8），是领域数值，不是标签；留 <code>const Int</code> 合理，但要注意它们和”档位序号”不是一回事。</li>
+<li><strong><code>M.DB_VERSION</code></strong>：注解参数，必须编译期常量。</li>
+<li><strong><code>GrowthEvent.TYPE_*</code></strong>：持久化字符串 + 云端协议，留 <code>const String</code>。</li>
+<li><strong><code>ArchitecturePart.childType</code> 的取值</strong>：复合主键，留 <code>const Int</code>。</li>
+<li><strong><code>M.MAX_LEVEL</code> &#x2F; <code>M.POINTS_MAX</code></strong>：纯数值上限，<code>const</code> 最直接。</li>
+</ul>
+<h3 id="5-2-哪些适合枚举"><a href="#5-2-哪些适合枚举" class="headerlink" title="5.2 哪些适合枚举"></a>5.2 哪些适合枚举</h3><ul>
+<li><strong><code>WeatherAlertLevel</code> &#x2F; <code>WeatherAlertType</code></strong>：固定集合、带资源 id、需要 <code>when</code> 穷尽和严重程度比较。</li>
+<li><strong><code>SeedModule</code></strong>：模块注册表，每个模块带 <code>spKey</code> + <code>seedVersion</code>，还要当 Map key。</li>
+<li><strong><code>DataType</code>（<code>DataShowFragment</code>）</strong>：固定两种页面类型，适合枚举；但持久化方式应从 <code>name</code> 改成显式 <code>key</code>。</li>
+<li><strong><code>SearchViewModel.DataType</code></strong>：搜索分栏类型，固定六种；虽然它和 <code>SearchItem</code> 的 sealed 子类有重叠，但作为”分栏标签”用枚举是合理的（详见密封类那篇）。</li>
+</ul>
+<h3 id="5-3-哪些是”该收窄但还没收窄”"><a href="#5-3-哪些是”该收窄但还没收窄”" class="headerlink" title="5.3 哪些是”该收窄但还没收窄”"></a>5.3 哪些是”该收窄但还没收窄”</h3><ul>
+<li><strong><code>ToolState.recognizeMode: Int</code></strong>：五个模式值，建议改成 <code>enum class RecognizeMode(val code: Int)</code>，SharedPreferences 里存 <code>code</code>，读的时候 <code>entries.firstOrNull { it.code == saved } ?: CLOSE</code>。这样 <code>when</code> 能穷尽，非法值有兜底，<code>recognizeModeAt</code> 的两套编号也能合并。</li>
+<li><strong><code>GrowthEvent.type: String</code></strong>：如果短期不能改列类型，至少加 <code>@StringDef</code>（AndroidX 的字符串版 <code>@IntDef</code>）收窄；长期看可以建一个 <code>GrowthEventType</code> 枚举 + <code>name</code> 转换，但必须先解决云端兼容。</li>
+<li><strong><code>M.CHAT_TYPE_*</code></strong>：已经没有对应字段，建议删除或补回 <code>Chat.chatType</code> 并真正使用，避免”注释即文档”的漂移。</li>
+</ul>
+<h3 id="5-4-一个必须说清的安全问题"><a href="#5-4-一个必须说清的安全问题" class="headerlink" title="5.4 一个必须说清的安全问题"></a>5.4 一个必须说清的安全问题</h3><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// base/M.kt:74</span></span><br><span class="line"><span class="keyword">const</span> <span class="keyword">val</span> AI_API_KEY = <span class="string">&quot;sk-ws-...&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p><code>const val</code> 会被内联进调用方的字节码，APK 里必然存在明文；反编译、字符串搜索都能拿到。<strong>常量不等于安全存储</strong>。真实项目应该走服务端签发&#x2F;短期 token，至少不要把长期 key 硬编码在客户端。这里把它列为”常量使用边界”，不是鼓励这么写。</p>
+<h2 id="六、坑与边界"><a href="#六、坑与边界" class="headerlink" title="六、坑与边界"></a>六、坑与边界</h2><h3 id="6-1-const-val-的二进制兼容坑"><a href="#6-1-const-val-的二进制兼容坑" class="headerlink" title="6.1 const val 的二进制兼容坑"></a>6.1 <code>const val</code> 的二进制兼容坑</h3><p>SDK&#x2F;库里的 <code>const val</code> 改了值，调用方如果没重新编译，内联的旧值还在。App 内部模块通常一起编译，问题不大；但发布 AAR 时要特别小心，公共常量更适合普通 <code>val</code> 或方法。</p>
+<h3 id="6-2-ordinal-不能持久化"><a href="#6-2-ordinal-不能持久化" class="headerlink" title="6.2 ordinal 不能持久化"></a>6.2 <code>ordinal</code> 不能持久化</h3><ul>
+<li>重排常量 → 历史数据语义翻转；</li>
+<li>插入常量 → 后面所有值偏移；</li>
+<li>用 <code>ordinal</code> 做数据库列，等于把”代码顺序”写进了数据。</li>
+</ul>
+<p>灵江 <code>WeatherAlertLevel.max</code> 用 <code>ordinal</code> 是进程内比较，且注释明确了严重程度顺序；但更稳的还是显式 <code>rank</code>。</p>
+<h3 id="6-3-values-每次克隆数组"><a href="#6-3-values-每次克隆数组" class="headerlink" title="6.3 values() 每次克隆数组"></a>6.3 <code>values()</code> 每次克隆数组</h3><p>在 <code>onBindViewHolder</code>、循环、频繁调用的工具方法里写 <code>values().first { ... }</code>，会持续分配数组。改用 <code>entries</code>（1.9+），或把 <code>values()</code> 缓存成 <code>private val ALL = values()</code>。</p>
+<h3 id="6-4-name-valueOf-的协议风险"><a href="#6-4-name-valueOf-的协议风险" class="headerlink" title="6.4 name&#x2F;valueOf 的协议风险"></a>6.4 <code>name</code>&#x2F;<code>valueOf</code> 的协议风险</h3><ul>
+<li>枚举改名 → 持久化数据读不回来；</li>
+<li>R8 混淆 → 跨版本 <code>valueOf</code> 可能失败；</li>
+<li>云端下发未知值 → 直接抛异常。</li>
+</ul>
+<p>持久化场景用显式 <code>code</code>&#x2F;<code>key</code> + <code>firstOrNull</code> 兜底，不要直接用 <code>valueOf</code>。</p>
+<h3 id="6-5-枚举不是”零成本”"><a href="#6-5-枚举不是”零成本”" class="headerlink" title="6.5 枚举不是”零成本”"></a>6.5 枚举不是”零成本”</h3><p>每个常量是一个对象，类还有 <code>$VALUES</code> 数组和元数据。几十个常量完全无所谓；但如果是几百个、且只需要一个 <code>Int</code> 标签，枚举的内存和类加载成本就不划算了。</p>
+<h3 id="6-6-IntDef-不是运行时约束"><a href="#6-6-IntDef-不是运行时约束" class="headerlink" title="6.6 @IntDef 不是运行时约束"></a>6.6 <code>@IntDef</code> 不是运行时约束</h3><p>它只在 lint 层起作用。云端返回 <code>source = 99</code>，<code>@ImageSource</code> 依然接受，<code>when</code> 也会走 <code>else</code>。所以 <code>@IntDef</code> 必须配合运行时兜底：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 通用示例</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">normalize</span><span class="params">(source: <span class="type">Int</span>)</span></span>: <span class="built_in">Int</span> = <span class="keyword">when</span> (source) &#123;</span><br><span class="line">    M.SOURCE_SYSTEM, M.SOURCE_USER, M.SOURCE_CAMERA,</span><br><span class="line">    M.SOURCE_ALBUM, M.SOURCE_AVATAR, M.SOURCE_AI -&gt; source</span><br><span class="line">    <span class="keyword">else</span> -&gt; M.SOURCE_SYSTEM</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>灵江 <code>ToolStateRepository.normalizeMode</code> 做的就是这件事：<code>if (mode in M.TOOL_MODE_CLOSE..M.TOOL_MODE_RELIC) mode else M.TOOL_MODE_CLOSE</code>。范围校验能挡住越界，但挡不住”范围内但语义错误”的值（比如把 <code>TOOL_MODE_RELIC</code> 传给 <code>source</code>）。</p>
+<h3 id="6-7-同一个-Int-域被多个语义复用"><a href="#6-7-同一个-Int-域被多个语义复用" class="headerlink" title="6.7 同一个 Int 域被多个语义复用"></a>6.7 同一个 <code>Int</code> 域被多个语义复用</h3><p><code>SOURCE_SYSTEM = 0</code>、<code>STORAGE_STATE_JUNK = 0</code>、<code>TOOL_MODE_CLOSE = 0</code> 都是 0。函数签名只写 <code>Int</code> 时，传错常量完全合法。<code>@IntDef</code> 的价值就在这里：让 lint 区分不同”Int 域”。</p>
+<h3 id="6-8-枚举在-when-里加-else"><a href="#6-8-枚举在-when-里加-else" class="headerlink" title="6.8 枚举在 when 里加 else"></a>6.8 枚举在 <code>when</code> 里加 <code>else</code></h3><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">when</span> (level) &#123;</span><br><span class="line">    YELLOW -&gt; ...</span><br><span class="line">    ORANGE -&gt; ...</span><br><span class="line">    RED -&gt; ...</span><br><span class="line">    <span class="keyword">else</span> -&gt; ...   <span class="comment">// 新增级别时静默走这里</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>和 sealed 一样，加 <code>else</code> 就放弃”新增常量编译报错”的保护。只有确实需要兜底（比如未来常量来自服务端）时才加。</p>
+<h2 id="七、面试考点（问答式）"><a href="#七、面试考点（问答式）" class="headerlink" title="七、面试考点（问答式）"></a>七、面试考点（问答式）</h2><p><strong>Q1：<code>const val</code>、普通 <code>val</code>、枚举、<code>@IntDef</code> 怎么选？</strong></p>
+<p>A：先看值要不要跨边界持久化。要进 Room&#x2F;云端&#x2F;注解 → <code>const val</code>（值稳定、编译期常量）；只是运行时配置、非基本类型 → 普通 <code>val</code>；集合固定且需要类型安全、<code>when</code> 穷尽、带属性&#x2F;方法 → 枚举；值已经进了历史数据改不动，但想收窄编译期范围 → <code>@IntDef</code>。灵江的 <code>DB_VERSION</code> 是注解参数只能 <code>const</code>，<code>WeatherAlertLevel</code> 是固定集合用枚举，<code>source</code> 已进库用 <code>const Int</code> + 可加 <code>@IntDef</code>。</p>
+<p><strong>Q2：<code>const val</code> 和普通 <code>val</code> 的编译产物有什么区别？</strong></p>
+<p>A：<code>const val</code> 是编译期常量，使用处内联成字面量，运行时零读取；普通 <code>val</code> 是静态字段 + getter（<code>object</code> 里）或实例字段，使用时真正读字段。<code>const</code> 只能基本类型&#x2F;String、不能自定义 getter；普通 <code>val</code> 可以运行时计算、可以是非基本类型。<code>const</code> 改值后调用方不重编译会保留旧值，这是二进制兼容坑。</p>
+<p><strong>Q3：为什么 <code>ordinal</code> 不能持久化？</strong></p>
+<p>A：<code>ordinal</code> 是声明顺序，不是稳定业务 id。重排&#x2F;插入常量会让所有后续值偏移，历史数据读出来就变成另一个语义。持久化应该存 <code>name</code>（仍有改名&#x2F;混淆风险）或显式 <code>code</code>（最稳）。灵江 <code>WeatherAlertLevel.max</code> 用 <code>ordinal</code> 只做进程内优先级比较，且顺序有业务含义，属于可接受用法。</p>
+<p><strong>Q4：<code>values()</code> 和 <code>entries</code> 有什么区别？</strong></p>
+<p>A：<code>values()</code> 每次调用返回一个新克隆的数组，有分配开销，且数组可变（改了也不影响枚举）；<code>entries</code>（Kotlin 1.9+）返回缓存的不可变 <code>EnumEntries</code> 列表，不克隆，推荐遍历&#x2F;查找。<code>enumValues&lt;T&gt;()</code> &#x2F; <code>enumEntries&lt;T&gt;()</code> 是它们的泛型版本。高频路径不要反复 <code>values()</code>。</p>
+<p><strong>Q5：枚举的 <code>when</code> 为什么能穷尽？编译成什么？</strong></p>
+<p>A：编译器知道枚举的常量全集，<code>when</code> 必须覆盖每个常量（或有 <code>else</code>），新增常量会让所有穷尽 <code>when</code> 编译失败。JVM 上通常编译成基于 <code>ordinal</code> 的 <code>tableswitch</code>；跨模块时可能生成一个 <code>$EnumSwitchMapping</code> 映射数组，把当前编译期的 ordinal 映射到分支。它比 sealed 的 <code>instanceof</code> 链更适合”纯标签分派”。</p>
+<p><strong>Q6：枚举能不能带属性、方法、实现接口？能不能继承？</strong></p>
+<p>A：可以带构造参数&#x2F;属性、成员方法、伴生对象方法，可以实现接口，甚至每个常量可以有自己的抽象方法实现。不能继承别的类，也不能被继承——这正是”常量集合固定”的保证。灵江 <code>WeatherAlertLevel(titleRes)</code>、<code>SeedModule(spKey, seedVersion)</code> 都是这种用法。</p>
+<p><strong>Q7：枚举和密封类什么时候互换？</strong></p>
+<p>A：枚举适合”固定单例 + 所有常量字段结构相同 + 需要 name&#x2F;ordinal&#x2F;values”；密封类适合”每个变体携带不同类型&#x2F;数量的数据 + 需要 data class 的 copy&#x2F;equals”。灵江 <code>DataType</code>（纯标签）用枚举，<code>SearchItem</code>（每个变体带不同实体）用密封接口。如果密封类的子类全是无字段的 <code>object</code>，可以降级成枚举；如果枚举需要给不同常量挂不同字段，说明该换密封类。</p>
+<p><strong>Q8：<code>@IntDef</code> 的原理和局限？</strong></p>
+<p>A：它是 AndroidX 注解，<code>@Retention(SOURCE)</code> 时编译后不保留，运行时零开销；lint 检查注解标注的参数&#x2F;返回值只能传指定常量。局限是：只在编译期&#x2F;lint 生效，运行时任意 <code>Int</code> 都能进来；没有 <code>when</code> 穷尽；不能遍历；反序列化&#x2F;云端数据仍要运行时兜底。它最适合”历史 Int 列不能改类型，但想减少传错常量”的场景。</p>
+<p><strong>Q9：为什么 <code>DB_VERSION</code> 必须是 <code>const val</code>？</strong></p>
+<p>A：Room 的 <code>@Database(version = ...)</code> 是注解参数，Java&#x2F;Kotlin 注解参数要求编译期常量。普通 <code>val</code> 不是编译期常量，编译不过。<code>const val</code> 还能保证”关于页展示的版本号”和”注解里的版本号”同源，灵江 <code>AboutFragment</code> 直接读 <code>M.DB_VERSION</code>。</p>
+<p><strong>Q10：混淆&#x2F;R8 对枚举有什么影响？</strong></p>
+<p>A：R8 可能对枚举做 unboxing 优化（把枚举替换成 <code>int</code>），但一旦代码用了 <code>values()</code>&#x2F;<code>valueOf()</code>&#x2F;<code>name()</code> 或反射，优化会受限；枚举常量名可能被混淆，基于 <code>name</code> 的持久化&#x2F;Gson 序列化跨版本会失效，需要 keep 规则或 <code>@SerializedName</code>。值内联的 <code>const val</code> 不受改名影响，但明文密钥仍能被反编译看到。</p>
+<h2 id="八、一句话总结"><a href="#八、一句话总结" class="headerlink" title="八、一句话总结"></a>八、一句话总结</h2><p><strong>常量方案的选择不是”安全 vs 不安全”，而是”这个值要不要跨进程&#x2F;跨版本&#x2F;跨端”：跨边界就用稳定的 <code>const</code>&#x2F;显式 code，进程内固定集合就用枚举换类型安全和穷尽，历史 Int 列用 <code>@IntDef</code> 收窄但不能当运行时校验。</strong></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://moliangxx.github.io">Liang_Mo</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://moliangxx.github.io/2026/11/04/android-kotlin-enum-constants/">https://moliangxx.github.io/2026/11/04/android-kotlin-enum-constants/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://moliangxx.github.io" target="_blank">莫良的小窝</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Kotlin/">Kotlin</a><a class="post-meta__tags" href="/tags/%E6%9E%9A%E4%B8%BE/">枚举</a><a class="post-meta__tags" href="/tags/const/">const</a><a class="post-meta__tags" href="/tags/IntDef/">IntDef</a><a class="post-meta__tags" href="/tags/Android-%E9%9D%A2%E8%AF%95/">Android 面试</a></div><div class="post-share"><div class="social-share" data-image="/img/winter/banner-post.jpg" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><div class="post-reward"><div class="reward-button"><i class="fas fa-qrcode"></i>“请我喝杯奶茶~”</div><div class="reward-main"><ul class="reward-all"><li class="reward-item"><a href="/img/wechat.jpg" target="_blank"><img class="post-qr-code-img" src="/img/wechat.jpg"/ loading='lazy'></a><div class="post-qr-code-desc"></div></li></ul></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2026/11/04/android-interview-index/" title="从灵江项目学 Android：面试向系列索引"><img class="cover" src="/img/winter/banner-post.jpg" onerror="onerror=null;src='/img/error2.jpg'" alt="cover of previous post" loading='lazy'><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">从灵江项目学 Android：面试向系列索引</div></div><div class="info-2"><div class="info-item-1">从灵江项目学 Android：面试向系列索引这套文章不写”教科书式科普”，每篇都对照灵江项目 d:\AndroidProject\LingJiang 里真实存在的代码（下文路径均相对 app/src/main/java/com/lingjiang/）。目的是：面试时能说出”我在项目里就是这么用的、为什么这么用、踩过什么坑”，而不是背定义。 系列文章   序号 文章 主要考点    1 《策略模式：从灵江项目的类型分发说起》 枚举&#x2F;when 分发、DataShowFragment 的 specOf 单点映射、HomeFeedAdapter 槽位策略、策略 vs 工厂、开闭原则边界   2 《适配器的几种写法：从灵江的 Adapter 说起》 多 ViewType、手写 DiffUtil、ListAdapter&#x2F;ConcatAdapter&#x2F;payload 取舍、复用导致的状态错乱、异步图片串位   3 《MVVM 与其他架构：灵江的 ViewModel 到底承担了什么》 MVC&#x2F;MVP&#x2F;MVVM&#x2F;MVI 数据流向、单向数据流...</div></div></div></a><a class="pagination-related" href="/2026/11/04/android-annotations-in-practice/" title="注解的运用：编译期生成代码，还是运行时反射？"><img class="cover" src="/img/winter/banner-post.jpg" onerror="onerror=null;src='/img/error2.jpg'" alt="cover of next post" loading='lazy'><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">注解的运用：编译期生成代码，还是运行时反射？</div></div><div class="info-2"><div class="info-item-1">注解的运用：编译期生成代码，还是运行时反射？注解（Annotation）是 Android 面试里”看起来简单、一问就露底”的知识点。多数人能说出 @Override、@Deprecated，但被追问”@Entity 是什么时候生效的、@GET 为什么能发请求、@Volatile 到底改了什么、@JvmStatic 不写会怎样”时，答案往往就变成”框架自动处理的”。 这篇按灵江项目里真实出现的注解来讲，每个都对应具体文件和真实代码，并明确区分：编译期生成代码 &#x2F; 编译期检查 &#x2F; 运行时反射 &#x2F; 只是给编译器看的。 一、场景：灵江用到了哪些注解先列清单，后面逐类拆。以下全部来自 d:\AndroidProject\LingJiang 的实际代码：    注解 出现位置 生效时机 谁在处理    @Entity &#x2F; @PrimaryKey &#x2F; @Index data/arch/local/catalog/AncientArchitecture.kt 编译期 Room 注解处理器（KSP）   @Dao &#x2F; @Query &#...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2026/11/04/android-kotlin-sealed/" title="密封类（Sealed Class &#x2F; Sealed Interface）：从灵江的联合模型说起"><img class="cover" src="/img/winter/banner-post.jpg" alt="cover" loading='lazy'><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-11-04</div><div class="info-item-2">密封类（Sealed Class &#x2F; Sealed Interface）：从灵江的联合模型说起</div></div><div class="info-2"><div class="info-item-1">密封类：从灵江的联合模型说起面试里问 sealed，标准答案是”受限的类层次结构，when 可以穷尽”。这句话不算错，但它解释不了三个更关键的问题：  为什么灵江的搜索项用 sealed interface，首页节点却用 sealed class？ 明明用了 sealed，为什么 HomeFeedAdapter 里还有 else 和 as?？ 新增一种类型时，编译器到底能帮你拦住几处？  这篇全部对照灵江项目 d:\AndroidProject\LingJiang 的真实代码（下文路径相对 app/src/main/java/com/lingjiang/），把 sealed 讲成”一个用来描述’有限种可能’的工具”，而不是语法知识点。 一、场景：一个列表要装下五种东西灵江的搜索页有两级：  一级是综合候选列表，里面可能混着打卡、古建图鉴、结构、文物、用户； 二级是六个分栏，每个分栏只放一种类型。  如果按 Java 的老办法，通常是一个 SearchItem 基类 + 一个 int type 字段： 12345// 常规写法（Java 风格）：基类 + int 类型标签class...</div></div></div></a><a class="pagination-related" href="/2026/11/04/android-kotlin-coroutines-flow/" title="协程与 Flow：灵江项目里的搜索防抖、聊天发送与 Room 订阅"><img class="cover" src="/img/winter/banner-post.jpg" alt="cover" loading='lazy'><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-11-04</div><div class="info-item-2">协程与 Flow：灵江项目里的搜索防抖、聊天发送与 Room 订阅</div></div><div class="info-2"><div class="info-item-1">协程与 Flow：灵江项目里的搜索防抖、聊天发送与 Room 订阅协程的面试题很容易变成名词默写：launch、async、withContext、SupervisorJob、StateFlow……但真实项目里，决定代码对不对的往往不是”知不知道这个 API”，而是：  这个 launch 应该挂在哪个作用域？ 取消之后，catch (e: Exception) 会不会把取消也吞掉？ 为什么搜索结果用 StateFlow，而”回前台补查”用 SharedFlow？ Room 的 Flow 到底在哪个线程查、哪个线程收？  这篇全部对照灵江项目 d:\AndroidProject\LingJiang 的真实代码（路径相对 app/src/main/java/com/lingjiang/），把协程讲成”一套有生命周期、可取消、结构化的工作管理方式”。 一、场景：灵江里协程出现的五个位置 搜索防抖：输入 300ms 后才查，点搜索按钮要立刻取消防抖任务； 聊天发送：落库用户消息 → 调 AI → 落库回复，期间要防止重复发送； 首页&#x2F;我的页订阅：Room Flow 在页面可见...</div></div></div></a><a class="pagination-related" href="/2026/11/04/android-data-class-room/" title="数据类与存储策略：灵江的 Data Class、单表&#x2F;拆表与 Room 幂等"><img class="cover" src="/img/winter/banner-post.jpg" alt="cover" loading='lazy'><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-11-04</div><div class="info-item-2">数据类与存储策略：灵江的 Data Class、单表&#x2F;拆表与 Room 幂等</div></div><div class="info-2"><div class="info-item-1">数据类与存储策略：灵江的 data class、单表&#x2F;拆表与 Room 幂等这篇回答两个面试里经常被割裂的问题：  data class 到底替你生成了什么？为什么它不能 open&#x2F;abstract？ 一张表什么时候该拆、什么时候该冗余？”幂等计分”只加一个唯一索引就够了吗？  灵江项目 d:\AndroidProject\LingJiang 正好把这两个问题连在一起：GrowthEvent 是成长流水（data class + Room 实体），CatalogUnlockPart 是图鉴解锁关系（唯一索引 + 幂等计分），AncientCheckin 是”单表内嵌游记 + 快照冗余”的典型。下面全部按真实代码（路径相对 app/src/main/java/com/lingjiang/）拆。 一、场景：一次打卡会写哪些表用户在灵江打卡一次，可能发生：  写一条 ancient_checkin（打卡本体，含照片、地点、游记）； 关联 architecture_part（这座古建包含哪些结构&#x2F;文物，属于知识层）； 写 catalog_unlock（谁解锁...</div></div></div></a><a class="pagination-related" href="/2026/11/04/android-pattern-strategy/" title="策略模式：从灵江项目的类型分发说起"><img class="cover" src="/img/winter/banner-post.jpg" alt="cover" loading='lazy'><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-11-04</div><div class="info-item-2">策略模式：从灵江项目的类型分发说起</div></div><div class="info-2"><div class="info-item-1">策略模式：从灵江项目的类型分发说起面试里问策略模式，很多人会背”Context、Strategy、ConcreteStrategy 三要素”。但真实项目里它往往不长这样：没有 Strategy 接口，只有一张 when 映射表；没有 Context 类，只有一个 Fragment。 这篇不写教科书，全部对照灵江项目 d:\AndroidProject\LingJiang 里实际存在的代码，讲清楚：什么情况下值得把 if-else 改成策略、Kotlin 里策略有哪几种落地形态、”新增类型只改一处”到底能改到多小、以及开闭原则的真实边界在哪。 一、场景：四个 tab 一套页面，六个分栏一套适配器灵江首页有 4 个数据 tab（打卡 &#x2F; 建筑 &#x2F; 结构 &#x2F; 文物），二级搜索页有 6 个分栏（综合 &#x2F; 打卡 &#x2F; 图鉴 &#x2F; 结构 &#x2F; 文物 &#x2F; 用户）。如果按最直白的写法，会变成：  4 个 HomeFeedFragment，每个里面复制一遍 RecyclerView 初始化 + Flow 订阅； 6 个 Se...</div></div></div></a><a class="pagination-related" href="/2026/11/02/Android_Kotlin/Kotlin%20%E8%AF%AD%E6%B3%95%E9%80%9F%E8%A7%88%E4%B8%8E%E5%8D%8F%E7%A8%8B%E5%85%A5%E9%97%A8/" title="Kotlin 语法速览与协程入门"><img class="cover" src="/img/winter/banner-post.jpg" alt="cover" loading='lazy'><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-11-02</div><div class="info-item-2">Kotlin 语法速览与协程入门</div></div><div class="info-2"><div class="info-item-1">Kotlin 语法速览与协程入门如果你已经写过 Android 的 Java 代码，Kotlin 不是“另一门语言”，而是把常见的样板代码折叠起来的工具。这篇笔记按“写业务时最常用”的顺序整理，最后落到协程。 一、空安全：把 NPE 挡在编译期1234var name: String? = null      // 可空类型name?.length                  // 安全调用，null 时返回 nullname ?: &quot;匿名&quot;                // Elvis：null 时给默认值name!!.length                 // 非空断言，确认不为 null 才用     写法 含义 建议    String? 可以为 null 网络、数据库字段默认用它   String 一定不为 null 内部确定值用它   ?. 安全调用 首选   !! 强制非空 只在确定不会为 null 时用    一个经验：!! 出现在业务代码里，通常意味着“这里应该有兜底逻辑”。  二、val &#x2F; var、数据类与解构1...</div></div></div></a><a class="pagination-related" href="/2026/11/04/android-adapter-patterns/" title="适配器的几种写法：从灵江的 Adapter 说起"><img class="cover" src="/img/winter/banner-post.jpg" alt="cover" loading='lazy'><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-11-04</div><div class="info-item-2">适配器的几种写法：从灵江的 Adapter 说起</div></div><div class="info-2"><div class="info-item-1">适配器的几种写法：从灵江的 Adapter 说起RecyclerView.Adapter 是最容易被”会用”掩盖”用对”的组件。能显示列表不算本事，面试真正会问的是：为什么 notifyDataSetChanged 差、DiffUtil 的两个回调到底怎么判、复用为什么会串图、payload 什么时候值得用、ConcatAdapter 解决什么问题。 这篇全部对照灵江项目里实际存在的 Adapter，挑 6 个有代表性的，代码位置都标出来，方便你打开项目对照。 一、场景：灵江的代表性列表   Adapter 文件 形态 关键点    HomeFeedAdapter main/home/HomeFeedAdapter.kt 4 种 ViewType + 模块槽位 sealed 节点、Banner 置顶、每 6 条插槽、手写 DiffUtil   SearchCheckinAdapter main/home/search/SearchCheckinAdapter.kt 5 种数据类型 → 3 种 Holder 图鉴&#x2F;结构&#x2F;文物共用 item_catalog   S...</div></div></div></a><a class="pagination-related" href="/2026/11/04/android-interview-index/" title="从灵江项目学 Android：面试向系列索引"><img class="cover" src="/img/winter/banner-post.jpg" alt="cover" loading='lazy'><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-11-04</div><div class="info-item-2">从灵江项目学 Android：面试向系列索引</div></div><div class="info-2"><div class="info-item-1">从灵江项目学 Android：面试向系列索引这套文章不写”教科书式科普”，每篇都对照灵江项目 d:\AndroidProject\LingJiang 里真实存在的代码（下文路径均相对 app/src/main/java/com/lingjiang/）。目的是：面试时能说出”我在项目里就是这么用的、为什么这么用、踩过什么坑”，而不是背定义。 系列文章   序号 文章 主要考点    1 《策略模式：从灵江项目的类型分发说起》 枚举&#x2F;when 分发、DataShowFragment 的 specOf 单点映射、HomeFeedAdapter 槽位策略、策略 vs 工厂、开闭原则边界   2 《适配器的几种写法：从灵江的 Adapter 说起》 多 ViewType、手写 DiffUtil、ListAdapter&#x2F;ConcatAdapter&#x2F;payload 取舍、复用导致的状态错乱、异步图片串位   3 《MVVM 与其他架构：灵江的 ViewModel 到底承担了什么》 MVC&#x2F;MVP&#x2F;MVVM&#x2F;MVI 数据流向、单向数据流...</div></div></div></a><a class="pagination-related" href="/2026/11/04/android-annotations-in-practice/" title="注解的运用：编译期生成代码，还是运行时反射？"><img class="cover" src="/img/winter/banner-post.jpg" alt="cover" loading='lazy'><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-11-04</div><div class="info-item-2">注解的运用：编译期生成代码，还是运行时反射？</div></div><div class="info-2"><div class="info-item-1">注解的运用：编译期生成代码，还是运行时反射？注解（Annotation）是 Android 面试里”看起来简单、一问就露底”的知识点。多数人能说出 @Override、@Deprecated，但被追问”@Entity 是什么时候生效的、@GET 为什么能发请求、@Volatile 到底改了什么、@JvmStatic 不写会怎样”时，答案往往就变成”框架自动处理的”。 这篇按灵江项目里真实出现的注解来讲，每个都对应具体文件和真实代码，并明确区分：编译期生成代码 &#x2F; 编译期检查 &#x2F; 运行时反射 &#x2F; 只是给编译器看的。 一、场景：灵江用到了哪些注解先列清单，后面逐类拆。以下全部来自 d:\AndroidProject\LingJiang 的实际代码：    注解 出现位置 生效时机 谁在处理    @Entity &#x2F; @PrimaryKey &#x2F; @Index data/arch/local/catalog/AncientArchitecture.kt 编译期 Room 注解处理器（KSP）   @Dao &#x2F; @Query &#...</div></div></div></a></div></div><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="giscus-wrap"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content is-expand"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%9E%9A%E4%B8%BE%E3%80%81const-val%E3%80%81%E6%99%AE%E9%80%9A-val-%E4%B8%8E-IntDef%EF%BC%9A%E7%81%B5%E6%B1%9F%E9%A1%B9%E7%9B%AE%E7%9A%84%E5%9B%9B%E7%A7%8D%E2%80%9D%E5%B8%B8%E9%87%8F%E2%80%9D%E5%8F%96%E8%88%8D"><span class="toc-number">1.</span> <span class="toc-text">枚举、const val、普通 val 与 @IntDef：灵江项目的四种”常量”取舍</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E5%9C%BA%E6%99%AF%EF%BC%9A%E4%B8%80%E4%B8%AA-App-%E9%87%8C%E4%B8%BA%E4%BB%80%E4%B9%88%E4%BC%9A%E6%9C%89%E5%9B%9B%E7%A7%8D%E5%B8%B8%E9%87%8F"><span class="toc-number">1.1.</span> <span class="toc-text">一、场景：一个 App 里为什么会有四种常量</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E7%81%B5%E6%B1%9F%E9%87%8C%E7%9A%84%E7%9C%9F%E5%AE%9E%E4%BB%A3%E7%A0%81"><span class="toc-number">1.2.</span> <span class="toc-text">二、灵江里的真实代码</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-M-kt%EF%BC%9A%E5%A4%A7%E9%87%8F-const-val-Int"><span class="toc-number">1.2.1.</span> <span class="toc-text">2.1 M.kt：大量 const val Int</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-GrowthEvent%EF%BC%9Aconst-val-String-%E4%BD%9C%E4%B8%BA%E6%8C%81%E4%B9%85%E5%8C%96%E7%B1%BB%E5%9E%8B%E6%A0%87%E7%AD%BE"><span class="toc-number">1.2.2.</span> <span class="toc-text">2.2 GrowthEvent：const val String 作为持久化类型标签</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-WeatherAlertLevel-WeatherAlertType%EF%BC%9A%E5%B8%A6%E5%B1%9E%E6%80%A7%E7%9A%84%E6%9E%9A%E4%B8%BE"><span class="toc-number">1.2.3.</span> <span class="toc-text">2.3 WeatherAlertLevel &#x2F; WeatherAlertType：带属性的枚举</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-4-SeedModule%EF%BC%9A%E6%9E%9A%E4%B8%BE%E5%BD%93%E2%80%9D%E6%B3%A8%E5%86%8C%E8%A1%A8%E2%80%9D"><span class="toc-number">1.2.4.</span> <span class="toc-text">2.4 SeedModule：枚举当”注册表”</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-5-DataShowFragment-DataType%EF%BC%9A%E8%B7%A8-Bundle-%E4%BC%A0%E6%9E%9A%E4%B8%BE%E5%90%8D"><span class="toc-number">1.2.5.</span> <span class="toc-text">2.5 DataShowFragment.DataType：跨 Bundle 传枚举名</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-6-ArchitecturePart-childType%EF%BC%9A%E5%B8%B8%E9%87%8F%E8%BF%9B%E5%A4%8D%E5%90%88%E4%B8%BB%E9%94%AE"><span class="toc-number">1.2.6.</span> <span class="toc-text">2.6 ArchitecturePart.childType：常量进复合主键</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-7-ToolState-recognizeMode%EF%BC%9AInt-%E6%A8%A1%E5%BC%8F%E5%80%BC%E4%B8%80%E8%B7%AF%E6%B3%84%E6%BC%8F"><span class="toc-number">1.2.7.</span> <span class="toc-text">2.7 ToolState.recognizeMode：Int 模式值一路泄漏</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-8-%E4%B8%80%E4%B8%AA%E2%80%9D%E5%B8%B8%E9%87%8F%E4%B8%8E%E6%A8%A1%E5%9E%8B%E6%BC%82%E7%A7%BB%E2%80%9D%E7%9A%84%E7%9C%9F%E5%AE%9E%E4%BE%8B%E5%AD%90"><span class="toc-number">1.2.8.</span> <span class="toc-text">2.8 一个”常量与模型漂移”的真实例子</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E5%8E%9F%E7%90%86%E6%8B%86%E8%A7%A3%EF%BC%9A%E5%9B%9B%E7%A7%8D%E6%96%B9%E6%A1%88%E5%88%B0%E5%BA%95%E5%B7%AE%E5%9C%A8%E5%93%AA"><span class="toc-number">1.3.</span> <span class="toc-text">三、原理拆解：四种方案到底差在哪</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-const-val%EF%BC%9A%E7%BC%96%E8%AF%91%E6%9C%9F%E5%86%85%E8%81%94%E7%9A%84%E2%80%9D%E5%AD%97%E9%9D%A2%E9%87%8F%E2%80%9D"><span class="toc-number">1.3.1.</span> <span class="toc-text">3.1 const val：编译期内联的”字面量”</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-%E6%99%AE%E9%80%9A-val%EF%BC%9A%E8%BF%90%E8%A1%8C%E6%97%B6%E7%9A%84%E9%9D%99%E6%80%81%E5%AD%97%E6%AE%B5-getter"><span class="toc-number">1.3.2.</span> <span class="toc-text">3.2 普通 val：运行时的静态字段 + getter</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-%E6%9E%9A%E4%B8%BE%EF%BC%9A%E5%9B%BA%E5%AE%9A%E5%8D%95%E4%BE%8B-%E7%B1%BB"><span class="toc-number">1.3.3.</span> <span class="toc-text">3.3 枚举：固定单例 + 类</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-4-IntDef%EF%BC%9A%E5%8F%AA%E5%9C%A8%E7%BC%96%E8%AF%91%E6%9C%9F-lint-%E5%AD%98%E5%9C%A8%E7%9A%84%E2%80%9D%E4%BC%AA%E6%9E%9A%E4%B8%BE%E2%80%9D"><span class="toc-number">1.3.4.</span> <span class="toc-text">3.4 @IntDef：只在编译期&#x2F;lint 存在的”伪枚举”</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-5-values-%E3%80%81entries-%E4%B8%8E-ordinal"><span class="toc-number">1.3.5.</span> <span class="toc-text">3.5 values()、entries 与 ordinal</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-6-name%E3%80%81valueOf-%E4%B8%8E%E6%B7%B7%E6%B7%86"><span class="toc-number">1.3.6.</span> <span class="toc-text">3.6 name、valueOf 与混淆</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-7-%E6%9E%9A%E4%B8%BE%E8%83%BD%E5%B8%A6%E5%B1%9E%E6%80%A7%E3%80%81%E6%96%B9%E6%B3%95%E3%80%81%E6%8E%A5%E5%8F%A3"><span class="toc-number">1.3.7.</span> <span class="toc-text">3.7 枚举能带属性、方法、接口</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E5%86%99%E6%B3%95%E5%AF%B9%E6%AF%94%EF%BC%9A%E5%9B%9B%E7%A7%8D%E6%96%B9%E6%A1%88%E6%80%8E%E4%B9%88%E9%80%89"><span class="toc-number">1.4.</span> <span class="toc-text">四、写法对比：四种方案怎么选</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E7%81%B5%E6%B1%9F%E7%9A%84%E5%8F%96%E8%88%8D%E9%80%90%E6%9D%A1%E5%88%86%E6%9E%90"><span class="toc-number">1.5.</span> <span class="toc-text">五、灵江的取舍逐条分析</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#5-1-%E5%93%AA%E4%BA%9B%E5%BF%85%E9%A1%BB%E7%95%99%E5%B8%B8%E9%87%8F"><span class="toc-number">1.5.1.</span> <span class="toc-text">5.1 哪些必须留常量</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-2-%E5%93%AA%E4%BA%9B%E9%80%82%E5%90%88%E6%9E%9A%E4%B8%BE"><span class="toc-number">1.5.2.</span> <span class="toc-text">5.2 哪些适合枚举</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-3-%E5%93%AA%E4%BA%9B%E6%98%AF%E2%80%9D%E8%AF%A5%E6%94%B6%E7%AA%84%E4%BD%86%E8%BF%98%E6%B2%A1%E6%94%B6%E7%AA%84%E2%80%9D"><span class="toc-number">1.5.3.</span> <span class="toc-text">5.3 哪些是”该收窄但还没收窄”</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-4-%E4%B8%80%E4%B8%AA%E5%BF%85%E9%A1%BB%E8%AF%B4%E6%B8%85%E7%9A%84%E5%AE%89%E5%85%A8%E9%97%AE%E9%A2%98"><span class="toc-number">1.5.4.</span> <span class="toc-text">5.4 一个必须说清的安全问题</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AD%E3%80%81%E5%9D%91%E4%B8%8E%E8%BE%B9%E7%95%8C"><span class="toc-number">1.6.</span> <span class="toc-text">六、坑与边界</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#6-1-const-val-%E7%9A%84%E4%BA%8C%E8%BF%9B%E5%88%B6%E5%85%BC%E5%AE%B9%E5%9D%91"><span class="toc-number">1.6.1.</span> <span class="toc-text">6.1 const val 的二进制兼容坑</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-2-ordinal-%E4%B8%8D%E8%83%BD%E6%8C%81%E4%B9%85%E5%8C%96"><span class="toc-number">1.6.2.</span> <span class="toc-text">6.2 ordinal 不能持久化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-3-values-%E6%AF%8F%E6%AC%A1%E5%85%8B%E9%9A%86%E6%95%B0%E7%BB%84"><span class="toc-number">1.6.3.</span> <span class="toc-text">6.3 values() 每次克隆数组</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-4-name-valueOf-%E7%9A%84%E5%8D%8F%E8%AE%AE%E9%A3%8E%E9%99%A9"><span class="toc-number">1.6.4.</span> <span class="toc-text">6.4 name&#x2F;valueOf 的协议风险</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-5-%E6%9E%9A%E4%B8%BE%E4%B8%8D%E6%98%AF%E2%80%9D%E9%9B%B6%E6%88%90%E6%9C%AC%E2%80%9D"><span class="toc-number">1.6.5.</span> <span class="toc-text">6.5 枚举不是”零成本”</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-6-IntDef-%E4%B8%8D%E6%98%AF%E8%BF%90%E8%A1%8C%E6%97%B6%E7%BA%A6%E6%9D%9F"><span class="toc-number">1.6.6.</span> <span class="toc-text">6.6 @IntDef 不是运行时约束</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-7-%E5%90%8C%E4%B8%80%E4%B8%AA-Int-%E5%9F%9F%E8%A2%AB%E5%A4%9A%E4%B8%AA%E8%AF%AD%E4%B9%89%E5%A4%8D%E7%94%A8"><span class="toc-number">1.6.7.</span> <span class="toc-text">6.7 同一个 Int 域被多个语义复用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-8-%E6%9E%9A%E4%B8%BE%E5%9C%A8-when-%E9%87%8C%E5%8A%A0-else"><span class="toc-number">1.6.8.</span> <span class="toc-text">6.8 枚举在 when 里加 else</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%83%E3%80%81%E9%9D%A2%E8%AF%95%E8%80%83%E7%82%B9%EF%BC%88%E9%97%AE%E7%AD%94%E5%BC%8F%EF%BC%89"><span class="toc-number">1.7.</span> <span class="toc-text">七、面试考点（问答式）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AB%E3%80%81%E4%B8%80%E5%8F%A5%E8%AF%9D%E6%80%BB%E7%BB%93"><span class="toc-number">1.8.</span> <span class="toc-text">八、一句话总结</span></a></li></ol></li></ol></div></div></div></div></main><footer id="footer" style="background-image: url(/img/winter/bg-winter.jpg);"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By Liang_Mo</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.1</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.3</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.3"></script><script src="/js/main.js?v=5.5.3"></script><script src="/js/tw_cn.js?v=5.5.3"></script><script src="https://cdn.jsdelivr.net/npm/medium-zoom@1.1.0/dist/medium-zoom.min.js"></script><div class="js-pjax"><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = {"mapping":"pathname","crossorigin":"anonymous"}
+
+  const getGiscusTheme = theme => theme === 'dark' ? 'dark' : 'light'
+
+  const createScriptElement = config => {
+    const ele = document.createElement('script')
+    Object.entries(config).forEach(([key, value]) => {
+      ele.setAttribute(key, value)
+    })
+    return ele
+  }
+
+  const loadGiscus = (el = document, key) => {
+    const mappingConfig = isShuoshuo
+      ? { 'data-mapping': 'specific', 'data-term': key }
+      : { 'data-mapping': (option && option['data-mapping']) || 'pathname' }
+
+    const giscusConfig = {
+      src: 'https://giscus.app/client.js',
+      'data-repo': 'moliangxx/moliangxx.github.io',
+      'data-repo-id': 'R_kgDOQkNdpQ',
+      'data-category-id': 'DIC_kwDOQkNdpc4C0z4Q',
+      'data-theme': getGiscusTheme(document.documentElement.getAttribute('data-theme')),
+      'data-reactions-enabled': '1',
+      crossorigin: 'anonymous',
+      async: true,
+      ...option,
+      ...mappingConfig
+    }
+
+    const scriptElement = createScriptElement(giscusConfig)
+
+    el.querySelector('#giscus-wrap').appendChild(scriptElement)
+
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyGiscus = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+  }
+
+  const changeGiscusTheme = theme => {
+    const iframe = document.querySelector('#giscus-wrap iframe')
+    if (iframe) {
+      const message = {
+        giscus: {
+          setConfig: {
+            theme: getGiscusTheme(theme)
+          }
+        }
+      }
+      iframe.contentWindow.postMessage(message, 'https://giscus.app')
+    }
+  }
+
+  btf.addGlobalFn('themeChange', changeGiscusTheme, 'giscus')
+
+  if (isShuoshuo) {
+    'Giscus' === 'Giscus'
+      ? window.shuoshuoComment = { loadComment: loadGiscus }
+      : window.loadOtherComment = loadGiscus
+    return
+  }
+
+  if ('Giscus' === 'Giscus' || !false) {
+    if (false) btf.loadComment(document.getElementById('giscus-wrap'), loadGiscus)
+    else loadGiscus()
+  } else {
+    window.loadOtherComment = loadGiscus
+  }
+})()</script></div><script src="/js/custom.js"></script><script src="/js/winter.js"></script><script src="https://fastly.jsdelivr.net/npm/live2d-widgets@1.0.1/dist/autoload.js"></script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js"></script><script src="https://cdn.jsdelivr.net/npm/meting@2/dist/Meting.min.js"></script><script>(() => {
+  const destroyAplayer = () => {
+    if (window.aplayers) {
+      for (let i = 0; i < window.aplayers.length; i++) {
+        if (!window.aplayers[i].options.fixed) {
+          window.aplayers[i].destroy()
+        }
+      }
+    }
+  }
+
+  const runMetingJS = () => {
+    typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+  }
+
+  btf.addGlobalFn('pjaxSend', destroyAplayer, 'destroyAplayer')
+  btf.addGlobalFn('pjaxComplete', loadMeting, 'runMetingJS')
+})()</script><script src="https://cdn.jsdelivr.net/npm/pjax@0.2.8/pjax.min.js" defer="defer"></script><script>document.addEventListener('DOMContentLoaded', () => {
+  const pjaxSelectors = ["meta[property=\"og:image\"]","meta[property=\"og:title\"]","meta[property=\"og:url\"]","meta[property=\"og:description\"]","link[rel=\"canonical\"]","head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+
+  window.pjax = new Pjax({
+    elements: 'a:not([target="_blank"])',
+    selectors: pjaxSelectors,
+    cacheBust: false,
+    analytics: false,
+    scrollRestoration: false
+  })
+
+  const triggerPjaxFn = (val) => {
+    if (!val) return
+    Object.values(val).forEach(fn => {
+      try {
+        fn()
+      } catch (err) {
+        console.debug('Pjax callback failed:', err)
+      }
+    })
+  }
+
+  document.addEventListener('pjax:send', () => {
+    // removeEventListener
+    btf.removeGlobalFnEvent('pjaxSendOnce')
+    btf.removeGlobalFnEvent('themeChange')
+
+    // reset readmode
+    const $bodyClassList = document.body.classList
+    if ($bodyClassList.contains('read-mode')) $bodyClassList.remove('read-mode')
+
+    triggerPjaxFn(window.globalFn.pjaxSend)
+  })
+
+  document.addEventListener('pjax:complete', () => {
+    btf.removeGlobalFnEvent('pjaxCompleteOnce')
+    document.querySelectorAll('script[data-pjax]').forEach(item => {
+      const newScript = document.createElement('script')
+      const content = item.text || item.textContent || item.innerHTML || ""
+      Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+      newScript.appendChild(document.createTextNode(content))
+      item.parentNode.replaceChild(newScript, item)
+    })
+
+    triggerPjaxFn(window.globalFn.pjaxComplete)
+  })
+
+  document.addEventListener('pjax:error', e => {
+    if (e.request.status === 404) {
+      true
+        ? pjax.loadUrl('/404.html')
+        : window.location.href = e.request.responseURL
+    }
+  })
+})</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
