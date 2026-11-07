@@ -52,23 +52,17 @@
   /* 点击雪花画笔颜色（RGB 分量，供 JS 读取后拼 rgba） */
   --w-click-flake: 255, 250, 240;
 
-  /* 卡片雪层边框：上亮下暗的冷灰雪面 + 外投影，夜间不刺眼 */
-  --w-snow-svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 24' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23eaf2f8'/%3E%3Cstop offset='.55' stop-color='%23cfdbe5'/%3E%3Cstop offset='1' stop-color='%239dadbd'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath fill='url(%23g)' d='M0 0H240V9C232 13 226 16 216 15C206 14 202 9 192 10C182 11 178 16 168 16C158 16 154 10 144 10C134 10 130 15.5 120 15.5C110 15.5 106 10 96 9.5C86 9 82 14.5 72 15C62 15.5 58 10 48 10C38 10 34 15 24 15.5C16 16 8 13 0 8Z'/%3E%3C/svg%3E");
+  /* 卡片雪层镶边：极薄一圈霜色，靠轻微明暗渐变与贴地投影示意厚度 */
   --w-snow-side: rgba(178, 196, 212, 0.32);
   --w-snow-side-hover: rgba(198, 214, 228, 0.55);
-  --w-snow-opacity: 0.62;
-  --w-snow-opacity-hover: 0.85;
-  --w-snow-shadow: rgba(8, 12, 18, 0.55);
 
-  /* 卡片外沿整圈积雪：13px 实体雪带 + 上下雪脊，靠实色与投影压出厚度 */
-  --w-snow-thick: 13px;
-  --w-snow-ring-glow: rgba(168, 199, 217, 0.34);
-  --w-snow-edge: rgba(12, 22, 34, 0.5);
-  --w-snow-fill-top: #eaf3fa;
-  --w-snow-fill-mid: #d5e4f1;
-  --w-snow-fill-bot: #b0c4d8;
-  --w-snow-top: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 16' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23fbfdff'/%3E%3Cstop offset='.55' stop-color='%23eaf3fa'/%3E%3Cstop offset='1' stop-color='%23d3e2ef'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath fill='url(%23g)' d='M0 3.2C10 0.6 16 5.4 28 4.2C40 3 46 0.8 58 2.4C70 4 76 6.6 88 5.4C100 4.2 106 1.2 118 2.2C130 3.2 136 6 148 4.8C160 3.6 166 1 178 2C190 3 196 5.8 208 4.4C220 3 230 1.4 240 2.6V16H0Z'/%3E%3C/svg%3E");
-  --w-snow-bottom: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 16' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23eef7fd'/%3E%3Cstop offset='.5' stop-color='%23d7e5f1'/%3E%3Cstop offset='1' stop-color='%23bacce0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath fill='url(%23g)' d='M0 0H240V10.5C230 13.5 222 9.5 210 11C198 12.5 192 15.5 180 14.2C168 12.9 162 9.4 150 10.8C138 12.2 132 15.2 120 13.8C108 12.4 102 9.2 90 10.6C78 12 72 15 60 13.6C48 12.2 42 9 30 10.4C18 11.8 10 14.6 0 12.8Z'/%3E%3C/svg%3E");
+  /* 6px 薄霜环：上沿略亮、下沿略沉，不含发光、不叠雪脊 */
+  --w-snow-thick: 6px;
+  --w-snow-rim-top: rgba(248, 244, 236, 0.5);
+  --w-snow-rim-mid: rgba(206, 222, 236, 0.26);
+  --w-snow-rim-bot: rgba(150, 172, 194, 0.16);
+  --w-snow-edge: rgba(12, 22, 34, 0.42);
+  --w-snow-shadow: rgba(8, 12, 18, 0.38);
 
   /* 头像：只保留极细描边 + 轻微光晕 */
   --w-avatar-ring: rgba(255, 255, 255, 0.36);
@@ -1337,12 +1331,12 @@ select:focus-visible {
 }
 
 /* ============================================================
-   14. 卡片雪层：一整圈“压在外沿”的积雪厚度
-   做法：伪元素向外扩 9px，用 padding + mask 只保留外圈；
-   上沿是不规则雪脊 SVG，下沿是雪堆 SVG，左右是渐变薄雪。
-   旧实现失效原因：custom.css 的 ::before 写死 width:8px，
-   而旧规则只设 left/right，宽度被 8px 压死；且 overflow:hidden
-   把外扩部分裁掉，所以只剩左上角一小块。
+   14. 卡片雪层：外沿一圈薄霜，只勾出厚度，不抢正文
+   做法：伪元素向外扩 6px，用 padding + mask 只保留外圈，
+   填充一条自上而下由亮到沉的半透明霜色渐变；
+   只用一层贴地投影压出体积，不加发光、不叠雪脊图。
+   旧版问题：13px 近白实色环 + 10px 冷光晕 + 上下雪脊 SVG
+   三层叠在一起，边缘发糊，亮度盖过卡片正文。
    ============================================================ */
 
 .recent-post-item,
@@ -1368,8 +1362,8 @@ select:focus-visible {
   }
 }
 
-/* 首页文章卡片外沿整圈积雪：只有 .recent-post-item，侧栏/正文页一律不参与。
-   厚度靠“整条环带实色 + 上下雪脊 + 外投影”实现，mask 只负责把环带外侧留出来 */
+/* 首页文章卡片外沿薄霜：只有 .recent-post-item，侧栏/正文页一律不参与。
+   mask 只留外圈，环内是一条半透明霜色渐变，hover 不再加亮加光 */
 .recent-post-item::before {
   content: "" !important;
   position: absolute !important;
@@ -1382,36 +1376,26 @@ select:focus-visible {
   border-radius: calc(var(--w-radius-xl) + var(--w-snow-thick)) !important;
   opacity: 1 !important;
   pointer-events: none;
-  /* 用 background 简写一次性覆盖 custom.css 的 contain/center，三层各自定位 */
+  /* 用 background 简写一次性覆盖 custom.css 的 contain/center */
   background:
-    var(--w-snow-top) top center / 100% var(--w-snow-thick) no-repeat,
-    var(--w-snow-bottom) bottom center / 100% var(--w-snow-thick) no-repeat,
     linear-gradient(180deg,
-      var(--w-snow-fill-top) 0%,
-      var(--w-snow-fill-mid) 52%,
-      var(--w-snow-fill-bot) 100%) center / 100% 100% no-repeat !important;
-  background-color: var(--w-snow-fill-mid) !important;
+      var(--w-snow-rim-top) 0%,
+      var(--w-snow-rim-mid) 48%,
+      var(--w-snow-rim-bot) 100%) center / 100% 100% no-repeat !important;
+  background-color: transparent !important;
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
   mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   mask-composite: exclude;
+  /* 1px 压边 + 3px 贴地投影：只给厚度，不产生光晕 */
   filter:
-    drop-shadow(0 0 1px var(--w-snow-edge))
-    drop-shadow(0 2px 3px var(--w-snow-shadow))
-    drop-shadow(0 0 10px var(--w-snow-ring-glow));
-  transition: filter var(--w-base) var(--w-ease-soft);
-}
-
-.recent-post-item:hover::before {
-  filter:
-    drop-shadow(0 0 1px var(--w-snow-edge))
-    drop-shadow(0 3px 5px var(--w-snow-shadow))
-    drop-shadow(0 0 14px var(--w-snow-ring-glow));
+    drop-shadow(0 1px 1px var(--w-snow-edge))
+    drop-shadow(0 2px 3px var(--w-snow-shadow));
 }
 
 @media (max-width: 768px) {
   :root {
-    --w-snow-thick: 9px;
+    --w-snow-thick: 5px;
   }
 }
 
@@ -1573,22 +1557,15 @@ html.winter-day {
   --w-nav-icon-hover: #1f1d19;
   --w-click-flake: 158, 106, 58;
 
-  /* 日间雪层：暖白雪面，靠暖棕描边和投影与浅底拉开层次 */
-  --w-snow-svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 24' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23ffffff'/%3E%3Cstop offset='.55' stop-color='%23f7f1e7'/%3E%3Cstop offset='1' stop-color='%23e4d8c7'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath fill='url(%23g)' d='M0 0H240V9C232 13 226 16 216 15C206 14 202 9 192 10C182 11 178 16 168 16C158 16 154 10 144 10C134 10 130 15.5 120 15.5C110 15.5 106 10 96 9.5C86 9 82 14.5 72 15C62 15.5 58 10 48 10C38 10 34 15 24 15.5C16 16 8 13 0 8Z'/%3E%3C/svg%3E");
+  /* 日间雪层：暖白薄霜环，靠暖棕投影与浅底拉开层次 */
   --w-snow-side: rgba(150, 111, 70, 0.24);
   --w-snow-side-hover: rgba(150, 111, 70, 0.38);
-  --w-snow-opacity: 0.9;
-  --w-snow-opacity-hover: 1;
-  --w-snow-shadow: rgba(150, 111, 70, 0.3);
 
-  /* 日间积雪环：暖白雪面 + 暖棕投影，浅底上也压得出厚度 */
-  --w-snow-ring-glow: rgba(150, 111, 70, 0.34);
-  --w-snow-edge: rgba(110, 84, 56, 0.62);
-  --w-snow-fill-top: #fffdfa;
-  --w-snow-fill-mid: #edf4fa;
-  --w-snow-fill-bot: #ccdae7;
-  --w-snow-top: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 16' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23ffffff'/%3E%3Cstop offset='.55' stop-color='%23f4f8fc'/%3E%3Cstop offset='1' stop-color='%23dbe7f1'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath fill='url(%23g)' d='M0 3.2C10 0.6 16 5.4 28 4.2C40 3 46 0.8 58 2.4C70 4 76 6.6 88 5.4C100 4.2 106 1.2 118 2.2C130 3.2 136 6 148 4.8C160 3.6 166 1 178 2C190 3 196 5.8 208 4.4C220 3 230 1.4 240 2.6V16H0Z'/%3E%3C/svg%3E");
-  --w-snow-bottom: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 16' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23fdf9f2'/%3E%3Cstop offset='.5' stop-color='%23e9f1f8'/%3E%3Cstop offset='1' stop-color='%23c9d8e6'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath fill='url(%23g)' d='M0 0H240V10.5C230 13.5 222 9.5 210 11C198 12.5 192 15.5 180 14.2C168 12.9 162 9.4 150 10.8C138 12.2 132 15.2 120 13.8C108 12.4 102 9.2 90 10.6C78 12 72 15 60 13.6C48 12.2 42 9 30 10.4C18 11.8 10 14.6 0 12.8Z'/%3E%3C/svg%3E");
+  --w-snow-rim-top: rgba(255, 253, 248, 0.82);
+  --w-snow-rim-mid: rgba(236, 229, 217, 0.5);
+  --w-snow-rim-bot: rgba(200, 184, 164, 0.34);
+  --w-snow-edge: rgba(120, 92, 62, 0.42);
+  --w-snow-shadow: rgba(150, 111, 70, 0.26);
   --w-avatar-ring: rgba(150, 111, 70, 0.3);
   --w-avatar-halo: rgba(198, 123, 60, 0.16);
 
@@ -2099,4 +2076,346 @@ html.winter-day #rightside.rightside-show {
    ============================================================ */
 #winter-transition.is-in {
   pointer-events: auto;
+}
+
+/* ============================================================
+   28. 悬浮音乐播放器：APlayer 内核 + 自建胶囊容器
+   拖动 / 折叠由 /js/player.js 处理，这里只负责观感与层级。
+   层级：高于正文、右侧按钮与看板娘(99990)，低于转场(99998)
+   ============================================================ */
+#wmp {
+  --w-mp-line: var(--w-line);
+  --w-mp-bar: rgba(248, 244, 236, 0.22);
+  --w-mp-loaded: rgba(248, 244, 236, 0.36);
+
+  position: fixed;
+  right: 70px;
+  bottom: 28px;
+  z-index: 99992;
+  width: 320px;
+  max-width: calc(100vw - 56px);
+  border-radius: var(--w-radius-lg);
+  border: 1px solid var(--w-line);
+  background: var(--w-glass);
+  box-shadow: var(--w-shadow);
+  color: var(--w-snow);
+  -webkit-backdrop-filter: blur(16px) saturate(1.25);
+  backdrop-filter: blur(16px) saturate(1.25);
+  overflow: hidden;
+  font-family: var(--w-font-body);
+  transition: width var(--w-base) var(--w-ease-soft),
+    border-radius var(--w-base) var(--w-ease-soft);
+}
+
+html.winter-day #wmp {
+  --w-mp-line: rgba(150, 111, 70, 0.24);
+  --w-mp-bar: rgba(150, 111, 70, 0.26);
+  --w-mp-loaded: rgba(150, 111, 70, 0.4);
+}
+
+#wmp.is-dragging,
+#wmp.is-dragging * {
+  cursor: grabbing !important;
+  -webkit-user-select: none !important;
+  user-select: none !important;
+}
+
+/* 标题栏 = 拖动手柄 */
+#wmp .wmp-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  padding: 0 8px 0 10px;
+  border-bottom: 1px solid var(--w-mp-line);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0));
+  cursor: grab;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+#wmp .wmp-grip {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  gap: 2px;
+  opacity: 0.45;
+}
+
+#wmp .wmp-grip i {
+  display: block;
+  width: 11px;
+  height: 1px;
+  background: currentColor;
+}
+
+#wmp .wmp-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  color: var(--w-mist);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#wmp .wmp-meta {
+  flex: 0 0 auto;
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+  color: var(--w-muted);
+}
+
+#wmp .wmp-btn {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--w-mist);
+  cursor: pointer;
+  transition: color var(--w-fast) var(--w-ease-soft), background-color var(--w-fast) var(--w-ease-soft);
+}
+
+#wmp .wmp-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+#wmp .wmp-btn:hover {
+  color: var(--w-amber);
+  background: rgba(242, 179, 109, 0.14);
+}
+
+#wmp .wmp-body {
+  padding: 8px 9px 9px;
+  min-height: 74px;
+}
+
+#wmp.is-collapsed .wmp-head,
+#wmp.is-collapsed .wmp-body {
+  display: none;
+}
+
+/* APlayer 外观：去白底、统一边框与文字色 */
+#wmp .aplayer {
+  width: 100%;
+  margin: 0;
+  background: transparent;
+  box-shadow: none;
+  border-radius: var(--w-radius-md);
+  color: var(--w-snow);
+  font-family: var(--w-font-body);
+}
+
+#wmp .aplayer .aplayer-pic {
+  border-radius: var(--w-radius-md) 0 0 var(--w-radius-md);
+}
+
+#wmp .aplayer.aplayer-withlist .aplayer-info {
+  border-bottom: 1px solid var(--w-mp-line);
+}
+
+#wmp .aplayer .aplayer-info .aplayer-music {
+  margin: 0 0 10px 2px;
+}
+
+#wmp .aplayer .aplayer-info .aplayer-music .aplayer-title {
+  font-size: 13px;
+  font-family: var(--w-font-display);
+  letter-spacing: 0.01em;
+  color: var(--w-snow);
+}
+
+#wmp .aplayer .aplayer-info .aplayer-music .aplayer-author {
+  font-size: 11px;
+  color: var(--w-muted);
+}
+
+#wmp .aplayer .aplayer-info .aplayer-controller {
+  padding: 0 6px 0 2px;
+}
+
+#wmp .aplayer .aplayer-info .aplayer-controller .aplayer-time {
+  color: var(--w-muted);
+}
+
+#wmp .aplayer .aplayer-info .aplayer-controller .aplayer-time .aplayer-icon path {
+  fill: var(--w-muted);
+}
+
+#wmp .aplayer .aplayer-info .aplayer-controller .aplayer-time .aplayer-icon:hover path {
+  fill: var(--w-amber);
+}
+
+#wmp .aplayer .aplayer-info .aplayer-controller .aplayer-bar-wrap .aplayer-bar {
+  background: var(--w-mp-bar);
+}
+
+#wmp .aplayer .aplayer-info .aplayer-controller .aplayer-bar-wrap .aplayer-bar .aplayer-loaded {
+  background: var(--w-mp-loaded);
+}
+
+/* 播放列表 */
+#wmp .aplayer .aplayer-list {
+  max-height: 170px;
+  border-top: 1px solid var(--w-mp-line);
+}
+
+#wmp .aplayer .aplayer-list ol li {
+  height: 30px;
+  line-height: 30px;
+  font-size: 12px;
+  color: var(--w-mist);
+  background: transparent;
+  border-top: 1px solid var(--w-mp-line);
+}
+
+#wmp .aplayer .aplayer-list ol li:first-child {
+  border-top: none;
+}
+
+#wmp .aplayer .aplayer-list ol li:hover {
+  background: rgba(242, 179, 109, 0.1);
+}
+
+#wmp .aplayer .aplayer-list ol li.aplayer-list-light {
+  background: rgba(242, 179, 109, 0.16);
+}
+
+#wmp .aplayer .aplayer-list ol li.aplayer-list-light .aplayer-list-title {
+  color: var(--w-amber);
+}
+
+#wmp .aplayer .aplayer-list-index,
+#wmp .aplayer-list-author {
+  color: var(--w-muted);
+}
+
+#wmp .aplayer .aplayer-list ol::-webkit-scrollbar-thumb {
+  background: var(--w-mp-loaded);
+}
+
+/* 收起后的胶囊按钮 */
+#wmp .wmp-fab {
+  display: none;
+  position: relative;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  padding: 0;
+  margin: 0;
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  border-radius: 50%;
+  background: radial-gradient(140% 140% at 30% 20%, #f7c98d 0%, #e8a25d 46%, #c97b3c 100%);
+  color: #2a1b0e;
+  cursor: grab;
+  touch-action: none;
+  box-shadow: 0 10px 26px -10px rgba(0, 0, 0, 0.75), 0 0 22px -8px rgba(242, 179, 109, 0.75);
+}
+
+#wmp .wmp-fab svg {
+  width: 24px;
+  height: 24px;
+}
+
+#wmp .wmp-fab::after {
+  content: "";
+  position: absolute;
+  inset: -5px;
+  border: 1px solid rgba(242, 179, 109, 0.6);
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+}
+
+#wmp.is-playing .wmp-fab::after {
+  animation: wmp-ping 2s var(--w-ease-soft) infinite;
+}
+
+@keyframes wmp-ping {
+  0% { transform: scale(0.9); opacity: 0.9; }
+  70%, 100% { transform: scale(1.35); opacity: 0; }
+}
+
+#wmp.is-collapsed {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  overflow: visible;
+}
+
+#wmp.is-collapsed .wmp-fab {
+  display: inline-flex;
+}
+
+/* 加载 / 失败态 */
+#wmp.is-loading .wmp-aplayer::after {
+  content: "歌单加载中…";
+  display: block;
+  padding: 22px 0;
+  text-align: center;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--w-muted);
+}
+
+#wmp .wmp-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 18px 4px;
+  font-size: 12px;
+  color: var(--w-muted);
+}
+
+#wmp .wmp-retry {
+  padding: 4px 11px;
+  border: 1px solid var(--w-mp-line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--w-amber);
+  font-size: 12px;
+  cursor: pointer;
+  transition: background-color var(--w-fast) var(--w-ease-soft);
+}
+
+#wmp .wmp-retry:hover {
+  background: rgba(242, 179, 109, 0.14);
+}
+
+@media (max-width: 768px) {
+  #wmp {
+    right: 58px;
+    bottom: 16px;
+    width: calc(100vw - 74px);
+    max-width: 320px;
+  }
+
+  #wmp .aplayer .aplayer-info .aplayer-controller .aplayer-time .aplayer-icon-order,
+  #wmp .aplayer .aplayer-info .aplayer-controller .aplayer-time .aplayer-icon-loop {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #wmp,
+  #wmp.is-playing .wmp-fab::after {
+    transition: none;
+    animation: none;
+  }
 }
